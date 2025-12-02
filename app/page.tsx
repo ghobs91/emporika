@@ -4,11 +4,11 @@ import { useState } from 'react';
 import SearchBar from '@/components/SearchBar';
 import ProductGrid from '@/components/ProductGrid';
 import TrendingFeed from '@/components/TrendingFeed';
-import { WalmartProduct } from '@/types/walmart';
+import { UnifiedProduct } from '@/types/unified';
 import { ShoppingBag } from 'lucide-react';
 
 export default function Home() {
-  const [products, setProducts] = useState<WalmartProduct[]>([]);
+  const [products, setProducts] = useState<UnifiedProduct[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [totalResults, setTotalResults] = useState(0);
@@ -84,7 +84,7 @@ export default function Home() {
       <footer className="bg-gray-900 text-white mt-20 py-8">
         <div className="container mx-auto px-4 text-center">
           <p className="text-gray-400">
-            © 2025 Emporika. Built with Next.js and Walmart API
+            © 2025 Emporika. Built with Next.js, Walmart API, and Best Buy API
           </p>
         </div>
       </footer>
