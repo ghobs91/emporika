@@ -9,6 +9,20 @@ import {
   UnifiedProduct 
 } from '@/types/unified';
 
+const VALID_SORT_VALUES = ['relevance', 'price', 'title', 'bestseller', 'customerRating', 'new'] as const;
+const VALID_ORDER_VALUES = ['ascending', 'descending'] as const;
+
+type ValidSortValue = typeof VALID_SORT_VALUES[number];
+type ValidOrderValue = typeof VALID_ORDER_VALUES[number];
+
+function isValidSort(value: string | null): value is ValidSortValue {
+  return value !== null && VALID_SORT_VALUES.includes(value as ValidSortValue);
+}
+
+function isValidOrder(value: string | null): value is ValidOrderValue {
+  return value !== null && VALID_ORDER_VALUES.includes(value as ValidOrderValue);
+}
+
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -24,10 +38,13 @@ export async function GET(request: NextRequest) {
     const numItems = searchParams.get('numItems') ? parseInt(searchParams.get('numItems')!) : 25;
     const itemsPerSource = Math.ceil(numItems / 2);
 
+    const sortParam = searchParams.get('sort');
+    const orderParam = searchParams.get('order');
+
     const walmartParams: WalmartSearchParams = {
       query,
-      sort: (searchParams.get('sort') as WalmartSearchParams['sort']) || 'relevance',
-      order: (searchParams.get('order') as WalmartSearchParams['order']) || undefined,
+      sort: isValidSort(sortParam) ? sortParam : 'relevance',
+      order: isValidOrder(orderParam) ? orderParam : undefined,
       start: searchParams.get('start') ? parseInt(searchParams.get('start')!) : undefined,
       numItems: itemsPerSource,
       categoryId: searchParams.get('categoryId') || undefined,

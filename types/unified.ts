@@ -41,7 +41,7 @@ export function normalizeBestBuyProduct(product: BestBuyProduct): UnifiedProduct
     id: `bestbuy-${product.sku}`,
     name: product.name,
     price: product.salePrice,
-    originalPrice: product.onSale && product.regularPrice > product.salePrice ? product.regularPrice : undefined,
+    originalPrice: product.regularPrice > product.salePrice ? product.regularPrice : undefined,
     image: product.mediumImage || product.thumbnailImage || product.image || '',
     productUrl: product.url,
     source: 'bestbuy',
