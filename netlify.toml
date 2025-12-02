@@ -1,0 +1,12 @@
+# Netlify will automatically detect Next.js and use Essential Next.js
+# No need for explicit plugin configuration for Next.js 15+
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type"

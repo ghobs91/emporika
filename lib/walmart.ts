@@ -13,9 +13,16 @@ export class WalmartAPI {
 
   constructor(consumerId: string, keyVersion: string) {
     this.consumerId = consumerId;
-    // Read private key from file
-    const keyPath = path.join(process.cwd(), 'WM_IO_private_key.pem');
-    this.privateKey = fs.readFileSync(keyPath, 'utf8');
+    
+    // Try to read private key from environment variable first (for Netlify)
+    // Otherwise fall back to reading from file (for local development)
+    if (process.env.WALMART_PRIVATE_KEY_BASE64) {
+      this.privateKey = Buffer.from(process.env.WALMART_PRIVATE_KEY_BASE64, 'base64').toString('utf8');
+    } else {
+      const keyPath = path.join(process.cwd(), 'WM_IO_private_key.pem');
+      this.privateKey = fs.readFileSync(keyPath, 'utf8');
+    }
+    
     this.keyVersion = keyVersion;
   }
 
