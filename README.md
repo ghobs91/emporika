@@ -1,6 +1,6 @@
 # Emporika - Intelligent Shopping Search Engine
 
-An intelligent shopping search engine that allows users to browse and search across multiple online retailers. Currently integrated with Walmart's Product Search API.
+An intelligent shopping search engine that allows users to browse and search across multiple online retailers. Currently integrated with Walmart's Product Search API and Best Buy's Product Search API.
 
 ## Features
 
@@ -10,6 +10,7 @@ An intelligent shopping search engine that allows users to browse and search acr
 - ⭐ **Customer Ratings**: View product ratings and review counts
 - 📱 **Responsive Design**: Fully responsive UI that works on all devices
 - 🚀 **Fast Performance**: Built with Next.js 14+ and React Server Components
+- 🏪 **Multi-Retailer Search**: Search products from Walmart and Best Buy simultaneously
 
 ## Tech Stack
 
@@ -17,7 +18,7 @@ An intelligent shopping search engine that allows users to browse and search acr
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **Icons**: Lucide React
-- **API Integration**: Walmart Product Search API
+- **API Integration**: Walmart Product Search API, Best Buy Product Search API
 
 ## Getting Started
 
@@ -28,6 +29,8 @@ An intelligent shopping search engine that allows users to browse and search acr
   - Consumer ID (Client ID)
   - Private Key (for signing requests)
   - Key Version (usually "1")
+- Best Buy API credentials from [https://developer.bestbuy.com/](https://developer.bestbuy.com/)
+  - API Key
 
 ### Installation
 
@@ -44,11 +47,15 @@ npm install
 
 3. Set up environment variables:
    
-   Create a `.env.local` file in the root directory and add your Walmart API credentials:
+   Create a `.env.local` file in the root directory and add your API credentials:
    ```env
+   # Walmart API credentials
    WALMART_CONSUMER_ID=your_consumer_id_here
    WALMART_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYour private key here\n-----END PRIVATE KEY-----"
    WALMART_KEY_VERSION=1
+   
+   # Best Buy API credentials
+   BESTBUY_API_KEY=your_bestbuy_api_key_here
    ```
 
 4. Run the development server:
@@ -64,19 +71,25 @@ npm run dev
 emporika/
 ├── app/
 │   ├── api/
-│   │   └── search/
-│   │       └── route.ts          # Search API endpoint
+│   │   ├── search/
+│   │   │   └── route.ts          # Unified search API endpoint
+│   │   └── trending/
+│   │       └── route.ts          # Trending products API endpoint
 │   ├── globals.css               # Global styles
 │   ├── layout.tsx                # Root layout
 │   └── page.tsx                  # Home page
 ├── components/
 │   ├── ProductCard.tsx           # Product card component
 │   ├── ProductGrid.tsx           # Product grid layout
-│   └── SearchBar.tsx             # Search input component
+│   ├── SearchBar.tsx             # Search input component
+│   └── TrendingFeed.tsx          # Trending products component
 ├── lib/
-│   └── walmart.ts                # Walmart API client
+│   ├── walmart.ts                # Walmart API client
+│   └── bestbuy.ts                # Best Buy API client
 ├── types/
-│   └── walmart.ts                # TypeScript types for Walmart API
+│   ├── walmart.ts                # TypeScript types for Walmart API
+│   ├── bestbuy.ts                # TypeScript types for Best Buy API
+│   └── unified.ts                # Unified product types for cross-retailer display
 └── .env.local                    # Environment variables
 ```
 
@@ -95,14 +108,27 @@ The application integrates with Walmart's Affiliate API v1 Search endpoint:
 - `numItems`: Number of items to return (default: 25)
 - `start`: Pagination offset
 
+### Best Buy Search API
+
+The application integrates with Best Buy's Products API:
+
+**Endpoint**: `https://api.bestbuy.com/v1/products((search={query}))`
+
+**Parameters**:
+- `apiKey`: Your Best Buy API key
+- `format`: Response format (json)
+- `pageSize`: Number of items to return
+- `page`: Page number for pagination
+- `show`: Fields to include in the response
+
 ### Adding More Retailers
 
 To add more retailers:
 
 1. Create a new API client in `lib/` (e.g., `lib/amazon.ts`)
 2. Define TypeScript types in `types/` (e.g., `types/amazon.ts`)
-3. Create an API route in `app/api/` (e.g., `app/api/search-amazon/route.ts`)
-4. Update the search logic in `app/page.tsx` to aggregate results from multiple sources
+3. Add normalization function to `types/unified.ts`
+4. Update the search logic in `app/api/search/route.ts` to include the new source
 
 ## Environment Variables
 
@@ -111,6 +137,7 @@ To add more retailers:
 | `WALMART_CONSUMER_ID` | Your Consumer ID (Client ID) from developer.walmart.com | Yes |
 | `WALMART_PRIVATE_KEY` | Your private key for signing API requests | Yes |
 | `WALMART_KEY_VERSION` | Private key version (usually "1") | Yes |
+| `BESTBUY_API_KEY` | Your API key from developer.bestbuy.com | Yes |
 
 ## Development
 
@@ -130,7 +157,8 @@ npm run lint
 
 ## Features Roadmap
 
-- [ ] Add more retailers (Amazon, Target, Best Buy, etc.)
+- [x] Add Best Buy as a retailer
+- [ ] Add more retailers (Amazon, Target, etc.)
 - [ ] Advanced filtering (price range, ratings, categories)
 - [ ] Sort options (price, rating, relevance)
 - [ ] Pagination for results
