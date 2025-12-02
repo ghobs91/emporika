@@ -1,9 +1,10 @@
-import { WalmartSearchParams, WalmartSearchResponse } from '@/types/walmart';
+import { WalmartSearchParams, WalmartSearchResponse, WalmartTrendingResponse } from '@/types/walmart';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
 const WALMART_API_BASE = 'https://developer.api.walmart.com/api-proxy/service/affil/product/v2/search';
+const WALMART_TRENDING_API = 'https://developer.api.walmart.com/api-proxy/service/affil/product/v2/trends';
 
 export class WalmartAPI {
   private consumerId: string;
@@ -55,6 +56,31 @@ export class WalmartAPI {
     const url = `${WALMART_API_BASE}?${searchParams.toString()}`;
 
     const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'WM_CONSUMER.ID': this.consumerId,
+        'WM_CONSUMER.INTIMESTAMP': timestamp,
+        'WM_SEC.KEY_VERSION': this.keyVersion,
+        'WM_SEC.AUTH_SIGNATURE': signature,
+        'WM_QOS.CORRELATION_ID': `${Date.now()}-${Math.random().toString(36).substring(7)}`,
+      },
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Walmart API error: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    return response.json();
+  }
+
+  async getTrendingItems(): Promise<WalmartTrendingResponse> {
+    const timestamp = Date.now().toString();
+    const signature = this.generateSignature(this.consumerId, timestamp, this.keyVersion);
+
+    const response = await fetch(WALMART_TRENDING_API, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
