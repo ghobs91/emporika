@@ -49,3 +49,7 @@ export interface WalmartSearchParams {
   categoryId?: string;
   format?: 'json' | 'xml';
 }
+
+export interface WalmartTrendingResponse {
+  items: WalmartProduct[];
+}

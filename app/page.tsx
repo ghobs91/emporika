@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import SearchBar from '@/components/SearchBar';
 import ProductGrid from '@/components/ProductGrid';
+import TrendingFeed from '@/components/TrendingFeed';
 import { WalmartProduct } from '@/types/walmart';
 import { ShoppingBag } from 'lucide-react';
 
@@ -55,28 +56,24 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
+        {/* Show trending items when no search has been performed */}
+        {!searchQuery && !isLoading && (
+          <>
+            <TrendingFeed />
+          </>
+        )}
+
+        {/* Show search results when user has searched */}
         {searchQuery && !isLoading && (
           <div className="mb-6">
             <h2 className="text-xl font-semibold text-gray-800">
               Results for &quot;{searchQuery}&quot;
               {totalResults > 0 && (
                 <span className="text-gray-500 font-normal ml-2">
-                  ({totalResults.toLocaleString()} items found)
+                  ({totalResults} items found)
                 </span>
               )}
             </h2>
-          </div>
-        )}
-
-        {!searchQuery && !isLoading && (
-          <div className="text-center py-20">
-            <ShoppingBag size={64} className="mx-auto text-gray-300 mb-4" />
-            <h2 className="text-2xl font-semibold text-gray-700 mb-2">
-              Start Your Search
-            </h2>
-            <p className="text-gray-500">
-              Enter a product name to search across retailers and find the best deals
-            </p>
           </div>
         )}
 
