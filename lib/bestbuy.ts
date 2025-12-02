@@ -10,6 +10,10 @@ export class BestBuyAPI {
   }
 
   async searchProducts(params: BestBuySearchParams): Promise<BestBuySearchResponse> {
+    if (!this.apiKey) {
+      throw new Error('Best Buy API key is not configured');
+    }
+
     const searchParams = new URLSearchParams({
       apiKey: this.apiKey,
       format: 'json',
