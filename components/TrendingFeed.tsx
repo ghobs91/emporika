@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { WalmartProduct } from '@/types/walmart';
+import { UnifiedProduct } from '@/types/unified';
 import ProductCard from './ProductCard';
 import { TrendingUp } from 'lucide-react';
 
 export default function TrendingFeed() {
-  const [trendingItems, setTrendingItems] = useState<WalmartProduct[]>([]);
+  const [trendingItems, setTrendingItems] = useState<UnifiedProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -62,7 +62,7 @@ export default function TrendingFeed() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {trendingItems.map((product) => (
-            <ProductCard key={product.itemId} product={product} />
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       )}

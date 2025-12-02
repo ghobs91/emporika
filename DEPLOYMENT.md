@@ -6,7 +6,8 @@ This guide walks through deploying the Emporika application to Netlify.
 
 1. A Netlify account
 2. Walmart API credentials (Consumer ID and Private Key)
-3. Git repository (GitHub, GitLab, or Bitbucket)
+3. Best Buy API credentials (API Key)
+4. Git repository (GitHub, GitLab, or Bitbucket)
 
 ## Step 1: Prepare Your Environment Variables
 
@@ -15,6 +16,7 @@ You'll need to set the following environment variables in Netlify:
 1. **WALMART_CONSUMER_ID**: Your Walmart API Consumer ID
 2. **WALMART_KEY_VERSION**: Usually "1"
 3. **WALMART_PRIVATE_KEY_BASE64**: Your private key encoded as base64
+4. **BESTBUY_API_KEY**: Your Best Buy API key
 
 To generate the base64-encoded private key, run:
 
@@ -49,6 +51,7 @@ git push
    - `WALMART_CONSUMER_ID`
    - `WALMART_KEY_VERSION`
    - `WALMART_PRIVATE_KEY_BASE64`
+   - `BESTBUY_API_KEY`
 7. Click "Deploy site"
 
 ### Option B: Using Netlify CLI
@@ -69,6 +72,7 @@ git push
    netlify env:set WALMART_CONSUMER_ID "your_consumer_id"
    netlify env:set WALMART_KEY_VERSION "1"
    netlify env:set WALMART_PRIVATE_KEY_BASE64 "your_base64_key"
+   netlify env:set BESTBUY_API_KEY "your_bestbuy_api_key"
    netlify deploy --prod
    ```
 

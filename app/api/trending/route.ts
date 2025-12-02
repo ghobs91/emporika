@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { walmartAPI } from '@/lib/walmart';
+import { normalizeWalmartProduct, UnifiedProduct } from '@/types/unified';
 
 export async function GET() {
   try {
     const data = await walmartAPI.getTrendingItems();
-    return NextResponse.json(data);
+    const unifiedItems: UnifiedProduct[] = (data.items || []).map(normalizeWalmartProduct);
+    return NextResponse.json({ items: unifiedItems });
   } catch (error) {
     console.error('Trending items error:', error);
     return NextResponse.json(
