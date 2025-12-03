@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: '*.walmartimages.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'pisces.bbystatic.com',
+      },
     ],
   },
 };
