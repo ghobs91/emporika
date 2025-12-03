@@ -6,7 +6,7 @@ export class BestBuyAPI {
   private apiKey: string;
 
   constructor(apiKey: string) {
-    this.apiKey = apiKey;
+    this.apiKey = process.env.BESTBUY_API_KEY || apiKey;
   }
 
   async searchProducts(params: BestBuySearchParams): Promise<BestBuySearchResponse> {
