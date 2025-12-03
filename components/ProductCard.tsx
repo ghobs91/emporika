@@ -23,8 +23,8 @@ export default function ProductCard({ product }: ProductCardProps) {
   const buttonTextColor = product.source === 'walmart' ? 'text-white' : 'text-gray-900';
 
   return (
-    <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden group">
-      <div className="relative h-64 bg-gray-100">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl hover:shadow-2xl border-2 border-gray-200 dark:border-gray-700 transition-all duration-300 overflow-hidden group hover:scale-[1.02] hover:-translate-y-1">
+      <div className="relative h-64 bg-gray-100 dark:bg-gray-900">
         {product.image && (
           <Image
             src={product.image}
@@ -45,16 +45,16 @@ export default function ProductCard({ product }: ProductCardProps) {
       </div>
 
       <div className="p-4">
-        <h3 className="font-semibold text-gray-800 line-clamp-2 mb-2 min-h-12">
+        <h3 className="font-semibold text-gray-800 dark:text-gray-100 line-clamp-2 mb-2 min-h-12">
           {product.name}
         </h3>
 
         {product.customerRating && (
           <div className="flex items-center gap-1 mb-2">
             <Star className="fill-yellow-400 text-yellow-400" size={16} />
-            <span className="text-sm font-medium">{product.customerRating.toFixed(1)}</span>
+            <span className="text-sm font-medium dark:text-gray-200">{product.customerRating.toFixed(1)}</span>
             {product.reviewCount && (
-              <span className="text-sm text-gray-500">({product.reviewCount})</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">({product.reviewCount})</span>
             )}
           </div>
         )}
@@ -82,7 +82,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           href={product.productUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className={`flex items-center justify-center gap-2 w-full ${buttonColor} ${buttonTextColor} py-2 rounded-lg transition-colors font-medium`}
+          className={`flex items-center justify-center gap-2 w-full ${buttonColor} ${buttonTextColor} py-3 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl`}
         >
           View Product
           <ExternalLink size={16} />
