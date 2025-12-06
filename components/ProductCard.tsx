@@ -17,10 +17,10 @@ export default function ProductCard({ product }: ProductCardProps) {
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
 
-  const sourceLabel = product.source === 'walmart' ? 'Walmart' : 'Best Buy';
-  const sourceColor = product.source === 'walmart' ? 'bg-blue-600' : 'bg-yellow-500';
-  const buttonColor = product.source === 'walmart' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-yellow-500 hover:bg-yellow-600';
-  const buttonTextColor = product.source === 'walmart' ? 'text-white' : 'text-gray-900';
+  const sourceLabel = product.source === 'walmart' ? 'Walmart' : product.source === 'target' ? 'Target' : 'Best Buy';
+  const sourceColor = product.source === 'walmart' ? 'bg-blue-600' : product.source === 'target' ? 'bg-red-600' : 'bg-yellow-500';
+  const buttonColor = product.source === 'walmart' ? 'bg-blue-600 hover:bg-blue-700' : product.source === 'target' ? 'bg-red-600 hover:bg-red-700' : 'bg-yellow-500 hover:bg-yellow-600';
+  const buttonTextColor = product.source === 'bestbuy' ? 'text-gray-900' : 'text-white';
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl hover:shadow-2xl border-2 border-gray-200 dark:border-gray-700 transition-all duration-300 overflow-hidden group hover:scale-[1.02] hover:-translate-y-1">

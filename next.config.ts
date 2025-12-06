@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'pisces.bbystatic.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'target.scene7.com',
+      },
     ],
   },
 };

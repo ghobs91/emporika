@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { walmartAPI } from '@/lib/walmart';
 import { bestBuyAPI } from '@/lib/bestbuy';
+import { targetAPI } from '@/lib/target';
 import { WalmartSearchParams } from '@/types/walmart';
 import { 
   UnifiedSearchResponse, 
   normalizeWalmartProduct, 
   normalizeBestBuyProduct, 
+  normalizeTargetProduct,
   UnifiedProduct 
 } from '@/types/unified';
 
@@ -36,7 +38,11 @@ export async function GET(request: NextRequest) {
     }
 
     const numItems = searchParams.get('numItems') ? parseInt(searchParams.get('numItems')!) : 25;
-    const itemsPerSource = Math.ceil(numItems / 2);
+    const itemsPerSource = Math.ceil(numItems / 3);
+    
+    // Get Target-specific parameters
+    const targetStoreId = searchParams.get('targetStoreId');
+    const targetZip = searchParams.get('targetZip');
 
     const sortParam = searchParams.get('sort');
     const orderParam = searchParams.get('order');
@@ -50,10 +56,16 @@ export async function GET(request: NextRequest) {
       categoryId: searchParams.get('categoryId') || undefined,
     };
 
-    // Fetch from both APIs concurrently
-    const [walmartResult, bestBuyResult] = await Promise.allSettled([
+    // Fetch from all APIs concurrently
+    const [walmartResult, bestBuyResult, targetResult] = await Promise.allSettled([
       walmartAPI.searchProducts(walmartParams),
       bestBuyAPI.searchProducts({ query, pageSize: itemsPerSource }),
+      targetAPI.searchProducts({ 
+        query, 
+        count: itemsPerSource,
+        store_id: targetStoreId || undefined,
+        zip: targetZip || undefined,
+      }),
     ]);
 
     const unifiedProducts: UnifiedProduct[] = [];
@@ -77,6 +89,18 @@ export async function GET(request: NextRequest) {
     } else {
       console.error('Best Buy API error:', bestBuyResult.reason);
       sources.bestbuy = { count: 0, error: bestBuyResult.reason?.message || 'Failed to fetch from Best Buy' };
+    }
+
+    // Process Target results
+    if (targetResult.status === 'fulfilled') {
+      const targetProducts = targetResult.value.data?.search?.products?.map((product, index) => 
+        normalizeTargetProduct(product, index)
+      ) || [];
+      unifiedProducts.push(...targetProducts);
+      sources.target = { count: targetProducts.length };
+    } else {
+      console.error('Target API error:', targetResult.reason);
+      sources.target = { count: 0, error: targetResult.reason?.message || 'Failed to fetch from Target' };
     }
 
     // Interleave products from different sources for better UX
@@ -103,9 +127,10 @@ export async function GET(request: NextRequest) {
 function interleaveProducts(products: UnifiedProduct[]): UnifiedProduct[] {
   const walmartProducts = products.filter(p => p.source === 'walmart');
   const bestBuyProducts = products.filter(p => p.source === 'bestbuy');
+  const targetProducts = products.filter(p => p.source === 'target');
   
   const result: UnifiedProduct[] = [];
-  const maxLength = Math.max(walmartProducts.length, bestBuyProducts.length);
+  const maxLength = Math.max(walmartProducts.length, bestBuyProducts.length, targetProducts.length);
   
   for (let i = 0; i < maxLength; i++) {
     if (i < walmartProducts.length) {
@@ -113,6 +138,9 @@ function interleaveProducts(products: UnifiedProduct[]): UnifiedProduct[] {
     }
     if (i < bestBuyProducts.length) {
       result.push(bestBuyProducts[i]);
+    }
+    if (i < targetProducts.length) {
+      result.push(targetProducts[i]);
     }
   }
   
