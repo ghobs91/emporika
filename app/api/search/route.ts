@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { walmartAPI } from '@/lib/walmart';
 import { bestBuyAPI } from '@/lib/bestbuy';
 import { targetAPI } from '@/lib/target';
+import { ebayAPI } from '@/lib/ebay';
 import { WalmartSearchParams } from '@/types/walmart';
 import { 
   UnifiedSearchResponse, 
   normalizeWalmartProduct, 
   normalizeBestBuyProduct, 
   normalizeTargetProduct,
+  normalizeEbayProduct,
   UnifiedProduct 
 } from '@/types/unified';
 
@@ -38,7 +40,7 @@ export async function GET(request: NextRequest) {
     }
 
     const numItems = searchParams.get('numItems') ? parseInt(searchParams.get('numItems')!) : 25;
-    const itemsPerSource = Math.ceil(numItems / 3);
+    const itemsPerSource = Math.ceil(numItems / 4); // Now divided by 4 retailers
     
     // Get Target-specific parameters
     const targetStoreId = searchParams.get('targetStoreId');
@@ -57,7 +59,7 @@ export async function GET(request: NextRequest) {
     };
 
     // Fetch from all APIs concurrently
-    const [walmartResult, bestBuyResult, targetResult] = await Promise.allSettled([
+    const [walmartResult, bestBuyResult, targetResult, ebayResult] = await Promise.allSettled([
       walmartAPI.searchProducts(walmartParams),
       bestBuyAPI.searchProducts({ query, pageSize: itemsPerSource }),
       targetAPI.searchProducts({ 
@@ -65,6 +67,11 @@ export async function GET(request: NextRequest) {
         count: itemsPerSource,
         store_id: targetStoreId || undefined,
         zip: targetZip || undefined,
+      }),
+      ebayAPI.searchProducts({ 
+        q: query, 
+        limit: itemsPerSource,
+        fieldgroups: 'EXTENDED',
       }),
     ]);
 
@@ -103,6 +110,16 @@ export async function GET(request: NextRequest) {
       sources.target = { count: 0, error: targetResult.reason?.message || 'Failed to fetch from Target' };
     }
 
+    // Process eBay results
+    if (ebayResult.status === 'fulfilled') {
+      const ebayProducts = ebayResult.value.itemSummaries?.map(normalizeEbayProduct) || [];
+      unifiedProducts.push(...ebayProducts);
+      sources.ebay = { count: ebayProducts.length };
+    } else {
+      console.error('eBay API error:', ebayResult.reason);
+      sources.ebay = { count: 0, error: ebayResult.reason?.message || 'Failed to fetch from eBay' };
+    }
+
     // Interleave products from different sources for better UX
     const interleavedProducts = interleaveProducts(unifiedProducts);
 
@@ -128,9 +145,15 @@ function interleaveProducts(products: UnifiedProduct[]): UnifiedProduct[] {
   const walmartProducts = products.filter(p => p.source === 'walmart');
   const bestBuyProducts = products.filter(p => p.source === 'bestbuy');
   const targetProducts = products.filter(p => p.source === 'target');
+  const ebayProducts = products.filter(p => p.source === 'ebay');
   
   const result: UnifiedProduct[] = [];
-  const maxLength = Math.max(walmartProducts.length, bestBuyProducts.length, targetProducts.length);
+  const maxLength = Math.max(
+    walmartProducts.length, 
+    bestBuyProducts.length, 
+    targetProducts.length,
+    ebayProducts.length
+  );
   
   for (let i = 0; i < maxLength; i++) {
     if (i < walmartProducts.length) {
@@ -141,6 +164,9 @@ function interleaveProducts(products: UnifiedProduct[]): UnifiedProduct[] {
     }
     if (i < targetProducts.length) {
       result.push(targetProducts[i]);
+    }
+    if (i < ebayProducts.length) {
+      result.push(ebayProducts[i]);
     }
   }
   

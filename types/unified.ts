@@ -1,8 +1,9 @@
 import { WalmartProduct } from './walmart';
 import { BestBuyProduct, BestBuyTrendingProduct } from './bestbuy';
 import { TargetProduct } from './target';
+import { EbayItemSummary } from './ebay';
 
-export type RetailerSource = 'walmart' | 'bestbuy' | 'target';
+export type RetailerSource = 'walmart' | 'bestbuy' | 'target' | 'ebay';
 
 // Unified product interface that works across all retailers
 export interface UnifiedProduct {
@@ -106,6 +107,41 @@ export function normalizeTargetProduct(product: TargetProduct, index?: number): 
   };
 }
 
+export function normalizeEbayProduct(product: EbayItemSummary): UnifiedProduct {
+  const price = product.price ? parseFloat(product.price.value) : 0;
+  const originalPrice = product.marketingPrice?.originalPrice 
+    ? parseFloat(product.marketingPrice.originalPrice.value) 
+    : undefined;
+  
+  // Use the best available image
+  const imageUrl = product.image?.imageUrl || 
+    product.thumbnailImages?.[0]?.imageUrl || 
+    product.additionalImages?.[0]?.imageUrl || 
+    '';
+  
+  // Extract numeric rating if available from seller feedback
+  const rating = product.seller?.feedbackPercentage 
+    ? parseFloat(product.seller.feedbackPercentage) / 20 // Convert 0-100 to 0-5 scale
+    : undefined;
+
+  return {
+    id: `ebay-${product.itemId}`,
+    name: product.title,
+    price: price,
+    originalPrice: originalPrice && originalPrice > price ? originalPrice : undefined,
+    image: imageUrl,
+    productUrl: product.itemAffiliateWebUrl || product.itemWebUrl || `https://www.ebay.com/itm/${product.legacyItemId || product.itemId}`,
+    source: 'ebay',
+    customerRating: rating,
+    reviewCount: product.seller?.feedbackScore,
+    shortDescription: product.shortDescription,
+    freeShipping: product.shippingOptions?.some(option => 
+      option.shippingCost?.value === '0' || option.shippingCost?.value === '0.0'
+    ),
+    availableOnline: true, // eBay items are always available online
+  };
+}
+
 export interface UnifiedSearchResponse {
   query: string;
   totalResults: number;
@@ -120,6 +156,10 @@ export interface UnifiedSearchResponse {
       error?: string;
     };
     target?: {
+      count: number;
+      error?: string;
+    };
+    ebay?: {
       count: number;
       error?: string;
     };
