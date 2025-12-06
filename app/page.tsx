@@ -7,19 +7,32 @@ import TrendingFeed from '@/components/TrendingFeed';
 import ThemeToggle from '@/components/ThemeToggle';
 import { UnifiedProduct } from '@/types/unified';
 import { ShoppingBag } from 'lucide-react';
+import { useTargetStore } from '@/hooks/useTargetStore';
 
 export default function Home() {
   const [products, setProducts] = useState<UnifiedProduct[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [totalResults, setTotalResults] = useState(0);
+  const { storeInfo } = useTargetStore();
 
   const handleSearch = async (query: string) => {
     setIsLoading(true);
     setSearchQuery(query);
     
     try {
-      const response = await fetch(`/api/search?query=${encodeURIComponent(query)}&numItems=20`);
+      // Build search URL with Target store info if available
+      const params = new URLSearchParams({
+        query,
+        numItems: '20',
+      });
+      
+      if (storeInfo) {
+        params.append('targetStoreId', storeInfo.storeId);
+        params.append('targetZip', storeInfo.zip);
+      }
+      
+      const response = await fetch(`/api/search?${params.toString()}`);
       const data = await response.json();
       
       if (response.ok) {
@@ -91,7 +104,7 @@ export default function Home() {
       <footer className="bg-gray-900 dark:bg-gray-950 text-white mt-20 py-8">
         <div className="container mx-auto px-4 text-center">
           <p className="text-gray-400 dark:text-gray-500">
-            © 2025 Emporika. Built with Next.js, Walmart API, and Best Buy API
+            © 2025 Emporika. Built with Next.js, Walmart API, Best Buy API, and Target API
           </p>
         </div>
       </footer>
