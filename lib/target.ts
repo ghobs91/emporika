@@ -1,8 +1,7 @@
-import { TargetSearchParams, TargetSearchResponse, TargetNearbyStoresResponse, TargetRecommendationsResponse } from '@/types/target';
+import { TargetSearchParams, TargetSearchResponse, TargetNearbyStoresResponse } from '@/types/target';
 
 const TARGET_API_BASE = 'https://redsky.target.com/redsky_aggregations/v1/web/plp_search_v2';
 const TARGET_STORES_API = 'https://redsky.target.com/redsky_aggregations/v1/web/nearby_stores_v1';
-const TARGET_RECOMMENDATIONS_API = 'https://redsky.target.com/redsky_aggregations/v1/web/general_recommendations_placement_v1';
 
 export class TargetAPI {
   private defaultStoreId: string;
@@ -107,25 +106,30 @@ export class TargetAPI {
     return response.json();
   }
 
-  async getTrendingProducts(): Promise<TargetRecommendationsResponse> {
+  async getTrendingProducts(): Promise<TargetSearchResponse> {
     const visitorId = this.generateVisitorId();
     
     const searchParams = new URLSearchParams({
-      channel: 'WEB',
-      include_sponsored_recommendations: 'true',
-      key: '9f36aeafbe60771e321a7cc95a78140772ab3e96',
-      page: '/c/root',
-      placement_id: 'slingshot_manual_tcins',
-      pricing_store_id: '1264',
-      purchasable_store_ids: '1264,1885,1139,1866,3236',
-      visitor_id: visitorId,
-      resolve_to_first_variation_child: 'false',
-      slingshot_component_id: 'WEB-436728',
+      category: '4xw74', // Trending/deals category
+      count: '24',
+      offset: '0',
+      default_purchasability_filter: 'true',
+      include_review_summarization: 'true',
+      page: '/c/4xw74',
       platform: 'desktop',
-      include_dmc_dmr: 'false',
+      pricing_store_id: '1264',
+      store_ids: '1264,1885,1139,1866,3236',
+      visitor_id: visitorId,
+      scheduled_delivery_store_id: '1264',
+      zip: this.defaultZip,
+      key: '9f36aeafbe60771e321a7cc95a78140772ab3e96',
+      channel: 'WEB',
+      spellcheck: 'true',
+      include_dmc_dmr: 'true',
+      useragent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36',
     });
 
-    const url = `${TARGET_RECOMMENDATIONS_API}?${searchParams.toString()}`;
+    const url = `${TARGET_API_BASE}?${searchParams.toString()}`;
 
     const response = await fetch(url, {
       method: 'GET',
@@ -138,7 +142,7 @@ export class TargetAPI {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Target recommendations API error: ${response.status} ${response.statusText} - ${errorText}`);
+      throw new Error(`Target trending API error: ${response.status} ${response.statusText} - ${errorText}`);
     }
 
     return response.json();

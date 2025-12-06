@@ -1,13 +1,17 @@
 import { NextResponse } from 'next/server';
 import { bestBuyAPI } from '@/lib/bestbuy';
 import { walmartAPI } from '@/lib/walmart';
-import { normalizeBestBuyTrendingProduct, normalizeWalmartProduct, UnifiedProduct } from '@/types/unified';
+import { targetAPI } from '@/lib/target';
+import { ebayAPI } from '@/lib/ebay';
+import { normalizeBestBuyTrendingProduct, normalizeWalmartProduct, normalizeTargetProduct, normalizeEbayProduct, UnifiedProduct } from '@/types/unified';
 
 export async function GET() {
   try {
-    const [bestBuyData, walmartData] = await Promise.allSettled([
+    const [bestBuyData, walmartData, targetData, ebayData] = await Promise.allSettled([
       bestBuyAPI.getTrendingProducts(),
       walmartAPI.getTrendingItems(),
+      targetAPI.getTrendingProducts(),
+      ebayAPI.getTrendingProducts(),
     ]);
 
     const unifiedItems: UnifiedProduct[] = [];
@@ -26,6 +30,23 @@ export async function GET() {
       unifiedItems.push(...walmartItems);
     } else {
       console.error('Walmart trending error:', walmartData.reason);
+    }
+
+    // Add Target trending items
+    if (targetData.status === 'fulfilled') {
+      const targetProducts = targetData.value.data?.search?.products || [];
+      const targetItems = targetProducts.map((product, index) => normalizeTargetProduct(product, index));
+      unifiedItems.push(...targetItems);
+    } else {
+      console.error('Target trending error:', targetData.reason);
+    }
+
+    // Add eBay trending items
+    if (ebayData.status === 'fulfilled') {
+      const ebayItems = (ebayData.value.itemSummaries || []).map(normalizeEbayProduct);
+      unifiedItems.push(...ebayItems);
+    } else {
+      console.error('eBay trending error:', ebayData.reason);
     }
 
     return NextResponse.json({ items: unifiedItems });
