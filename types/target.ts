@@ -67,26 +67,31 @@ export interface TargetSearchParams {
 }
 
 export interface TargetStore {
-  location_id: number;
-  location_names: Array<{
-    name: string;
-  }>;
+  store_id: string;
+  location_name: string;
   mailing_address?: {
     address_line1?: string;
     city?: string;
     state?: string;
     postal_code?: string;
   };
-  geographic_specifications?: {
-    latitude?: number;
-    longitude?: number;
-  };
+  distance?: number;
 }
 
 export interface TargetNearbyStoresResponse {
   data?: {
     nearby_stores?: {
-      locations?: TargetStore[];
+      stores?: TargetStore[];
     };
+  };
+}
+
+export interface TargetRecommendationProduct {
+  product: TargetProduct;
+}
+
+export interface TargetRecommendationsResponse {
+  data?: {
+    recommendations?: TargetRecommendationProduct[];
   };
 }

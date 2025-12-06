@@ -1,5 +1,5 @@
 import { WalmartProduct } from './walmart';
-import { BestBuyProduct } from './bestbuy';
+import { BestBuyProduct, BestBuyTrendingProduct } from './bestbuy';
 import { TargetProduct } from './target';
 
 export type RetailerSource = 'walmart' | 'bestbuy' | 'target';
@@ -26,7 +26,7 @@ export function normalizeWalmartProduct(product: WalmartProduct): UnifiedProduct
     name: product.name,
     price: product.salePrice,
     originalPrice: product.msrp > product.salePrice ? product.msrp : undefined,
-    image: product.mediumImage || product.thumbnailImage,
+    image: product.largeImage || product.mediumImage || product.thumbnailImage,
     productUrl: product.productTrackingUrl,
     source: 'walmart',
     customerRating: product.customerRating ? parseFloat(product.customerRating) : undefined,
@@ -43,7 +43,7 @@ export function normalizeBestBuyProduct(product: BestBuyProduct): UnifiedProduct
     name: product.name,
     price: product.salePrice,
     originalPrice: product.regularPrice > product.salePrice ? product.regularPrice : undefined,
-    image: product.mediumImage || product.thumbnailImage || product.image || '',
+    image: product.largeFrontImage || product.image || product.mediumImage || product.thumbnailImage || '',
     productUrl: product.url,
     source: 'bestbuy',
     customerRating: product.customerReviewAverage,
@@ -51,6 +51,23 @@ export function normalizeBestBuyProduct(product: BestBuyProduct): UnifiedProduct
     shortDescription: product.shortDescription,
     freeShipping: product.freeShipping,
     availableOnline: product.onlineAvailability,
+  };
+}
+
+export function normalizeBestBuyTrendingProduct(product: BestBuyTrendingProduct): UnifiedProduct {
+  return {
+    id: `bestbuy-${product.sku}`,
+    name: product.names.title,
+    price: product.prices.current,
+    originalPrice: product.prices.regular > product.prices.current ? product.prices.regular : undefined,
+    image: product.images.standard,
+    productUrl: product.links.web,
+    source: 'bestbuy',
+    customerRating: product.customerReviews?.averageScore,
+    reviewCount: product.customerReviews?.count,
+    shortDescription: product.descriptions?.short || undefined,
+    freeShipping: undefined,
+    availableOnline: true,
   };
 }
 
