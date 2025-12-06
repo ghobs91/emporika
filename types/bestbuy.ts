@@ -47,3 +47,37 @@ export interface BestBuySearchParams {
   sort?: string;
   show?: string;
 }
+
+export interface BestBuyTrendingProduct {
+  sku: number;
+  names: {
+    title: string;
+  };
+  prices: {
+    regular: number;
+    current: number;
+  };
+  images: {
+    standard: string;
+  };
+  links: {
+    web: string;
+    addToCart?: string;
+  };
+  customerReviews?: {
+    averageScore?: number;
+    count?: number;
+  };
+  descriptions?: {
+    short?: string;
+  };
+}
+
+export interface BestBuyTrendingResponse {
+  metadata?: {
+    resultSet?: {
+      count: number;
+    };
+  };
+  results: BestBuyTrendingProduct[];
+}

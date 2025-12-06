@@ -1,4 +1,4 @@
-import { BestBuySearchParams, BestBuySearchResponse } from '@/types/bestbuy';
+import { BestBuySearchParams, BestBuySearchResponse, BestBuyTrendingResponse } from '@/types/bestbuy';
 
 const BESTBUY_API_BASE = 'https://api.bestbuy.com/v1/products';
 
@@ -38,6 +38,34 @@ export class BestBuyAPI {
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Best Buy API error: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    return response.json();
+  }
+
+  async getTrendingProducts(): Promise<BestBuyTrendingResponse> {
+    if (!this.apiKey) {
+      throw new Error('Best Buy API key is not configured');
+    }
+
+    const searchParams = new URLSearchParams({
+      apiKey: this.apiKey,
+      format: 'json',
+    });
+
+    const url = `${BESTBUY_API_BASE}/trendingViewed?${searchParams.toString()}`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Best Buy trending API error: ${response.status} ${response.statusText} - ${errorText}`);
     }
 
     return response.json();
