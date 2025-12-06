@@ -49,23 +49,25 @@ export default function TrendingFeed() {
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Trending Now</h2>
       </div>
       
-      {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="animate-pulse bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl p-4 shadow-lg">
-              <div className="bg-gray-300 dark:bg-gray-700 h-64 rounded-xl mb-4"></div>
-              <div className="bg-gray-300 dark:bg-gray-700 h-4 rounded w-3/4 mb-2"></div>
-              <div className="bg-gray-300 dark:bg-gray-700 h-4 rounded w-1/2"></div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {trendingItems.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      )}
+      <div className="max-w-[80%] mx-auto">
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="animate-pulse bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl p-4 shadow-lg">
+                <div className="bg-gray-300 dark:bg-gray-700 h-64 rounded-xl mb-4"></div>
+                <div className="bg-gray-300 dark:bg-gray-700 h-4 rounded w-3/4 mb-2"></div>
+                <div className="bg-gray-300 dark:bg-gray-700 h-4 rounded w-1/2"></div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {trendingItems.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
