@@ -22,13 +22,31 @@ export interface UnifiedProduct {
 }
 
 export function normalizeWalmartProduct(product: WalmartProduct): UnifiedProduct {
+  // Extract clean product URL from tracking URL
+  // Tracking URLs look like: https://goto.walmart.com/c/568844/9383?veh=aff&sourceid=...&u=https%3A%2F%2Fwww.walmart.com%2Fip%2F516833054
+  // We want just: https://www.walmart.com/ip/516833054
+  let productUrl = product.productUrl;
+  
+  if (product.productTrackingUrl) {
+    try {
+      const url = new URL(product.productTrackingUrl);
+      const targetUrl = url.searchParams.get('u');
+      if (targetUrl) {
+        productUrl = decodeURIComponent(targetUrl);
+      }
+    } catch (e) {
+      // If parsing fails, fall back to productUrl
+      console.error('Failed to parse Walmart tracking URL:', e);
+    }
+  }
+  
   return {
     id: `walmart-${product.itemId}`,
     name: product.name,
     price: product.salePrice,
     originalPrice: product.msrp > product.salePrice ? product.msrp : undefined,
     image: product.largeImage || product.mediumImage || product.thumbnailImage,
-    productUrl: product.productTrackingUrl,
+    productUrl: productUrl,
     source: 'walmart',
     customerRating: product.customerRating ? parseFloat(product.customerRating) : undefined,
     reviewCount: product.numReviews,
