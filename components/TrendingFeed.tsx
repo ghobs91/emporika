@@ -46,7 +46,7 @@ export default function TrendingFeed() {
     <div className="mb-12">
       <div className="flex items-center gap-3 mb-8">
         <TrendingUp className="text-orange-500 dark:text-orange-400" size={32} />
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Trending Now</h2>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Trending Deals</h2>
       </div>
       
       <div className="max-w-[80%] mx-auto">

@@ -27,37 +27,32 @@ export default function ProductCard({ product }: ProductCardProps) {
     }
   };
 
+  const getSourceFavicon = () => {
+    switch (product.source) {
+      case 'walmart': return '/walmart-favicon.png';
+      case 'target': return '/target-favicon.png';
+      case 'bestbuy': return '/bestbuy-favicon.png';
+      case 'ebay': return '/favicon-ebay.png';
+      default: return '';
+    }
+  };
+
   const getSourceColor = () => {
     switch (product.source) {
       case 'walmart': return 'bg-blue-600';
-      case 'target': return 'bg-red-600';
+      case 'target': return 'target-logo-bg';
       case 'bestbuy': return 'bg-yellow-500';
       case 'ebay': return 'bg-purple-600';
       default: return 'bg-gray-600';
     }
   };
 
-  const getButtonColor = () => {
-    switch (product.source) {
-      case 'walmart': return 'bg-blue-600 hover:bg-blue-700';
-      case 'target': return 'bg-red-600 hover:bg-red-700';
-      case 'bestbuy': return 'bg-yellow-500 hover:bg-yellow-600';
-      case 'ebay': return 'bg-purple-600 hover:bg-purple-700';
-      default: return 'bg-gray-600 hover:bg-gray-700';
-    }
-  };
-
-  const getButtonTextColor = () => {
-    return product.source === 'bestbuy' ? 'text-gray-900' : 'text-white';
-  };
-
   const sourceLabel = getSourceLabel();
+  const sourceFavicon = getSourceFavicon();
   const sourceColor = getSourceColor();
-  const buttonColor = getButtonColor();
-  const buttonTextColor = getButtonTextColor();
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl hover:shadow-2xl border-2 border-gray-200 dark:border-gray-700 transition-all duration-300 overflow-hidden group hover:scale-[1.02] hover:-translate-y-1">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl hover:shadow-2xl border-2 border-gray-200 dark:border-gray-700 transition-all duration-300 overflow-hidden group hover:scale-[1.02] hover:-translate-y-1 flex flex-col">
       <div className="relative h-64 bg-gray-100 dark:bg-gray-900">
         {product.image && (
           <Image
@@ -75,12 +70,22 @@ export default function ProductCard({ product }: ProductCardProps) {
             -{discount}%
           </div>
         )}
-        <div className={`absolute top-2 left-2 ${sourceColor} text-white px-2 py-1 rounded text-xs font-semibold`}>
+        <div className={`absolute top-2 left-2 ${sourceColor} text-white px-2 py-1 rounded text-xs font-semibold flex items-center gap-1.5`}>
+          {sourceFavicon && (
+            <Image
+              src={sourceFavicon}
+              alt={`${sourceLabel} favicon`}
+              width={14}
+              height={14}
+              className="rounded-sm"
+              unoptimized
+            />
+          )}
           {sourceLabel}
         </div>
       </div>
 
-      <div className="p-4">
+      <div className="p-4 flex flex-col flex-grow">
         <h3 className="font-semibold text-gray-800 dark:text-gray-100 line-clamp-2 mb-2 min-h-12">
           {product.name}
         </h3>
@@ -118,7 +123,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           href={product.productUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className={`flex items-center justify-center gap-2 w-full ${buttonColor} ${buttonTextColor} py-3 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl`}
+          className="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl mt-auto"
         >
           View Product
           <ExternalLink size={16} />

@@ -90,6 +90,9 @@ export function normalizeTargetProduct(product: TargetProduct, index?: number): 
 
   // Create unique ID using tcin and optional index to prevent duplicates
   const uniqueId = index !== undefined ? `target-${product.tcin}-${index}` : `target-${product.tcin}`;
+  
+  // Use buy_url from enrichment if available (from featured deals), otherwise construct it
+  const productUrl = product.item?.enrichment?.buy_url || `https://www.target.com/p/-/A-${product.tcin}`;
 
   return {
     id: uniqueId,
@@ -97,7 +100,7 @@ export function normalizeTargetProduct(product: TargetProduct, index?: number): 
     price: price,
     originalPrice: originalPrice && originalPrice > price ? originalPrice : undefined,
     image: imageUrl,
-    productUrl: `https://www.target.com/p/-/A-${product.tcin}`,
+    productUrl: productUrl,
     source: 'target',
     customerRating: rating,
     reviewCount: reviewCount,

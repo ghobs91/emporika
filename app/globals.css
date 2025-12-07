@@ -36,6 +36,10 @@ body {
 }
 
 @layer utilities {
+  .target-logo-bg {
+    background-color: #181a1b;
+  }
+
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
