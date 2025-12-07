@@ -9,12 +9,15 @@ import { UnifiedProduct } from '@/types/unified';
 import { ShoppingBag } from 'lucide-react';
 import { useTargetStore } from '@/hooks/useTargetStore';
 
+type SortOption = 'relevance' | 'price-asc' | 'price-desc' | 'rating-desc';
+
 export default function Home() {
   const [products, setProducts] = useState<UnifiedProduct[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [totalResults, setTotalResults] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>('relevance');
   const { storeInfo } = useTargetStore();
 
   useEffect(() => {
@@ -47,6 +50,7 @@ export default function Home() {
   const handleSearch = async (query: string) => {
     setIsLoading(true);
     setSearchQuery(query);
+    setSortBy('relevance'); // Reset sort when searching
     
     try {
       // Build search URL with Target store info if available
@@ -79,6 +83,21 @@ export default function Home() {
       setIsLoading(false);
     }
   };
+
+  // Sort products based on selected option
+  const sortedProducts = [...products].sort((a, b) => {
+    switch (sortBy) {
+      case 'price-asc':
+        return (a.price || Infinity) - (b.price || Infinity);
+      case 'price-desc':
+        return (b.price || 0) - (a.price || 0);
+      case 'rating-desc':
+        return (b.rating || 0) - (a.rating || 0);
+      case 'relevance':
+      default:
+        return 0; // Keep original order
+    }
+  });
 
   return (
     <div className="min-h-screen bg-linear-to-b from-blue-50 to-white dark:from-gray-950 dark:to-gray-900 transition-colors duration-300">
@@ -137,19 +156,39 @@ export default function Home() {
 
         {/* Show search results when user has searched */}
         {searchQuery && !isLoading && (
-          <div className="mb-6">
-            <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
-              Results for &quot;{searchQuery}&quot;
-              {totalResults > 0 && (
-                <span className="text-gray-500 dark:text-gray-400 font-normal ml-2">
-                  ({totalResults} items found)
-                </span>
-              )}
-            </h2>
+          <div className="sticky top-[72px] z-40 bg-linear-to-b from-blue-50 via-blue-50 to-transparent dark:from-gray-950 dark:via-gray-950 dark:to-transparent pb-4 mb-2">
+            <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 p-4">
+              <div>
+                <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
+                  Results for &quot;{searchQuery}&quot;
+                  {totalResults > 0 && (
+                    <span className="text-gray-500 dark:text-gray-400 font-normal ml-2">
+                      ({totalResults} items found)
+                    </span>
+                  )}
+                </h2>
+              </div>
+              <div className="flex items-center gap-3">
+                <label htmlFor="sort-select" className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                  Sort by:
+                </label>
+                <select
+                  id="sort-select"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as SortOption)}
+                  className="px-4 py-2 rounded-lg border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/40 dark:focus:ring-blue-500/40 cursor-pointer transition-all duration-200"
+                >
+                  <option value="relevance">Relevance</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                  <option value="rating-desc">Rating: High to Low</option>
+                </select>
+              </div>
+            </div>
           </div>
         )}
 
-        <ProductGrid products={products} isLoading={isLoading} />
+        <ProductGrid products={sortedProducts} isLoading={isLoading} />
       </main>
 
       {/* Footer */}
