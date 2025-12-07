@@ -1,15 +1,13 @@
 import { NextResponse } from 'next/server';
 import { bestBuyAPI } from '@/lib/bestbuy';
-import { walmartAPI } from '@/lib/walmart';
 import { targetAPI } from '@/lib/target';
 import { ebayAPI } from '@/lib/ebay';
-import { normalizeBestBuyTrendingProduct, normalizeWalmartProduct, normalizeTargetProduct, normalizeEbayProduct, UnifiedProduct } from '@/types/unified';
+import { normalizeBestBuyTrendingProduct, normalizeTargetProduct, normalizeEbayProduct, UnifiedProduct } from '@/types/unified';
 
 export async function GET() {
   try {
-    const [bestBuyData, walmartData, targetData, ebayData] = await Promise.allSettled([
+    const [bestBuyData, targetData, ebayData] = await Promise.allSettled([
       bestBuyAPI.getTrendingProducts(),
-      walmartAPI.getTrendingItems(),
       targetAPI.getTrendingProducts(),
       ebayAPI.getTrendingProducts(),
     ]);
@@ -22,14 +20,6 @@ export async function GET() {
       unifiedItems.push(...bestBuyItems);
     } else {
       console.error('Best Buy trending error:', bestBuyData.reason);
-    }
-
-    // Add Walmart trending items
-    if (walmartData.status === 'fulfilled') {
-      const walmartItems = (walmartData.value.items || []).map(normalizeWalmartProduct);
-      unifiedItems.push(...walmartItems);
-    } else {
-      console.error('Walmart trending error:', walmartData.reason);
     }
 
     // Add Target trending items
@@ -47,6 +37,12 @@ export async function GET() {
       unifiedItems.push(...ebayItems);
     } else {
       console.error('eBay trending error:', ebayData.reason);
+    }
+
+    // Randomly shuffle the items using Fisher-Yates algorithm
+    for (let i = unifiedItems.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [unifiedItems[i], unifiedItems[j]] = [unifiedItems[j], unifiedItems[i]];
     }
 
     return NextResponse.json({ items: unifiedItems });

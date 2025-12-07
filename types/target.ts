@@ -95,3 +95,62 @@ export interface TargetRecommendationsResponse {
     recommendations?: TargetRecommendationProduct[];
   };
 }
+
+export interface TargetFeaturedDealsProduct {
+  __typename?: string;
+  tcin: string;
+  is_sponsored_sku?: boolean;
+  promotions?: Array<{
+    plp_message?: string;
+    pdp_message?: string;
+    promotion_id?: string;
+    circle_offer?: boolean;
+    promotion_class?: string;
+  }>;
+  price?: {
+    current_retail?: number;
+    formatted_current_price?: string;
+    formatted_current_price_type?: string;
+    formatted_comparison_price?: string;
+    reg_retail?: number;
+    save_dollar?: number;
+    save_percent?: number;
+  };
+  ratings_and_reviews?: {
+    statistics?: {
+      rating?: {
+        average?: number;
+        count?: number;
+      };
+    };
+  };
+  item?: {
+    product_description?: {
+      title?: string;
+    };
+    enrichment?: {
+      buy_url?: string;
+      images?: {
+        primary_image_url?: string;
+        alternate_image_urls?: string[];
+      };
+    };
+    product_classification?: {
+      item_type?: {
+        name?: string;
+        type?: string;
+      };
+    };
+  };
+}
+
+export interface TargetFeaturedDealsResponse {
+  data?: {
+    recommended_products?: {
+      strategy_id?: string;
+      strategy_name?: string;
+      strategy_description?: string;
+      products?: TargetFeaturedDealsProduct[];
+    };
+  };
+}

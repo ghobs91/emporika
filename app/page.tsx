@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SearchBar from '@/components/SearchBar';
 import ProductGrid from '@/components/ProductGrid';
 import TrendingFeed from '@/components/TrendingFeed';
@@ -14,7 +14,35 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [totalResults, setTotalResults] = useState(0);
+  const [isScrolled, setIsScrolled] = useState(false);
   const { storeInfo } = useTargetStore();
+
+  useEffect(() => {
+    let ticking = false;
+    const threshold = 50; // Pixel threshold before switching
+    const hysteresis = 10; // Prevent rapid switching
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrollY = window.scrollY;
+          
+          // Add hysteresis to prevent flickering
+          if (!isScrolled && scrollY > threshold + hysteresis) {
+            setIsScrolled(true);
+          } else if (isScrolled && scrollY < threshold - hysteresis) {
+            setIsScrolled(false);
+          }
+          
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isScrolled]);
 
   const handleSearch = async (query: string) => {
     setIsLoading(true);
@@ -55,22 +83,46 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-linear-to-b from-blue-50 to-white dark:from-gray-950 dark:to-gray-900 transition-colors duration-300">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white dark:bg-gray-800 backdrop-blur-xl shadow-md border-b-2 border-gray-200 dark:border-gray-700">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex-1"></div>
-            <div className="flex items-center gap-3">
-              <ShoppingBag size={36} className="text-blue-600 dark:text-blue-400" />
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Emporika</h1>
+      <header className="sticky top-0 z-50 bg-white dark:bg-gray-800 backdrop-blur-xl shadow-md border-b-2 border-gray-200 dark:border-gray-700 transition-all duration-300">
+        <div className={`container mx-auto px-4 transition-all duration-300 ${
+          isScrolled ? 'py-3' : 'py-6'
+        }`}>
+          <div className={`flex items-center transition-all duration-300 ${
+            isScrolled ? 'gap-4 justify-start' : 'gap-6 justify-center flex-col'
+          }`}>
+            <div className={`flex items-center transition-all duration-300 ${
+              isScrolled ? 'gap-2 order-1' : 'gap-3 order-2'
+            }`}>
+              <ShoppingBag 
+                size={isScrolled ? 24 : 36} 
+                className="text-blue-600 dark:text-blue-400 transition-all duration-300" 
+              />
+              <h1 className={`font-bold text-gray-900 dark:text-white transition-all duration-300 whitespace-nowrap ${
+                isScrolled ? 'text-xl' : 'text-4xl'
+              }`}>
+                Emporika
+              </h1>
             </div>
-            <div className="flex-1 flex justify-end">
+            
+            <div className={`transition-all duration-300 ${
+              isScrolled ? 'flex-1 order-2' : 'w-full order-3'
+            }`}>
+              <div className={`transition-all duration-300 overflow-hidden ${
+                isScrolled ? 'max-h-0 opacity-0 mb-0' : 'max-h-10 opacity-100 mb-6'
+              }`}>
+                <p className="text-center text-gray-600 dark:text-gray-300">
+                  Search and compare products across multiple online retailers
+                </p>
+              </div>
+              <SearchBar onSearch={handleSearch} isLoading={isLoading} isScrolled={isScrolled} />
+            </div>
+            
+            <div className={`transition-all duration-300 ${
+              isScrolled ? 'order-3' : 'absolute top-6 right-4 order-1'
+            }`}>
               <ThemeToggle />
             </div>
           </div>
-          <p className="text-center text-gray-600 dark:text-gray-300 mb-6">
-            Search and compare products across multiple online retailers
-          </p>
-          <SearchBar onSearch={handleSearch} isLoading={isLoading} />
         </div>
       </header>
 
