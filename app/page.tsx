@@ -5,6 +5,7 @@ import SearchBar from '@/components/SearchBar';
 import ProductGrid from '@/components/ProductGrid';
 import TrendingFeed from '@/components/TrendingFeed';
 import ThemeToggle from '@/components/ThemeToggle';
+import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import { UnifiedProduct } from '@/types/unified';
 import { ShoppingBag } from 'lucide-react';
 import { useTargetStore } from '@/hooks/useTargetStore';
@@ -92,7 +93,7 @@ export default function Home() {
       case 'price-desc':
         return (b.price || 0) - (a.price || 0);
       case 'rating-desc':
-        return (b.rating || 0) - (a.rating || 0);
+        return (b.customerRating || 0) - (a.customerRating || 0);
       case 'relevance':
       default:
         return 0; // Keep original order
@@ -199,6 +200,9 @@ export default function Home() {
           </p>
         </div>
       </footer>
+
+      {/* PWA Install Prompt */}
+      <PWAInstallPrompt />
     </div>
   );
 }

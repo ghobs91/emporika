@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2563eb;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="80" fill="url(#grad)"/>
+  <g fill="white">
+    <!-- Shopping cart -->
+    <path d="M160 96c-8.8 0-16 7.2-16 16v16H80c-8.8 0-16 7.2-16 16s7.2 16 16 16h73.6l23.2 116H160c-8.8 0-16 7.2-16 16s7.2 16 16 16h32.8l12.8 64c1.6 8.6 9 14.8 17.8 14.8h158.4c8.8 0 16.2-6.2 17.8-14.8l25.6-128c.8-4.2 0-8.6-2.2-12.2s-5.8-6.2-9.8-7l-152-32c-1.8-.4-3.6-.4-5.4 0l-32.2 6.8L208.6 128H416c8.8 0 16-7.2 16-16s-7.2-16-16-16h-216l-8-40c-1.6-8.6-9-14.8-17.8-14.8H160z"/>
+    <!-- Letter E -->
+    <text x="256" y="280" font-family="Arial, sans-serif" font-size="200" font-weight="bold" text-anchor="middle" fill="white">E</text>
+  </g>
+</svg>
