@@ -1,0 +1,82 @@
+<html>
+  <head>
+    <link rel="apple-touch-icon" href="apple-icon-180.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+  </head>
+  <body>{
+    "name": "Emporika - Unified Shopping Search",
+    "short_name": "Emporika",
+    "description": "Search products across Walmart, Best Buy, Target, and eBay in one place",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#3b82f6",
+    "orientation": "portrait-primary",
+    "icons": [
+    {
+    "src": "/icon-72x72.png",
+    "sizes": "72x72",
+    "type": "image/png",
+    "purpose": "maskable any"
+    },
+    {
+    "src": "/icon-96x96.png",
+    "sizes": "96x96",
+    "type": "image/png",
+    "purpose": "maskable any"
+    },
+    {
+    "src": "/icon-128x128.png",
+    "sizes": "128x128",
+    "type": "image/png",
+    "purpose": "maskable any"
+    },
+    {
+    "src": "/icon-144x144.png",
+    "sizes": "144x144",
+    "type": "image/png",
+    "purpose": "maskable any"
+    },
+    {
+    "src": "/icon-152x152.png",
+    "sizes": "152x152",
+    "type": "image/png",
+    "purpose": "maskable any"
+    },
+    {
+    "src": "/icon-192x192.png",
+    "sizes": "192x192",
+    "type": "image/png",
+    "purpose": "maskable any"
+    },
+    {
+    "src": "/icon-384x384.png",
+    "sizes": "384x384",
+    "type": "image/png",
+    "purpose": "maskable any"
+    },
+    {
+    "src": "/icon-512x512.png",
+    "sizes": "512x512",
+    "type": "image/png",
+    "purpose": "maskable any"
+    }
+    ],
+    "categories": ["shopping", "lifestyle"],
+    "screenshots": [
+    {
+    "src": "/screenshot-wide.png",
+    "sizes": "1280x720",
+    "type": "image/png",
+    "form_factor": "wide"
+    },
+    {
+    "src": "/screenshot-narrow.png",
+    "sizes": "750x1334",
+    "type": "image/png",
+    "form_factor": "narrow"
+    }
+    ]
+    }
+  </body>
+</html>

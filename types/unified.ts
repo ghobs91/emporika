@@ -1,6 +1,6 @@
 import { WalmartProduct } from './walmart';
 import { BestBuyProduct, BestBuyTrendingProduct } from './bestbuy';
-import { TargetProduct } from './target';
+import { TargetProduct, TargetFeaturedDealsProduct } from './target';
 import { EbayItemSummary } from './ebay';
 
 export type RetailerSource = 'walmart' | 'bestbuy' | 'target' | 'ebay';
@@ -90,9 +90,12 @@ export function normalizeBestBuyTrendingProduct(product: BestBuyTrendingProduct)
   };
 }
 
-export function normalizeTargetProduct(product: TargetProduct, index?: number): UnifiedProduct {
+export function normalizeTargetProduct(product: TargetProduct | TargetFeaturedDealsProduct, index?: number): UnifiedProduct {
   const title = product.item?.product_description?.title || 'Untitled';
-  const price = product.price?.current_retail || product.price?.current_retail_min || 0;
+  
+  // Handle different price structures between TargetProduct and TargetFeaturedDealsProduct
+  const price = product.price?.current_retail || 
+    ('current_retail_min' in (product.price || {}) ? (product.price as any).current_retail_min : 0) || 0;
   const originalPrice = product.price?.reg_retail;
   let imageUrl = product.item?.enrichment?.images?.primary_image_url || '';
   
@@ -103,14 +106,25 @@ export function normalizeTargetProduct(product: TargetProduct, index?: number): 
   
   const rating = product.ratings_and_reviews?.statistics?.rating?.average;
   const reviewCount = product.ratings_and_reviews?.statistics?.rating?.count;
-  const description = product.item?.product_description?.bullet_descriptions?.join(' ');
-  const isAvailable = product.fulfillment?.shipping_options?.availability_status === 'IN_STOCK';
+  
+  // Handle different description structures
+  const description = 'bullet_descriptions' in (product.item?.product_description || {})
+    ? (product.item?.product_description as any).bullet_descriptions?.join(' ')
+    : undefined;
+  
+  // Handle fulfillment (only exists on TargetProduct)
+  const isAvailable = 'fulfillment' in product
+    ? product.fulfillment?.shipping_options?.availability_status === 'IN_STOCK'
+    : undefined;
 
   // Create unique ID using tcin and optional index to prevent duplicates
   const uniqueId = index !== undefined ? `target-${product.tcin}-${index}` : `target-${product.tcin}`;
   
   // Use buy_url from enrichment if available (from featured deals), otherwise construct it
-  const productUrl = product.item?.enrichment?.buy_url || `https://www.target.com/p/-/A-${product.tcin}`;
+  const buyUrl = 'buy_url' in (product.item?.enrichment || {})
+    ? (product.item?.enrichment as any).buy_url
+    : undefined;
+  const productUrl = buyUrl || `https://www.target.com/p/-/A-${product.tcin}`;
 
   return {
     id: uniqueId,
