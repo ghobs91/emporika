@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { UnifiedProduct } from '@/types/unified';
 import ProductCard from './ProductCard';
-import { TrendingUp } from 'lucide-react';
 
 export default function TrendingFeed() {
   const [trendingItems, setTrendingItems] = useState<UnifiedProduct[]>([]);
@@ -43,26 +42,45 @@ export default function TrendingFeed() {
   }
 
   return (
-    <div className="mb-12">
-      <div className="flex items-center gap-3 mb-8">
-        <TrendingUp className="text-orange-500 dark:text-orange-400" size={32} />
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Trending Deals</h2>
-      </div>
-      
-      <div className="max-w-[80%] mx-auto">
+    <div className="space-y-8">
+      {/* Black Friday Tech Doorbusters Section */}
+      <div>
+        <div className="mb-4">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">Black Friday Tech Doorbusters</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Find steep discounts on laptops, tablets, smart home devices, and must-have gadgets from top brands.</p>
+        </div>
+        
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="animate-pulse bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl p-4 shadow-lg">
-                <div className="bg-gray-300 dark:bg-gray-700 h-64 rounded-xl mb-4"></div>
-                <div className="bg-gray-300 dark:bg-gray-700 h-4 rounded w-3/4 mb-2"></div>
-                <div className="bg-gray-300 dark:bg-gray-700 h-4 rounded w-1/2"></div>
-              </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="animate-pulse bg-white dark:bg-[#242424] border border-gray-200 dark:border-gray-800 rounded-xl h-80" />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {trendingItems.map((product) => (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {trendingItems.slice(0, 5).map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Holiday Gifts Section */}
+      <div>
+        <div className="mb-4">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">Holiday Gifts for Everyone on Your List</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Discover curated gift picks across beauty, home, tech, fashion, and more—perfect for every budget.</p>
+        </div>
+        
+        {isLoading ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="animate-pulse bg-white dark:bg-[#242424] border border-gray-200 dark:border-gray-800 rounded-xl h-80" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {trendingItems.slice(5, 10).map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>

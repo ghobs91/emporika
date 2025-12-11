@@ -11,12 +11,10 @@ interface ProductGridProps {
 export default function ProductGrid({ products, isLoading }: ProductGridProps) {
   if (isLoading) {
     return (
-      <div className="max-w-[80%] mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl h-96 animate-pulse border-2 border-gray-200 dark:border-gray-700 shadow-lg" />
-          ))}
-        </div>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {[...Array(10)].map((_, i) => (
+          <div key={i} className="bg-white dark:bg-[#242424] rounded-xl h-80 animate-pulse border border-gray-200 dark:border-gray-800" />
+        ))}
       </div>
     );
   }
@@ -24,18 +22,16 @@ export default function ProductGrid({ products, isLoading }: ProductGridProps) {
   if (products.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500 dark:text-gray-400 text-lg">No products found. Try a different search.</p>
+        <p className="text-gray-500 dark:text-gray-400">No products found. Try a different search.</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-[80%] mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      {products.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
     </div>
   );
 }

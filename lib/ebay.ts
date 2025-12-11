@@ -112,7 +112,9 @@ export class EbayAPI {
     const token = await this.getAccessToken();
 
     // Search for items with high popularity and recent listings
+    // Use category_ids for Electronics (popular trending category)
     const searchParams = new URLSearchParams({
+      category_ids: '293', // Electronics category
       limit: '25',
       sort: 'newlyListed',
       filter: 'buyingOptions:{FIXED_PRICE},conditions:{NEW}',

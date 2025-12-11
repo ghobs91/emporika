@@ -5,43 +5,60 @@ import { useEffect, useState } from 'react';
 
 export default function ThemeToggle() {
   const [isDark, setIsDark] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Check for saved theme preference or default to light mode
+    setMounted(true);
+    // Check for saved theme preference or default to system preference
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-      setIsDark(true);
+    const shouldBeDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+    setIsDark(shouldBeDark);
+    
+    if (shouldBeDark) {
       document.documentElement.classList.add('dark');
     } else {
-      setIsDark(false);
       document.documentElement.classList.remove('dark');
     }
   }, []);
 
   const toggleTheme = () => {
-    if (isDark) {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-      setIsDark(false);
-    } else {
+    const newIsDark = !isDark;
+    setIsDark(newIsDark);
+    
+    if (newIsDark) {
       document.documentElement.classList.add('dark');
       localStorage.setItem('theme', 'dark');
-      setIsDark(true);
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     }
   };
+
+  // Prevent flash during hydration
+  if (!mounted) {
+    return (
+      <button
+        className="p-2 rounded-lg opacity-0"
+        aria-label="Toggle theme"
+        disabled
+      >
+        <Moon size={18} />
+      </button>
+    );
+  }
 
   return (
     <button
       onClick={toggleTheme}
-      className="p-3 rounded-xl bg-blue-100 dark:bg-gray-700 hover:bg-blue-200 dark:hover:bg-gray-600 border-2 border-blue-200 dark:border-gray-600 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-110"
+      className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#242424] transition-all duration-200"
       aria-label="Toggle theme"
     >
       {isDark ? (
-        <Sun size={22} className="text-yellow-500" />
+        <Sun size={18} className="text-gray-400 dark:text-gray-400" />
       ) : (
-        <Moon size={22} className="text-blue-600" />
+        <Moon size={18} className="text-gray-600" />
       )}
     </button>
   );

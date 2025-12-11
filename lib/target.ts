@@ -122,7 +122,7 @@ export class TargetAPI {
       purchasable_store_ids: `${this.defaultStoreId},1885,1139,1866,3236`,
       visitor_id: visitorId,
       resolve_to_first_variation_child: 'false',
-      slingshot_component_id: 'WEB-434655',
+      slingshot_component_id: 'WEB-437351',
       platform: 'desktop',
       include_dmc_dmr: 'true',
     });
