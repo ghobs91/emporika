@@ -107,9 +107,8 @@ export default function Home() {
         <div className={`container mx-auto px-6 transition-all duration-300 ${
           isScrolled ? 'py-3' : 'py-5'
         }`}>
-          <div className={`flex items-center transition-all duration-300 ${
-            isScrolled ? 'gap-4 justify-start' : 'gap-4 justify-start'
-          }`}>
+          {/* Desktop layout: Single row with logo, search, and theme toggle */}
+          <div className="hidden md:flex items-center gap-4">
             <div className={`flex items-center transition-all duration-300 ${
               isScrolled ? 'gap-2' : 'gap-3'
             }`}>
@@ -125,11 +124,40 @@ export default function Home() {
             </div>
             
             <div className="flex-1">
-              <SearchBar onSearch={handleSearch} isLoading={isLoading} isScrolled={isScrolled} />
+              <SearchBar onSearch={handleSearch} isLoading={isLoading} />
             </div>
             
             <div>
               <ThemeToggle />
+            </div>
+          </div>
+
+          {/* Mobile layout: Two rows - nav bar on top, search below */}
+          <div className="md:hidden">
+            {/* First row: Logo and theme toggle */}
+            <div className="flex items-center justify-between mb-3">
+              <div className={`flex items-center transition-all duration-300 ${
+                isScrolled ? 'gap-2' : 'gap-3'
+              }`}>
+                <ShoppingBag 
+                  size={isScrolled ? 20 : 24} 
+                  className="text-blue-500 dark:text-blue-400 transition-all duration-300" 
+                />
+                <h1 className={`font-semibold text-gray-900 dark:text-white transition-all duration-300 whitespace-nowrap ${
+                  isScrolled ? 'text-lg' : 'text-xl'
+                }`}>
+                  Emporika
+                </h1>
+              </div>
+              
+              <div>
+                <ThemeToggle />
+              </div>
+            </div>
+
+            {/* Second row: Search bar on its own line */}
+            <div className="w-full">
+              <SearchBar onSearch={handleSearch} isLoading={isLoading} />
             </div>
           </div>
         </div>

@@ -43,7 +43,7 @@ export class BestBuyAPI {
     return response.json();
   }
 
-  async getTrendingProducts(): Promise<BestBuyTrendingResponse> {
+  async getTrendingProducts(categoryId?: string): Promise<BestBuyTrendingResponse> {
     if (!this.apiKey) {
       throw new Error('Best Buy API key is not configured');
     }
@@ -53,7 +53,15 @@ export class BestBuyAPI {
       format: 'json',
     });
 
-    const url = `${BESTBUY_API_BASE}/trendingViewed?${searchParams.toString()}`;
+    // Build the URL with optional category filter
+    let url = `${BESTBUY_API_BASE}/trendingViewed`;
+    
+    // If category is specified, add it to the query
+    if (categoryId) {
+      url = `${BESTBUY_API_BASE}((categoryPath.id=${categoryId}))/trendingViewed`;
+    }
+    
+    url += `?${searchParams.toString()}`;
 
     const response = await fetch(url, {
       method: 'GET',
