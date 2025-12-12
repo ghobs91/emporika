@@ -108,17 +108,24 @@ export class EbayAPI {
    * Get trending/popular items from eBay
    * eBay doesn't have a dedicated trending endpoint, so we'll search for popular items
    */
-  async getTrendingProducts(): Promise<EbaySearchResponse> {
+  async getTrendingProducts(categoryId?: string): Promise<EbaySearchResponse> {
     const token = await this.getAccessToken();
 
     // Search for items with high popularity and recent listings
-    // Use category_ids for Electronics (popular trending category)
+    // Use category_ids for Electronics (popular trending category) if not specified
     const searchParams = new URLSearchParams({
-      category_ids: '293', // Electronics category
       limit: '25',
       sort: 'newlyListed',
       filter: 'buyingOptions:{FIXED_PRICE},conditions:{NEW}',
     });
+
+    // Add category filter if provided
+    if (categoryId) {
+      searchParams.append('category_ids', categoryId);
+    } else {
+      // Default to Electronics category
+      searchParams.append('category_ids', '293');
+    }
 
     const url = `${this.apiBase}/item_summary/search?${searchParams.toString()}`;
 
@@ -135,6 +142,46 @@ export class EbayAPI {
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`eBay trending API error: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Get best-selling/merchandised products from eBay by category
+   * Uses the Marketing API approach with BEST_SELLING metric
+   */
+  async getBestSellingProducts(categoryId?: string, limit: number = 25): Promise<EbaySearchResponse> {
+    const token = await this.getAccessToken();
+
+    // eBay Browse API doesn't have a direct "best selling" endpoint
+    // Instead, we search with filters that approximate best-selling items
+    const searchParams = new URLSearchParams({
+      limit: limit.toString(),
+      sort: 'price', // Sort by price to get varied results
+      filter: 'buyingOptions:{FIXED_PRICE},conditions:{NEW}',
+    });
+
+    // Add category filter if provided
+    if (categoryId) {
+      searchParams.append('category_ids', categoryId);
+    }
+
+    const url = `${this.apiBase}/item_summary/search?${searchParams.toString()}`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
+        'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US',
+      },
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`eBay best-selling API error: ${response.status} ${response.statusText} - ${errorText}`);
     }
 
     return response.json();

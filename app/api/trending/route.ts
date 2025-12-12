@@ -1,15 +1,21 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { bestBuyAPI } from '@/lib/bestbuy';
 import { targetAPI } from '@/lib/target';
 import { ebayAPI } from '@/lib/ebay';
 import { normalizeBestBuyTrendingProduct, normalizeTargetProduct, normalizeEbayProduct, UnifiedProduct } from '@/types/unified';
+import { ProductCategory, getCategoryConfig } from '@/types/categories';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const searchParams = request.nextUrl.searchParams;
+    const category = (searchParams.get('category') || 'all') as ProductCategory;
+    const categoryConfig = getCategoryConfig(category);
+
+    // Fetch trending products from all APIs with category filtering
     const [bestBuyData, targetData, ebayData] = await Promise.allSettled([
-      bestBuyAPI.getTrendingProducts(),
-      targetAPI.getTrendingProducts(),
-      ebayAPI.getTrendingProducts(),
+      bestBuyAPI.getTrendingProducts(categoryConfig.bestBuyCategory || undefined),
+      targetAPI.getTrendingProducts(categoryConfig.targetQuery || undefined),
+      ebayAPI.getTrendingProducts(categoryConfig.ebayId || undefined),
     ]);
 
     const unifiedItems: UnifiedProduct[] = [];
@@ -45,7 +51,11 @@ export async function GET() {
       [unifiedItems[i], unifiedItems[j]] = [unifiedItems[j], unifiedItems[i]];
     }
 
-    return NextResponse.json({ items: unifiedItems });
+    return NextResponse.json({ 
+      items: unifiedItems,
+      category: category,
+      categoryName: categoryConfig.name,
+    });
   } catch (error) {
     console.error('Trending items error:', error);
     return NextResponse.json(

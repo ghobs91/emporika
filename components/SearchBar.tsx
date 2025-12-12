@@ -6,10 +6,9 @@ import { Search } from 'lucide-react';
 interface SearchBarProps {
   onSearch: (query: string) => void;
   isLoading?: boolean;
-  isScrolled?: boolean;
 }
 
-export default function SearchBar({ onSearch, isLoading, isScrolled }: SearchBarProps) {
+export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
   const [query, setQuery] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
