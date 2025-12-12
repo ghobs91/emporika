@@ -149,16 +149,18 @@ export class EbayAPI {
 
   /**
    * Get best-selling/merchandised products from eBay by category
-   * Uses the Marketing API approach with BEST_SELLING metric
+   * Note: eBay Browse API doesn't have a direct "best selling" endpoint.
+   * This approximates popular items by using newlyListed sort with category filters.
+   * For production use, consider the eBay Marketing API's getMerchandisedProducts method.
    */
   async getBestSellingProducts(categoryId?: string, limit: number = 25): Promise<EbaySearchResponse> {
     const token = await this.getAccessToken();
 
     // eBay Browse API doesn't have a direct "best selling" endpoint
-    // Instead, we search with filters that approximate best-selling items
+    // Use newlyListed to get recently added popular items
     const searchParams = new URLSearchParams({
       limit: limit.toString(),
-      sort: 'price', // Sort by price to get varied results
+      sort: 'newlyListed',
       filter: 'buyingOptions:{FIXED_PRICE},conditions:{NEW}',
     });
 

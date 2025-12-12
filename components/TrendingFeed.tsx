@@ -51,8 +51,8 @@ export default function TrendingFeed() {
         <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Trending Products</h2>
         
         {/* Category tabs - horizontal scroll on mobile */}
-        <div className="overflow-x-auto scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0">
-          <div className="flex gap-2 min-w-max md:flex-wrap">
+        <div className="overflow-x-auto scrollbar-hide">
+          <div className="flex gap-2 pb-2">
             {categories.map((category: CategoryConfig) => (
               <button
                 key={category.id}
