@@ -60,7 +60,7 @@ export default function TrendingFeed() {
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                   selectedCategory === category.id
                     ? 'bg-blue-500 text-white shadow-md'
-                    : 'bg-gray-100 dark:bg-[#242424] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#2a2a2a]'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
               >
                 {category.name}

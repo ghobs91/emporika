@@ -62,7 +62,7 @@ export const PRODUCT_CATEGORIES: Record<ProductCategory, CategoryConfig> = {
     name: 'Toys & Games',
     description: 'Trending toys and games',
     ebayId: '220', // Toys & Hobbies on eBay
-    bestBuyCategory: 'abcat0400000', // Video Games category on Best Buy (closest)
+    bestBuyCategory: 'abcat0400000', // Video Games category (Best Buy has limited toy selection)
     targetQuery: 'toys',
   },
 };
