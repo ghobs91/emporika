@@ -124,7 +124,7 @@ export default function Home() {
             </div>
             
             <div className="flex-1">
-              <SearchBar onSearch={handleSearch} isLoading={isLoading} isScrolled={isScrolled} />
+              <SearchBar onSearch={handleSearch} isLoading={isLoading} />
             </div>
             
             <div>
@@ -157,7 +157,7 @@ export default function Home() {
 
             {/* Second row: Search bar on its own line */}
             <div className="w-full">
-              <SearchBar onSearch={handleSearch} isLoading={isLoading} isScrolled={isScrolled} />
+              <SearchBar onSearch={handleSearch} isLoading={isLoading} />
             </div>
           </div>
         </div>

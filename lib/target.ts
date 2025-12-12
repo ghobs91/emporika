@@ -107,9 +107,18 @@ export class TargetAPI {
     return response.json();
   }
 
-  async getTrendingProducts(): Promise<TargetSearchResponse> {
+  async getTrendingProducts(categoryQuery?: string): Promise<TargetSearchResponse> {
     const visitorId = this.generateVisitorId();
     
+    // If a category query is provided, use search-based approach
+    if (categoryQuery) {
+      return this.searchProducts({
+        query: categoryQuery,
+        count: 24,
+      });
+    }
+    
+    // Otherwise, use the featured deals/recommendations endpoint
     const searchParams = new URLSearchParams({
       category_id: 'root',
       channel: 'WEB',
