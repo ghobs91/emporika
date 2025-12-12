@@ -47,7 +47,7 @@ export const PRODUCT_CATEGORIES: Record<ProductCategory, CategoryConfig> = {
     description: 'Trending clothing and accessories',
     ebayId: '11450', // Clothing, Shoes & Accessories on eBay
     bestBuyCategory: '',
-    targetQuery: 'fashion',
+    targetQuery: 'clothing',
   },
   sports: {
     id: 'sports',
