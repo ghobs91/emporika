@@ -3,6 +3,7 @@ import { walmartAPI } from '@/lib/walmart';
 import { bestBuyAPI } from '@/lib/bestbuy';
 import { targetAPI } from '@/lib/target';
 import { ebayAPI } from '@/lib/ebay';
+import { costcoAPI } from '@/lib/costco';
 import { WalmartSearchParams } from '@/types/walmart';
 import { 
   UnifiedSearchResponse, 
@@ -10,6 +11,7 @@ import {
   normalizeBestBuyProduct, 
   normalizeTargetProduct,
   normalizeEbayProduct,
+  normalizeCostcoProduct,
   UnifiedProduct 
 } from '@/types/unified';
 
@@ -40,7 +42,7 @@ export async function GET(request: NextRequest) {
     }
 
     const numItems = searchParams.get('numItems') ? parseInt(searchParams.get('numItems')!) : 25;
-    const itemsPerSource = Math.ceil(numItems / 4); // Now divided by 4 retailers
+    const itemsPerSource = Math.ceil(numItems / 5); // Now divided by 5 retailers
     
     // Get Target-specific parameters
     const targetStoreId = searchParams.get('targetStoreId');
@@ -59,7 +61,7 @@ export async function GET(request: NextRequest) {
     };
 
     // Fetch from all APIs concurrently
-    const [walmartResult, bestBuyResult, targetResult, ebayResult] = await Promise.allSettled([
+    const [walmartResult, bestBuyResult, targetResult, ebayResult, costcoResult] = await Promise.allSettled([
       walmartAPI.searchProducts(walmartParams),
       bestBuyAPI.searchProducts({ query, pageSize: itemsPerSource }),
       targetAPI.searchProducts({ 
@@ -72,6 +74,10 @@ export async function GET(request: NextRequest) {
         q: query, 
         limit: itemsPerSource,
         fieldgroups: 'EXTENDED',
+      }),
+      costcoAPI.searchProducts({
+        query,
+        rows: itemsPerSource,
       }),
     ]);
 
@@ -120,6 +126,16 @@ export async function GET(request: NextRequest) {
       sources.ebay = { count: 0, error: ebayResult.reason?.message || 'Failed to fetch from eBay' };
     }
 
+    // Process Costco results
+    if (costcoResult.status === 'fulfilled') {
+      const costcoProducts = costcoResult.value.response?.docs?.map(normalizeCostcoProduct) || [];
+      unifiedProducts.push(...costcoProducts);
+      sources.costco = { count: costcoProducts.length };
+    } else {
+      console.error('Costco API error:', costcoResult.reason);
+      sources.costco = { count: 0, error: costcoResult.reason?.message || 'Failed to fetch from Costco' };
+    }
+
     // Interleave products from different sources for better UX
     const interleavedProducts = interleaveProducts(unifiedProducts);
 
@@ -146,13 +162,15 @@ function interleaveProducts(products: UnifiedProduct[]): UnifiedProduct[] {
   const bestBuyProducts = products.filter(p => p.source === 'bestbuy');
   const targetProducts = products.filter(p => p.source === 'target');
   const ebayProducts = products.filter(p => p.source === 'ebay');
+  const costcoProducts = products.filter(p => p.source === 'costco');
   
   const result: UnifiedProduct[] = [];
   const maxLength = Math.max(
     walmartProducts.length, 
     bestBuyProducts.length, 
     targetProducts.length,
-    ebayProducts.length
+    ebayProducts.length,
+    costcoProducts.length
   );
   
   for (let i = 0; i < maxLength; i++) {
@@ -167,6 +185,9 @@ function interleaveProducts(products: UnifiedProduct[]): UnifiedProduct[] {
     }
     if (i < ebayProducts.length) {
       result.push(ebayProducts[i]);
+    }
+    if (i < costcoProducts.length) {
+      result.push(costcoProducts[i]);
     }
   }
   
