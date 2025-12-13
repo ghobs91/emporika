@@ -34,6 +34,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       case 'target': return '/target-favicon.png';
       case 'bestbuy': return '/bestbuy-favicon.png';
       case 'ebay': return '/favicon-ebay.png';
+      case 'costco': return '/costco-favicon.png';
       default: return '';
     }
   };
