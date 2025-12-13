@@ -10,7 +10,7 @@ import { UnifiedProduct } from '@/types/unified';
 import { ShoppingBag } from 'lucide-react';
 import { useTargetStore } from '@/hooks/useTargetStore';
 
-type SortOption = 'relevance' | 'price-asc' | 'price-desc' | 'rating-desc';
+type SortOption = 'most-popular' | 'price-asc' | 'price-desc' | 'rating-desc';
 
 export default function Home() {
   const [products, setProducts] = useState<UnifiedProduct[]>([]);
@@ -18,7 +18,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [totalResults, setTotalResults] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [sortBy, setSortBy] = useState<SortOption>('relevance');
+  const [sortBy, setSortBy] = useState<SortOption>('most-popular');
   const { storeInfo } = useTargetStore();
 
   useEffect(() => {
@@ -51,7 +51,7 @@ export default function Home() {
   const handleSearch = async (query: string) => {
     setIsLoading(true);
     setSearchQuery(query);
-    setSortBy('relevance'); // Reset sort when searching
+    setSortBy('most-popular'); // Reset sort when searching
     
     try {
       // Build search URL with Target store info if available
@@ -94,9 +94,9 @@ export default function Home() {
         return (b.price || 0) - (a.price || 0);
       case 'rating-desc':
         return (b.customerRating || 0) - (a.customerRating || 0);
-      case 'relevance':
+      case 'most-popular':
       default:
-        return 0; // Keep original order
+        return (b.reviewCount || 0) - (a.reviewCount || 0); // Sort by number of reviews
     }
   });
 
@@ -196,7 +196,7 @@ export default function Home() {
                   onChange={(e) => setSortBy(e.target.value as SortOption)}
                   className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#242424] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer transition-all"
                 >
-                  <option value="relevance">Relevance</option>
+                  <option value="most-popular">Most Popular</option>
                   <option value="price-asc">Price: Low to High</option>
                   <option value="price-desc">Price: High to Low</option>
                   <option value="rating-desc">Rating: High to Low</option>
