@@ -23,6 +23,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       case 'target': return 'Target';
       case 'bestbuy': return 'Best Buy';
       case 'ebay': return 'eBay';
+      case 'costco': return 'Costco';
       default: return product.source;
     }
   };
@@ -43,6 +44,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       case 'target': return 'target-logo-bg';
       case 'bestbuy': return 'bg-yellow-500';
       case 'ebay': return 'bg-purple-600';
+      case 'costco': return 'bg-gray-600';
       default: return 'bg-gray-600';
     }
   };

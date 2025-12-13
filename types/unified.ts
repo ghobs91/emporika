@@ -2,8 +2,9 @@ import { WalmartProduct } from './walmart';
 import { BestBuyProduct, BestBuyTrendingProduct } from './bestbuy';
 import { TargetProduct, TargetFeaturedDealsProduct } from './target';
 import { EbayItemSummary } from './ebay';
+import { CostcoProduct } from './costco';
 
-export type RetailerSource = 'walmart' | 'bestbuy' | 'target' | 'ebay';
+export type RetailerSource = 'walmart' | 'bestbuy' | 'target' | 'ebay' | 'costco';
 
 // Unified product interface that works across all retailers
 export interface UnifiedProduct {
@@ -177,6 +178,71 @@ export function normalizeEbayProduct(product: EbayItemSummary): UnifiedProduct {
   };
 }
 
+export function normalizeCostcoProduct(product: CostcoProduct): UnifiedProduct {
+  // Extract price - try different fields
+  const price = product.item_location_pricing_salePrice ?? 
+    product.minSalePrice ?? 
+    product.maxSalePrice ?? 
+    0;
+
+  const listPrice = product.item_location_pricing_listPrice;
+  const originalPrice = listPrice && listPrice > price ? listPrice : undefined;
+
+  // Extract product name
+  const name = product.item_name || 
+    product.item_product_name || 
+    product.name || 
+    product.item_short_description || 
+    'Untitled';
+
+  // Extract item number
+  const itemNumber = product.item_number || 
+    (product.id ? product.id.split('!')[0] : undefined);
+
+  // Construct product URL
+  const productUrl = itemNumber 
+    ? `https://www.costco.com/.product.${itemNumber}.html`
+    : '#';
+
+  // Extract image URL
+  const imageUrl = product.item_collateral_primaryimage || 
+    product.item_product_primary_image || 
+    product.image || 
+    '';
+
+  // Extract rating
+  const rating = product.item_ratings || 
+    (product.item_review_ratings ? parseFloat(product.item_review_ratings) : undefined);
+
+  // Extract review count
+  const reviewCount = product.item_product_review_count ?? 
+    product.item_review_count ?? 
+    undefined;
+
+  // Check availability
+  const isAvailable = product.isItemInStock ?? 
+    product.item_buyable ?? 
+    product.item_product_buyable ?? 
+    (product.deliveryStatus === 'in stock' ||
+    product.item_location_availability === 'in stock' ||
+    product.item_location_stockStatus === 'in stock');
+
+  return {
+    id: `costco-${itemNumber || Math.random().toString(36).substr(2, 9)}`,
+    name: name,
+    price: price,
+    originalPrice: originalPrice,
+    image: imageUrl,
+    productUrl: productUrl,
+    source: 'costco',
+    customerRating: rating,
+    reviewCount: reviewCount,
+    shortDescription: product.item_short_description || product.description,
+    freeShipping: undefined, // Costco doesn't provide this info in search results
+    availableOnline: isAvailable,
+  };
+}
+
 export interface UnifiedSearchResponse {
   query: string;
   totalResults: number;
@@ -195,6 +261,10 @@ export interface UnifiedSearchResponse {
       error?: string;
     };
     ebay?: {
+      count: number;
+      error?: string;
+    };
+    costco?: {
       count: number;
       error?: string;
     };
