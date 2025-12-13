@@ -1,10 +1,11 @@
 import { CostcoSearchParams, CostcoSearchResponse } from '@/types/costco';
 import { costcoCookieCache } from './costco-cookie-cache';
+import { fetchCostcoCookies } from './costco-cookie-fetcher';
 
 const COSTCO_API_BASE = 'https://search.costco.com/api/apps/www_costco_com/query/www_costco_com_search';
 
 export class CostcoAPI {
-  private getCookies(): string | null {
+  private async getCookies(): Promise<string | null> {
     // Try cache first
     const cachedCookies = costcoCookieCache.get();
     if (cachedCookies) {
@@ -12,24 +13,37 @@ export class CostcoAPI {
       return cachedCookies;
     }
     
-    // Fallback to environment variable for manual override
+    // Try environment variable
     const envCookies = process.env.COSTCO_COOKIES || null;
     if (envCookies) {
       console.log('Using Costco cookies from environment');
       return envCookies;
     }
     
+    // In production, try to fetch fresh cookies automatically
+    console.log('No cached cookies, attempting to fetch fresh ones...');
+    try {
+      const freshCookies = await fetchCostcoCookies();
+      if (freshCookies) {
+        console.log('Successfully fetched fresh Costco cookies');
+        return freshCookies;
+      }
+    } catch (error) {
+      console.error('Failed to fetch fresh cookies:', error);
+    }
+    
     console.log('No Costco cookies found in cache or environment');
     return null;
   }
 
-  private isAvailable(): boolean {
-    return !!this.getCookies();
+  private async isAvailable(): Promise<boolean> {
+    const cookies = await this.getCookies();
+    return !!cookies;
   }
 
   async searchProducts(params: CostcoSearchParams): Promise<CostcoSearchResponse> {
-    // Skip if cookies aren't available
-    if (!this.isAvailable()) {
+    // Check if cookies are available (and fetch if needed)
+    if (!(await this.isAvailable())) {
       console.warn('Costco API: No cookies configured, skipping search');
       return { response: { numFound: 0, start: 0, docs: [] } };
     }
@@ -58,7 +72,7 @@ export class CostcoAPI {
     const url = `${COSTCO_API_BASE}?${searchParams.toString()}`;
 
     try {
-      const cookies = this.getCookies();
+      const cookies = await this.getCookies();
       
       const response = await fetch(url, {
         method: 'GET',
