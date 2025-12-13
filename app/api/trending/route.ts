@@ -1,21 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { bestBuyAPI } from '@/lib/bestbuy';
 import { targetAPI } from '@/lib/target';
-import { ebayAPI } from '@/lib/ebay';
-import { normalizeBestBuyTrendingProduct, normalizeTargetProduct, normalizeEbayProduct, UnifiedProduct } from '@/types/unified';
-import { ProductCategory, getCategoryConfig } from '@/types/categories';
+import { normalizeBestBuyTrendingProduct, normalizeTargetProduct, UnifiedProduct } from '@/types/unified';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const category = (searchParams.get('category') || 'all') as ProductCategory;
-    const categoryConfig = getCategoryConfig(category);
-
-    // Fetch trending products from all APIs with category filtering
-    const [bestBuyData, targetData, ebayData] = await Promise.allSettled([
-      bestBuyAPI.getTrendingProducts(categoryConfig.bestBuyCategory || undefined),
-      targetAPI.getTrendingProducts(categoryConfig.targetQuery || undefined),
-      ebayAPI.getTrendingProducts(categoryConfig.ebayId || undefined),
+    const [bestBuyData, targetData] = await Promise.allSettled([
+      bestBuyAPI.getTrendingProducts(),
+      targetAPI.getTrendingProducts(),
     ]);
 
     const unifiedItems: UnifiedProduct[] = [];
@@ -37,14 +29,6 @@ export async function GET(request: NextRequest) {
       console.error('Target trending error:', targetData.reason);
     }
 
-    // Add eBay trending items
-    if (ebayData.status === 'fulfilled') {
-      const ebayItems = (ebayData.value.itemSummaries || []).map(normalizeEbayProduct);
-      unifiedItems.push(...ebayItems);
-    } else {
-      console.error('eBay trending error:', ebayData.reason);
-    }
-
     // Randomly shuffle the items using Fisher-Yates algorithm
     for (let i = unifiedItems.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -53,8 +37,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ 
       items: unifiedItems,
-      category: category,
-      categoryName: categoryConfig.name,
     });
   } catch (error) {
     console.error('Trending items error:', error);
