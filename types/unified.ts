@@ -155,10 +155,7 @@ export function normalizeEbayProduct(product: EbayItemSummary): UnifiedProduct {
     product.additionalImages?.[0]?.imageUrl || 
     '';
   
-  // Extract numeric rating if available from seller feedback
-  const rating = product.seller?.feedbackPercentage 
-    ? parseFloat(product.seller.feedbackPercentage) / 20 // Convert 0-100 to 0-5 scale
-    : undefined;
+  // Note: eBay's feedback data is for the seller, not the product, so we exclude it
 
   return {
     id: `ebay-${product.itemId}`,
@@ -168,8 +165,8 @@ export function normalizeEbayProduct(product: EbayItemSummary): UnifiedProduct {
     image: imageUrl,
     productUrl: product.itemAffiliateWebUrl || product.itemWebUrl || `https://www.ebay.com/itm/${product.legacyItemId || product.itemId}`,
     source: 'ebay',
-    customerRating: rating,
-    reviewCount: product.seller?.feedbackScore,
+    customerRating: undefined, // eBay only provides seller ratings, not product ratings
+    reviewCount: undefined, // eBay only provides seller feedback, not product reviews
     shortDescription: product.shortDescription,
     freeShipping: product.shippingOptions?.some(option => 
       option.shippingCost?.value === '0' || option.shippingCost?.value === '0.0'
