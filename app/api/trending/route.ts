@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { bestBuyAPI } from '@/lib/bestbuy';
 import { targetAPI } from '@/lib/target';
-import { normalizeBestBuyTrendingProduct, normalizeTargetProduct, UnifiedProduct } from '@/types/unified';
+import { walmartAPI } from '@/lib/walmart';
+import { costcoAPI } from '@/lib/costco';
+import { normalizeBestBuyTrendingProduct, normalizeTargetProduct, normalizeWalmartProduct, normalizeCostcoProduct, UnifiedProduct } from '@/types/unified';
 import { getCategoryConfig, ProductCategory } from '@/types/categories';
 import { BestBuyTrendingResponse } from '@/types/bestbuy';
 import { TargetSearchResponse } from '@/types/target';
+import { WalmartSearchResponse } from '@/types/walmart';
+import { CostcoSearchResponse } from '@/types/costco';
 import { TargetProduct } from '@/types/target';
 
 export async function GET(request: NextRequest) {
@@ -26,8 +30,44 @@ export async function GET(request: NextRequest) {
     });
     
     // Build API calls array - only include APIs that support this category
-    const apiCalls: Promise<BestBuyTrendingResponse | TargetSearchResponse>[] = [];
+    const apiCalls: Promise<BestBuyTrendingResponse | TargetSearchResponse | WalmartSearchResponse | CostcoSearchResponse>[] = [];
     const apiSources: string[] = [];
+    
+    // Add Walmart search with random category-specific queries
+    const walmartQueryOptions: Record<string, string[]> = {
+      electronics: ['headphones', 'bluetooth speaker', 'smartwatch', 'wireless earbuds', 'tablet', 'phone case'],
+      home: ['cookware', 'bedding', 'towels', 'coffee maker', 'air fryer', 'candles'],
+      fashion: ['sneakers', 'jeans', 'sunglasses', 'watch', 'backpack', 'wallet'],
+      sports: ['dumbbells', 'yoga mat', 'resistance bands', 'water bottle', 'athletic shoes', 'fitness tracker'],
+      toys: ['lego', 'board games', 'action figures', 'puzzles', 'dolls', 'hot wheels'],
+      all: ['popular', 'trending', 'deals', 'bestseller', 'new arrivals', 'top rated']
+    };
+    
+    const walmartOptions = walmartQueryOptions[category];
+    if (walmartOptions) {
+      const randomQuery = walmartOptions[Math.floor(Math.random() * walmartOptions.length)];
+      console.log(`Adding Walmart with random query: ${randomQuery}`);
+      apiCalls.push(walmartAPI.searchProducts({ 
+        query: randomQuery, 
+        numItems: 12,
+        sort: 'bestseller'
+      }));
+      apiSources.push('walmart');
+    }
+    
+    // Add Costco search for relevant categories
+    const costcoQueries: Record<string, string> = {
+      electronics: 'tv',
+      home: 'kitchen',
+      toys: 'toys',
+      all: 'deals'
+    };
+    
+    if (costcoQueries[category]) {
+      console.log(`Adding Costco with query: ${costcoQueries[category]}`);
+      apiCalls.push(costcoAPI.searchProducts({ query: costcoQueries[category], rows: 12 }));
+      apiSources.push('costco');
+    }
     
     // Add Best Buy only for electronics and toys (their main categories)
     if (category === 'electronics' || category === 'toys' || category === 'home' || category === 'all') {
@@ -71,7 +111,16 @@ export async function GET(request: NextRequest) {
             const targetItems = targetProducts.map((product: TargetProduct) => normalizeTargetProduct(product, 0));
             console.log(`Target returned ${targetItems.length} items for category: ${category}`);
             unifiedItems.push(...targetItems);
-
+          } else if (source === 'walmart') {
+            const walmartResponse = result.value as WalmartSearchResponse;
+            const walmartItems = (walmartResponse.items || []).map(normalizeWalmartProduct);
+            console.log(`Walmart returned ${walmartItems.length} items for category: ${category}`);
+            unifiedItems.push(...walmartItems);
+          } else if (source === 'costco') {
+            const costcoResponse = result.value as CostcoSearchResponse;
+            const costcoItems = (costcoResponse.response?.docs || []).map(doc => normalizeCostcoProduct(doc));
+            console.log(`Costco returned ${costcoItems.length} items for category: ${category}`);
+            unifiedItems.push(...costcoItems);
           }
         } catch (error) {
           console.error(`Error processing ${source} response for category ${category}:`, error);
