@@ -92,11 +92,19 @@ export default function Home() {
         return (a.price || Infinity) - (b.price || Infinity);
       case 'price-desc':
         return (b.price || 0) - (a.price || 0);
-      case 'rating-desc':
-        return (b.customerRating || 0) - (a.customerRating || 0);
+      case 'rating-desc': {
+        // Products without ratings go to the end
+        const aRating = a.customerRating ?? -1;
+        const bRating = b.customerRating ?? -1;
+        return bRating - aRating;
+      }
       case 'most-popular':
-      default:
-        return (b.reviewCount || 0) - (a.reviewCount || 0); // Sort by number of reviews
+      default: {
+        // Products without review counts go to the end
+        const aReviews = a.reviewCount ?? -1;
+        const bReviews = b.reviewCount ?? -1;
+        return bReviews - aReviews;
+      }
     }
   });
 
@@ -164,7 +172,7 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-8">
+      <main className="container mx-auto px-6 py-8 max-w-5xl">
         {/* Show trending items when no search has been performed */}
         {!searchQuery && !isLoading && (
           <>
