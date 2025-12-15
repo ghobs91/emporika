@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import SearchBar from '@/components/SearchBar';
 import ProductGrid from '@/components/ProductGrid';
 import TrendingFeed from '@/components/TrendingFeed';
@@ -171,7 +172,7 @@ export default function Home() {
         }`}>
           {/* Desktop layout: Single row with logo, search, and theme toggle */}
           <div className="hidden md:flex items-center gap-4">
-            <div className={`flex items-center transition-all duration-300 ${
+            <Link href="/" className={`flex items-center transition-all duration-300 hover:opacity-75 cursor-pointer ${
               isScrolled ? 'gap-2' : 'gap-3'
             }`}>
               <ShoppingBag 
@@ -183,7 +184,7 @@ export default function Home() {
               }`}>
                 Emporika
               </h1>
-            </div>
+            </Link>
             
             <div className="flex-1">
               <SearchBar onSearch={handleSearch} isLoading={isLoading} />
@@ -198,7 +199,7 @@ export default function Home() {
           <div className="md:hidden">
             {/* First row: Logo and theme toggle */}
             <div className="flex items-center justify-between mb-3">
-              <div className={`flex items-center transition-all duration-300 ${
+              <Link href="/" className={`flex items-center transition-all duration-300 hover:opacity-75 cursor-pointer ${
                 isScrolled ? 'gap-2' : 'gap-3'
               }`}>
                 <ShoppingBag 
@@ -210,7 +211,7 @@ export default function Home() {
                 }`}>
                   Emporika
                 </h1>
-              </div>
+              </Link>
               
               <div>
                 <ThemeToggle />
