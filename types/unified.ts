@@ -7,6 +7,19 @@ import { CostcoProduct } from './costco';
 export type RetailerSource = 'walmart' | 'bestbuy' | 'target' | 'ebay' | 'costco';
 
 // Unified product interface that works across all retailers
+export interface ShippingInfo {
+  freeShipping?: boolean;
+  twoDay?: boolean; // Walmart 2-day eligible
+  levels?: Array<{
+    name: string; // e.g., "Standard", "Expedited", "Express"
+    price: number;
+  }>;
+  estimatedDates?: {
+    min?: string; // ISO date string
+    max?: string; // ISO date string
+  };
+}
+
 export interface UnifiedProduct {
   id: string;
   name: string;
@@ -20,6 +33,7 @@ export interface UnifiedProduct {
   shortDescription?: string;
   freeShipping?: boolean;
   availableOnline?: boolean;
+  shipping?: ShippingInfo;
 }
 
 export function normalizeWalmartProduct(product: WalmartProduct): UnifiedProduct {
@@ -41,6 +55,15 @@ export function normalizeWalmartProduct(product: WalmartProduct): UnifiedProduct
     }
   }
   
+  // Build shipping info
+  const shipping: ShippingInfo = {};
+  if (product.freeShippingOver35Dollars !== undefined) {
+    shipping.freeShipping = product.freeShippingOver35Dollars;
+  }
+  if (product.isTwoDayShippingEligible !== undefined) {
+    shipping.twoDay = product.isTwoDayShippingEligible;
+  }
+  
   return {
     id: `walmart-${product.itemId}`,
     name: product.name,
@@ -54,10 +77,23 @@ export function normalizeWalmartProduct(product: WalmartProduct): UnifiedProduct
     shortDescription: product.shortDescription,
     freeShipping: product.freeShippingOver35Dollars,
     availableOnline: product.availableOnline,
+    shipping: Object.keys(shipping).length > 0 ? shipping : undefined,
   };
 }
 
 export function normalizeBestBuyProduct(product: BestBuyProduct): UnifiedProduct {
+  // Build shipping info
+  const shipping: ShippingInfo = {};
+  if (product.freeShipping !== undefined) {
+    shipping.freeShipping = product.freeShipping;
+  }
+  if (product.shippingLevelsOfService && product.shippingLevelsOfService.length > 0) {
+    shipping.levels = product.shippingLevelsOfService.map(level => ({
+      name: level.serviceLevelName,
+      price: level.unitShippingPrice,
+    }));
+  }
+  
   return {
     id: `bestbuy-${product.sku}`,
     name: product.name,
@@ -71,6 +107,7 @@ export function normalizeBestBuyProduct(product: BestBuyProduct): UnifiedProduct
     shortDescription: product.shortDescription,
     freeShipping: product.freeShipping,
     availableOnline: product.onlineAvailability,
+    shipping: Object.keys(shipping).length > 0 ? shipping : undefined,
   };
 }
 
@@ -156,6 +193,24 @@ export function normalizeEbayProduct(product: EbayItemSummary): UnifiedProduct {
     '';
   
   // Note: eBay's feedback data is for the seller, not the product, so we exclude it
+  
+  // Build shipping info
+  const shipping: ShippingInfo = {};
+  const hasFreeShipping = product.shippingOptions?.some(option => 
+    option.shippingCost?.value === '0' || option.shippingCost?.value === '0.0'
+  );
+  if (hasFreeShipping) {
+    shipping.freeShipping = true;
+  }
+  
+  // Get estimated delivery dates if available
+  const shippingOption = product.shippingOptions?.[0];
+  if (shippingOption?.minEstimatedDeliveryDate || shippingOption?.maxEstimatedDeliveryDate) {
+    shipping.estimatedDates = {
+      min: shippingOption.minEstimatedDeliveryDate,
+      max: shippingOption.maxEstimatedDeliveryDate,
+    };
+  }
 
   return {
     id: `ebay-${product.itemId}`,
@@ -168,10 +223,9 @@ export function normalizeEbayProduct(product: EbayItemSummary): UnifiedProduct {
     customerRating: undefined, // eBay only provides seller ratings, not product ratings
     reviewCount: undefined, // eBay only provides seller feedback, not product reviews
     shortDescription: product.shortDescription,
-    freeShipping: product.shippingOptions?.some(option => 
-      option.shippingCost?.value === '0' || option.shippingCost?.value === '0.0'
-    ),
+    freeShipping: hasFreeShipping,
     availableOnline: true, // eBay items are always available online
+    shipping: Object.keys(shipping).length > 0 ? shipping : undefined,
   };
 }
 

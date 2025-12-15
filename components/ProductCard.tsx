@@ -1,14 +1,15 @@
 'use client';
 
 import { UnifiedProduct } from '@/types/unified';
-import { Star } from 'lucide-react';
+import { Star, Truck, Zap, Package, ExternalLink } from 'lucide-react';
 import Image from 'next/image';
 
 interface ProductCardProps {
   product: UnifiedProduct;
+  onClick?: () => void;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, onClick }: ProductCardProps) {
   const formatPrice = (price: number) => {
     return `$${price.toFixed(2)}`;
   };
@@ -60,8 +61,15 @@ export default function ProductCard({ product }: ProductCardProps) {
   const sourceFavicon = getSourceFavicon();
   const sourceColor = getSourceColor();
 
+  const handleExternalLinkClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
-    <div className="bg-white dark:bg-[#242424] rounded-xl overflow-hidden group hover:shadow-xl transition-all duration-200 flex flex-col border border-gray-200 dark:border-gray-800 shadow-sm">
+    <div 
+      className="bg-white dark:bg-[#242424] rounded-xl overflow-hidden group hover:shadow-xl transition-all duration-200 flex flex-col border border-gray-200 dark:border-gray-800 shadow-sm cursor-pointer"
+      onClick={onClick}
+    >
       <div className="relative aspect-square bg-gray-50 dark:bg-[#1a1a1a]">
         {product.image && (
           <Image
@@ -81,12 +89,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         )}
       </div>
 
-      <a
-        href={product.productUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="p-3 flex flex-col grow"
-      >
+      <div className="p-3 flex flex-col grow relative">
         <div className={`${sourceColor} text-white px-2 py-0.5 rounded-full text-xs font-medium flex items-center gap-1.5 w-fit mb-2`}>
           {sourceFavicon && (
             <Image
@@ -116,6 +119,52 @@ export default function ProductCard({ product }: ProductCardProps) {
             </div>
           )}
 
+          {/* Shipping Information */}
+          {product.shipping && (
+            <div className="mb-2 flex flex-wrap gap-1">
+              {/* Free Shipping Badge */}
+              {product.shipping.freeShipping && (
+                <div className="flex items-center gap-1 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 px-2 py-0.5 rounded text-xs font-medium">
+                  <Truck size={12} />
+                  <span>Free Ship</span>
+                </div>
+              )}
+              
+              {/* 2-Day Shipping (Walmart) */}
+              {product.shipping.twoDay && (
+                <div className="flex items-center gap-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded text-xs font-medium">
+                  <Zap size={12} />
+                  <span>2-Day</span>
+                </div>
+              )}
+              
+              {/* Shipping Levels (Best Buy) */}
+              {product.shipping.levels && product.shipping.levels.length > 0 && (
+                <div className="flex items-center gap-1 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 px-2 py-0.5 rounded text-xs font-medium">
+                  <Package size={12} />
+                  <span>{product.shipping.levels[0].name}</span>
+                  {product.shipping.levels[0].price === 0 ? (
+                    <span className="font-semibold">Free</span>
+                  ) : (
+                    <span>${product.shipping.levels[0].price.toFixed(2)}</span>
+                  )}
+                </div>
+              )}
+              
+              {/* Estimated Delivery (eBay) */}
+              {product.shipping.estimatedDates?.min && product.shipping.estimatedDates?.max && (
+                <div className="flex items-center gap-1 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 px-2 py-0.5 rounded text-xs font-medium">
+                  <Truck size={12} />
+                  <span>
+                    {new Date(product.shipping.estimatedDates.min).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    {' - '}
+                    {new Date(product.shipping.estimatedDates.max).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="flex items-baseline gap-2">
             <span className="text-lg font-semibold text-gray-900 dark:text-white">
               {formatPrice(product.price)}
@@ -127,7 +176,18 @@ export default function ProductCard({ product }: ProductCardProps) {
             )}
           </div>
         </div>
-      </a>
+        
+        <a
+          href={product.productUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={handleExternalLinkClick}
+          className="absolute bottom-2 right-2 bg-white dark:bg-[#242424] hover:bg-gray-100 dark:hover:bg-gray-800 p-2 rounded-full shadow-md transition-colors opacity-0 group-hover:opacity-100"
+          aria-label="Open product page"
+        >
+          <ExternalLink size={16} className="text-gray-700 dark:text-gray-300" />
+        </a>
+      </div>
     </div>
   );
 }

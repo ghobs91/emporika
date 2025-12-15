@@ -25,6 +25,12 @@ export interface BestBuyProduct {
   freeShipping?: boolean;
   inStoreAvailability?: boolean;
   onlineAvailability?: boolean;
+  shippingCost?: number;
+  shippingLevelsOfService?: Array<{
+    serviceLevelId: number;
+    serviceLevelName: string;
+    unitShippingPrice: number;
+  }>;
 }
 
 export interface BestBuySearchResponse {

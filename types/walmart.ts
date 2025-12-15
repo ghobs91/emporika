@@ -28,6 +28,7 @@ export interface WalmartProduct {
   offerType?: string;
   isTwoDayShippingEligible?: boolean;
   availableOnline?: boolean;
+  twoThreeDayShippingRate?: number;
 }
 
 export interface WalmartSearchResponse {

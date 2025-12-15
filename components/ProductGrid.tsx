@@ -2,6 +2,8 @@
 
 import { UnifiedProduct } from '@/types/unified';
 import ProductCard from './ProductCard';
+import ProductModal from './ProductModal';
+import { useState } from 'react';
 
 interface ProductGridProps {
   products: UnifiedProduct[];
@@ -9,6 +11,8 @@ interface ProductGridProps {
 }
 
 export default function ProductGrid({ products, isLoading }: ProductGridProps) {
+  const [selectedProduct, setSelectedProduct] = useState<UnifiedProduct | null>(null);
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -28,10 +32,24 @@ export default function ProductGrid({ products, isLoading }: ProductGridProps) {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {products.map((product) => (
+          <ProductCard 
+            key={product.id} 
+            product={product} 
+            onClick={() => setSelectedProduct(product)}
+          />
+        ))}
+      </div>
+
+      {selectedProduct && (
+        <ProductModal
+          product={selectedProduct}
+          isOpen={true}
+          onClose={() => setSelectedProduct(null)}
+        />
+      )}
+    </>
   );
 }
