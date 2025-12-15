@@ -6,6 +6,8 @@ import ProductGrid from '@/components/ProductGrid';
 import TrendingFeed from '@/components/TrendingFeed';
 import ThemeToggle from '@/components/ThemeToggle';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
+import ShoeSizeFilter from '@/components/ShoeSizeFilter';
+import ClothingSizeFilter from '@/components/ClothingSizeFilter';
 import { UnifiedProduct } from '@/types/unified';
 import { ShoppingBag } from 'lucide-react';
 import { useTargetStore } from '@/hooks/useTargetStore';
@@ -19,7 +21,24 @@ export default function Home() {
   const [totalResults, setTotalResults] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('most-popular');
+  const [selectedShoeSize, setSelectedShoeSize] = useState<string | null>(null);
+  const [selectedClothingSize, setSelectedClothingSize] = useState<string | null>(null);
   const { storeInfo } = useTargetStore();
+
+  // Detect if search query is shoe-related
+  const isShoeSearch = searchQuery.toLowerCase().match(/\b(shoe|shoes|sneaker|sneakers|boot|boots|sandal|sandals|slipper|slippers|heel|heels|loafer|loafers|oxford|oxfords|moccasin|moccasins|clog|clogs)\b/);
+  
+  // Detect if search query is clothing-related
+  const topsKeywords = ['shirt', 'shirts', 't-shirt', 'tshirt', 'tee', 'blouse', 'top', 'tops', 'sweater', 'sweatshirt', 'hoodie', 'jacket', 'coat', 'dress', 'dresses'];
+  const bottomsKeywords = ['pant', 'pants', 'jean', 'jeans', 'trouser', 'trousers', 'short', 'shorts', 'skirt', 'skirts', 'legging', 'leggings'];
+  
+  const searchLower = searchQuery.toLowerCase();
+  const isTopsSearch = topsKeywords.some(keyword => searchLower.includes(keyword));
+  const isBottomsSearch = bottomsKeywords.some(keyword => searchLower.includes(keyword));
+  const isClothingSearch = isTopsSearch || isBottomsSearch;
+  
+  const clothingType: 'tops' | 'bottoms' | 'general' = isTopsSearch ? 'tops' : isBottomsSearch ? 'bottoms' : 'general';
+
 
   useEffect(() => {
     let ticking = false;
@@ -52,6 +71,8 @@ export default function Home() {
     setIsLoading(true);
     setSearchQuery(query);
     setSortBy('most-popular'); // Reset sort when searching
+    setSelectedShoeSize(null); // Reset shoe size filter when searching
+    setSelectedClothingSize(null); // Reset clothing size filter when searching
     
     try {
       // Build search URL with Target store info if available
@@ -85,8 +106,41 @@ export default function Home() {
     }
   };
 
+  // Filter products by shoe size if a size is selected
+  let filteredProducts = selectedShoeSize
+    ? products.filter((product) => {
+        const searchText = `${product.name} ${product.shortDescription || ''}`.toLowerCase();
+        // Look for the size in various formats: "Size 10", "10.5", "size:10", etc.
+        const sizePatterns = [
+          new RegExp(`\\bsize\\s*:?\\s*${selectedShoeSize.replace('.', '\\.')}\\b`, 'i'),
+          new RegExp(`\\b${selectedShoeSize.replace('.', '\\.')}\\s*(m|w|d|b|us)?\\b`, 'i'),
+          new RegExp(`\\(${selectedShoeSize.replace('.', '\\.').replace(/\(/g, '\\(').replace(/\)/g, '\\)')}\\)`, 'i'),
+        ];
+        return sizePatterns.some(pattern => pattern.test(searchText));
+      })
+    : products;
+
+  // Filter products by clothing size if a size is selected
+  filteredProducts = selectedClothingSize
+    ? filteredProducts.filter((product) => {
+        const searchText = `${product.name} ${product.shortDescription || ''}`.toLowerCase();
+        // Look for the size in various formats: "Size M", "M", "Size: Medium", "32W", "Size 32", etc.
+        const escapedSize = selectedClothingSize.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const sizePatterns = [
+          new RegExp(`\\bsize\\s*:?\\s*${escapedSize}\\b`, 'i'),
+          new RegExp(`\\b${escapedSize}\\s*(w|l|r)?\\b`, 'i'),
+          new RegExp(`\\(${escapedSize}\\)`, 'i'),
+          // For numeric sizes like "32", also match "32W", "32L", "32x34"
+          ...(!/[a-z]/i.test(selectedClothingSize) ? [
+            new RegExp(`\\b${escapedSize}(w|l|x\\d+)?\\b`, 'i')
+          ] : []),
+        ];
+        return sizePatterns.some(pattern => pattern.test(searchText));
+      })
+    : filteredProducts;
+
   // Sort products based on selected option
-  const sortedProducts = [...products].sort((a, b) => {
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
     switch (sortBy) {
       case 'price-asc':
         return (a.price || Infinity) - (b.price || Infinity);
@@ -189,7 +243,7 @@ export default function Home() {
                   Results for &quot;{searchQuery}&quot;
                   {totalResults > 0 && (
                     <span className="text-gray-500 dark:text-gray-400 font-normal text-base ml-2">
-                      ({totalResults.toLocaleString()} items)
+                      ({(selectedShoeSize || selectedClothingSize ? filteredProducts.length : totalResults).toLocaleString()} items)
                     </span>
                   )}
                 </h2>
@@ -211,6 +265,23 @@ export default function Home() {
                 </select>
               </div>
             </div>
+            
+            {/* Show shoe size filter for shoe-related searches */}
+            {isShoeSearch && (
+              <ShoeSizeFilter 
+                onSizeSelect={setSelectedShoeSize}
+                selectedSize={selectedShoeSize}
+              />
+            )}
+            
+            {/* Show clothing size filter for clothing-related searches */}
+            {isClothingSearch && (
+              <ClothingSizeFilter 
+                onSizeSelect={setSelectedClothingSize}
+                selectedSize={selectedClothingSize}
+                clothingType={clothingType}
+              />
+            )}
           </div>
         )}
 
