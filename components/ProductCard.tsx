@@ -13,6 +13,12 @@ export default function ProductCard({ product }: ProductCardProps) {
     return `$${price.toFixed(2)}`;
   };
 
+  const decodeHtmlEntities = (text: string) => {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = text;
+    return textarea.value;
+  };
+
   const discount = product.originalPrice && product.originalPrice > product.price
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
@@ -96,7 +102,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
 
         <h3 className="text-sm font-normal text-gray-900 dark:text-gray-100 line-clamp-2 mb-2 leading-snug">
-          {product.name}
+          {decodeHtmlEntities(product.name)}
         </h3>
 
         <div className="mt-auto">
