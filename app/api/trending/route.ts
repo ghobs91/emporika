@@ -1,100 +1,70 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { bestBuyAPI } from '@/lib/bestbuy';
 import { targetAPI } from '@/lib/target';
 import { walmartAPI } from '@/lib/walmart';
-import { costcoAPI } from '@/lib/costco';
-import { normalizeBestBuyTrendingProduct, normalizeTargetProduct, normalizeWalmartProduct, normalizeCostcoProduct, UnifiedProduct } from '@/types/unified';
-import { getCategoryConfig, ProductCategory } from '@/types/categories';
+import { normalizeBestBuyTrendingProduct, normalizeTargetProduct, normalizeWalmartProduct, UnifiedProduct } from '@/types/unified';
+import { ProductCategory } from '@/types/categories';
+import { groupProductsByCategory } from '@/lib/categorize-product';
 import { BestBuyTrendingResponse } from '@/types/bestbuy';
 import { TargetSearchResponse } from '@/types/target';
 import { WalmartSearchResponse } from '@/types/walmart';
-import { CostcoSearchResponse } from '@/types/costco';
 import { TargetProduct } from '@/types/target';
 
-export async function GET(request: NextRequest) {
+// Set runtime config for serverless function
+export const runtime = 'nodejs';
+export const maxDuration = 60; // 60 seconds max
+
+export async function GET() {
   try {
-    // Get category parameter from query string
-    const searchParams = request.nextUrl.searchParams;
-    const categoryParam = searchParams.get('category') as ProductCategory | null;
-    const category = categoryParam || 'all';
+    console.log('=== Trending API called - fetching all retailer trending products ===');
     
-    console.log(`=== Trending API called with category: ${category} ===`);
-    
-    // Get category configuration
-    const categoryConfig = getCategoryConfig(category);
-    console.log('Category config:', {
-      id: categoryConfig.id,
-      bestBuyCategory: categoryConfig.bestBuyCategory,
-      targetQuery: categoryConfig.targetQuery,
-      ebayId: categoryConfig.ebayId,
-    });
-    
-    // Build API calls array - only include APIs that support this category
-    const apiCalls: Promise<BestBuyTrendingResponse | TargetSearchResponse | WalmartSearchResponse | CostcoSearchResponse>[] = [];
+    // Build API calls array - one call per retailer to get all trending products
+    // Add timeout wrapper to prevent hanging
+    const timeoutPromise = <T,>(promise: Promise<T>, ms: number): Promise<T> => {
+      return Promise.race([
+        promise,
+        new Promise<T>((_, reject) => 
+          setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms)
+        )
+      ]);
+    };
+
+    const apiCalls: Promise<BestBuyTrendingResponse | TargetSearchResponse | WalmartSearchResponse>[] = [];
     const apiSources: string[] = [];
     
-    // Add Walmart search with random category-specific queries
-    const walmartQueryOptions: Record<string, string[]> = {
-      electronics: ['headphones', 'bluetooth speaker', 'smartwatch', 'wireless earbuds', 'tablet', 'phone case'],
-      home: ['cookware', 'bedding', 'towels', 'coffee maker', 'air fryer', 'candles'],
-      fashion: ['sneakers', 'jeans', 'sunglasses', 'watch', 'backpack', 'wallet'],
-      sports: ['dumbbells', 'yoga mat', 'resistance bands', 'water bottle', 'athletic shoes', 'fitness tracker'],
-      toys: ['lego', 'board games', 'action figures', 'puzzles', 'dolls', 'hot wheels'],
-      all: ['popular', 'trending', 'deals', 'bestseller', 'new arrivals', 'top rated']
-    };
+    // Walmart - use bestseller search with popular queries for variety (with timeout)
+    const walmartQueries = ['headphones', 'kitchen', 'toys', 'fitness', 'tablet', 'shoes'];
+    const randomWalmartQuery = walmartQueries[Math.floor(Math.random() * walmartQueries.length)];
+    console.log(`Adding Walmart bestsellers with query: ${randomWalmartQuery}`);
+    apiCalls.push(timeoutPromise(walmartAPI.searchProducts({ 
+      query: randomWalmartQuery, 
+      numItems: 25,
+      sort: 'bestseller'
+    }), 15000));
+    apiSources.push('walmart');
     
-    const walmartOptions = walmartQueryOptions[category];
-    if (walmartOptions) {
-      const randomQuery = walmartOptions[Math.floor(Math.random() * walmartOptions.length)];
-      console.log(`Adding Walmart with random query: ${randomQuery}`);
-      apiCalls.push(walmartAPI.searchProducts({ 
-        query: randomQuery, 
-        numItems: 12,
-        sort: 'bestseller'
-      }));
-      apiSources.push('walmart');
-    }
+    // Best Buy - get all trending products (with timeout)
+    console.log('Adding Best Buy trending products');
+    apiCalls.push(timeoutPromise(bestBuyAPI.getTrendingProducts(), 15000));
+    apiSources.push('bestbuy');
     
-    // Add Costco search for relevant categories
-    const costcoQueries: Record<string, string> = {
-      electronics: 'tv',
-      home: 'kitchen',
-      toys: 'toys',
-      all: 'deals'
-    };
-    
-    if (costcoQueries[category]) {
-      console.log(`Adding Costco with query: ${costcoQueries[category]}`);
-      apiCalls.push(costcoAPI.searchProducts({ query: costcoQueries[category], rows: 12 }));
-      apiSources.push('costco');
-    }
-    
-    // Add Best Buy only for electronics and toys (their main categories)
-    if (category === 'electronics' || category === 'toys' || category === 'home' || category === 'all') {
-      console.log(`Adding Best Buy for category: ${category}`);
-      apiCalls.push(bestBuyAPI.getTrendingProducts());
-      apiSources.push('bestbuy');
-    }
-    
-    // Add Target if category is supported (has targetQuery defined and not empty)
-    if (categoryConfig.targetQuery && categoryConfig.targetQuery.trim() !== '') {
-      console.log(`Adding Target with query: ${categoryConfig.targetQuery}`);
-      apiCalls.push(targetAPI.getTrendingProducts(categoryConfig.targetQuery));
-      apiSources.push('target');
-    } else if (category === 'all') {
-      // Include Target for 'all' category with no filter
-      console.log('Adding Target for "all" category');
-      apiCalls.push(targetAPI.getTrendingProducts());
-      apiSources.push('target');
-    }
+    // Target - use search for popular items instead of broken trending endpoint
+    const targetQueries = ['home decor', 'electronics', 'clothing', 'sports', 'toys'];
+    const randomTargetQuery = targetQueries[Math.floor(Math.random() * targetQueries.length)];
+    console.log(`Adding Target search with query: ${randomTargetQuery}`);
+    apiCalls.push(timeoutPromise(targetAPI.searchProducts({ 
+      query: randomTargetQuery,
+      count: 24
+    }), 15000));
+    apiSources.push('target');
     
     console.log(`Total API calls to make: ${apiCalls.length}, sources: ${apiSources.join(', ')}`);
     
-    // Fetch from all applicable APIs
+    // Fetch from all retailers in parallel
     const results = await Promise.allSettled(apiCalls);
-    const unifiedItems: UnifiedProduct[] = [];
+    const allProducts: UnifiedProduct[] = [];
 
-    // Process results based on which APIs were called
+    // Process results from each retailer
     results.forEach((result, index) => {
       const source = apiSources[index];
       
@@ -103,49 +73,96 @@ export async function GET(request: NextRequest) {
           if (source === 'bestbuy') {
             const bestBuyResponse = result.value as BestBuyTrendingResponse;
             const bestBuyItems = (bestBuyResponse.results || []).map(normalizeBestBuyTrendingProduct);
-            console.log(`Best Buy returned ${bestBuyItems.length} items for category: ${category}`);
-            unifiedItems.push(...bestBuyItems);
+            console.log(`✓ Best Buy returned ${bestBuyItems.length} items`);
+            allProducts.push(...bestBuyItems);
           } else if (source === 'target') {
             const targetResponse = result.value as TargetSearchResponse;
             const targetProducts = targetResponse.data?.search?.products || [];
-            const targetItems = targetProducts.map((product: TargetProduct) => normalizeTargetProduct(product, 0));
-            console.log(`Target returned ${targetItems.length} items for category: ${category}`);
-            unifiedItems.push(...targetItems);
+            const targetItems = targetProducts.map((product: TargetProduct, index: number) => normalizeTargetProduct(product, index));
+            console.log(`✓ Target returned ${targetItems.length} items`);
+            allProducts.push(...targetItems);
           } else if (source === 'walmart') {
             const walmartResponse = result.value as WalmartSearchResponse;
             const walmartItems = (walmartResponse.items || []).map(normalizeWalmartProduct);
-            console.log(`Walmart returned ${walmartItems.length} items for category: ${category}`);
-            unifiedItems.push(...walmartItems);
-          } else if (source === 'costco') {
-            const costcoResponse = result.value as CostcoSearchResponse;
-            const costcoItems = (costcoResponse.response?.docs || []).map(doc => normalizeCostcoProduct(doc));
-            console.log(`Costco returned ${costcoItems.length} items for category: ${category}`);
-            unifiedItems.push(...costcoItems);
+            console.log(`✓ Walmart returned ${walmartItems.length} items`);
+            allProducts.push(...walmartItems);
           }
         } catch (error) {
-          console.error(`Error processing ${source} response for category ${category}:`, error);
+          console.error(`✗ Error processing ${source} response:`, error);
+          if (error instanceof Error) {
+            console.error(`  Error message: ${error.message}`);
+            console.error(`  Error stack: ${error.stack}`);
+          }
         }
       } else {
-        console.error(`${source} trending error for category ${category}:`, result.reason);
+        console.error(`✗ ${source} API call failed:`, result.reason);
+        if (result.reason instanceof Error) {
+          console.error(`  Reason: ${result.reason.message}`);
+        }
       }
     });
 
-    console.log(`Total items before shuffle: ${unifiedItems.length} for category: ${category}`);
+    console.log(`Total items fetched: ${allProducts.length}`);
 
-    // Randomly shuffle the items using Fisher-Yates algorithm
-    for (let i = unifiedItems.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [unifiedItems[i], unifiedItems[j]] = [unifiedItems[j], unifiedItems[i]];
+    // If no products were fetched, return empty categories to avoid frontend hanging
+    if (allProducts.length === 0) {
+      console.warn('No products fetched from any retailer');
+      const emptyCategories: Record<ProductCategory, UnifiedProduct[]> = {
+        electronics: [],
+        home: [],
+        fashion: [],
+        sports: [],
+        toys: [],
+        all: [],
+      };
+      return NextResponse.json({ 
+        categorizedProducts: emptyCategories,
+      });
     }
 
+    // Group products by category using the categorize-product utility
+    const categorizedProducts = groupProductsByCategory(allProducts);
+    
+    console.log('Products grouped by category:', {
+      electronics: categorizedProducts.electronics.length,
+      home: categorizedProducts.home.length,
+      fashion: categorizedProducts.fashion.length,
+      sports: categorizedProducts.sports.length,
+      toys: categorizedProducts.toys.length,
+      all: categorizedProducts.all.length,
+    });
+
+    // Shuffle products within each category using Fisher-Yates algorithm
+    Object.keys(categorizedProducts).forEach((category) => {
+      const items = categorizedProducts[category as ProductCategory];
+      for (let i = items.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [items[i], items[j]] = [items[j], items[i]];
+      }
+    });
+
     return NextResponse.json({ 
-      items: unifiedItems,
+      categorizedProducts,
     });
   } catch (error) {
     console.error('Trending items error:', error);
+    
+    // Return empty categories instead of error to prevent frontend from hanging
+    const emptyCategories: Record<ProductCategory, UnifiedProduct[]> = {
+      electronics: [],
+      home: [],
+      fashion: [],
+      sports: [],
+      toys: [],
+      all: [],
+    };
+    
     return NextResponse.json(
-      { error: 'Failed to fetch trending items' },
-      { status: 500 }
+      { 
+        categorizedProducts: emptyCategories,
+        error: 'Failed to fetch trending items' 
+      },
+      { status: 200 } // Return 200 to allow frontend to handle gracefully
     );
   }
 }

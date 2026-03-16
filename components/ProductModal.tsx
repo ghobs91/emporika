@@ -52,6 +52,42 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
     return textarea.value;
   };
 
+  const formatDescription = (description: string): string | Array<{label: string, value: string}> => {
+    if (!description) return '';
+    
+    // Decode HTML entities first
+    let formatted = decodeHtmlEntities(description);
+    
+    // Replace <B> tags with markdown-style emphasis and add line breaks
+    formatted = formatted
+      .replace(/<\/?B>/gi, '') // Remove <B> tags
+      .replace(/(<\/B>:?\s*)/gi, ': ') // Replace closing tags with colon and space
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .trim();
+    
+    // Split by common patterns that indicate new specifications
+    // Look for patterns like "Label: value Label: value"
+    const specPattern = /([A-Za-z\s\(\)\/\-]+):\s*([^:]+?)(?=\s+[A-Za-z\s\(\)\/\-]+:|$)/g;
+    const matches = [...formatted.matchAll(specPattern)];
+    
+    if (matches.length > 3) {
+      // If we have multiple specifications, format them as a list
+      return matches
+        .map(match => {
+          const label = match[1].trim();
+          const value = match[2].trim();
+          return { label, value };
+        })
+        .filter(spec => spec.label && spec.value);
+    }
+    
+    // Otherwise return the cleaned text as-is
+    return formatted;
+  };
+
+  const descriptionData = product.shortDescription ? formatDescription(product.shortDescription) : null;
+  const isSpecsList = Array.isArray(descriptionData);
+
   const discount = product.originalPrice && product.originalPrice > product.price
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
@@ -241,12 +277,29 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
             )}
 
             {/* Description */}
-            {product.shortDescription && (
+            {product.shortDescription && descriptionData && (
               <div className="space-y-2">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Description</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                  {decodeHtmlEntities(product.shortDescription)}
-                </p>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                  {isSpecsList ? 'Specifications' : 'Description'}
+                </h3>
+                {isSpecsList ? (
+                  <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto">
+                    {(descriptionData as Array<{label: string, value: string}>).map((spec, idx) => (
+                      <div key={idx} className="flex flex-col sm:flex-row sm:gap-2 text-sm">
+                        <span className="font-medium text-gray-700 dark:text-gray-300 min-w-[140px]">
+                          {spec.label}:
+                        </span>
+                        <span className="text-gray-600 dark:text-gray-400">
+                          {spec.value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                    {descriptionData as string}
+                  </p>
+                )}
               </div>
             )}
 

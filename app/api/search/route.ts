@@ -4,6 +4,7 @@ import { bestBuyAPI } from '@/lib/bestbuy';
 import { targetAPI } from '@/lib/target';
 import { ebayAPI } from '@/lib/ebay';
 import { costcoAPI } from '@/lib/costco';
+// import { searchShopifyProducts, convertShopifyToUnified } from '@/lib/shopify'; // Temporarily disabled
 import { WalmartSearchParams } from '@/types/walmart';
 import { 
   UnifiedSearchResponse, 
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
     }
 
     const numItems = searchParams.get('numItems') ? parseInt(searchParams.get('numItems')!) : 25;
-    const itemsPerSource = Math.ceil(numItems / 5); // Now divided by 5 retailers
+    const itemsPerSource = Math.ceil(numItems / 5); // Divided by 5 retailers (Shopify temporarily disabled)
     
     // Get Target-specific parameters
     const targetStoreId = searchParams.get('targetStoreId');
@@ -79,6 +80,12 @@ export async function GET(request: NextRequest) {
         query,
         rows: itemsPerSource,
       }),
+      // Shopify temporarily disabled - awaiting API access
+      // searchShopifyProducts({
+      //   query,
+      //   limit: itemsPerSource,
+      //   ships_to: 'US',
+      // }),
     ]);
 
     const unifiedProducts: UnifiedProduct[] = [];
@@ -136,6 +143,16 @@ export async function GET(request: NextRequest) {
       sources.costco = { count: 0, error: costcoResult.reason?.message || 'Failed to fetch from Costco' };
     }
 
+    // Shopify temporarily disabled - awaiting API access
+    // if (shopifyResult.status === 'fulfilled') {
+    //   const shopifyProducts = convertShopifyToUnified(shopifyResult.value);
+    //   unifiedProducts.push(...shopifyProducts);
+    //   sources.shopify = { count: shopifyProducts.length };
+    // } else {
+    //   console.error('Shopify API error:', shopifyResult.reason);
+    //   sources.shopify = { count: 0, error: shopifyResult.reason?.message || 'Failed to fetch from Shopify' };
+    // }
+
     // Interleave products from different sources for better UX
     const interleavedProducts = interleaveProducts(unifiedProducts);
 
@@ -163,6 +180,7 @@ function interleaveProducts(products: UnifiedProduct[]): UnifiedProduct[] {
   const targetProducts = products.filter(p => p.source === 'target');
   const ebayProducts = products.filter(p => p.source === 'ebay');
   const costcoProducts = products.filter(p => p.source === 'costco');
+  // const shopifyProducts = products.filter(p => p.source === 'shopify');
   
   const result: UnifiedProduct[] = [];
   const maxLength = Math.max(
@@ -171,6 +189,7 @@ function interleaveProducts(products: UnifiedProduct[]): UnifiedProduct[] {
     targetProducts.length,
     ebayProducts.length,
     costcoProducts.length
+    // shopifyProducts.length
   );
   
   for (let i = 0; i < maxLength; i++) {
@@ -189,6 +208,9 @@ function interleaveProducts(products: UnifiedProduct[]): UnifiedProduct[] {
     if (i < costcoProducts.length) {
       result.push(costcoProducts[i]);
     }
+    // if (i < shopifyProducts.length) {
+    //   result.push(shopifyProducts[i]);
+    // }
   }
   
   return result;

@@ -28,56 +28,54 @@ export default function TrendingFeed() {
   );
 
   useEffect(() => {
-    const fetchAllCategories = async () => {
-      // Fetch all categories with staggered delays to avoid rate limiting
-      const fetchPromises = categories.map(async (cat, index) => {
-        // Add a staggered delay (200ms per category) to prevent hitting rate limits
-        await new Promise(resolve => setTimeout(resolve, index * 200));
-        try {
-          const params = new URLSearchParams();
-          params.append('category', cat.id);
+    const fetchTrendingProducts = async () => {
+      try {
+        // Make a single API call to get all trending products categorized
+        const response = await fetch('/api/trending');
+        const data = await response.json();
+        
+        if (data.categorizedProducts) {
+          // Update each category with its products from the categorized response
+          const updatedCategories = categories.map(cat => ({
+            category: cat.id,
+            name: cat.name,
+            description: cat.description,
+            items: data.categorizedProducts[cat.id] || [],
+            isLoading: false,
+            error: data.error || null, // Show error if present but still display any products
+          }));
           
-          const url = `/api/trending?${params.toString()}`;
-          const response = await fetch(url);
-          const data = await response.json();
-          
-          if (response.ok) {
-            return {
-              category: cat.id,
-              name: cat.name,
-              description: cat.description,
-              items: data.items || [],
-              isLoading: false,
-              error: null,
-            };
-          } else {
-            return {
-              category: cat.id,
-              name: cat.name,
-              description: cat.description,
-              items: [],
-              isLoading: false,
-              error: data.error || 'Failed to load items',
-            };
-          }
-        } catch (err) {
-          console.error(`Failed to fetch ${cat.name}:`, err);
-          return {
+          setCategoryData(updatedCategories);
+        } else {
+          // Handle error case - no categorizedProducts in response
+          const errorCategories = categories.map(cat => ({
             category: cat.id,
             name: cat.name,
             description: cat.description,
             items: [],
             isLoading: false,
-            error: 'Failed to load items',
-          };
+            error: data.error || 'Failed to load items',
+          }));
+          
+          setCategoryData(errorCategories);
         }
-      });
-
-      const results = await Promise.all(fetchPromises);
-      setCategoryData(results);
+      } catch (err) {
+        console.error('Failed to fetch trending products:', err);
+        // Handle error case
+        const errorCategories = categories.map(cat => ({
+          category: cat.id,
+          name: cat.name,
+          description: cat.description,
+          items: [],
+          isLoading: false,
+          error: 'Failed to load items',
+        }));
+        
+        setCategoryData(errorCategories);
+      }
     };
 
-    fetchAllCategories();
+    fetchTrendingProducts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

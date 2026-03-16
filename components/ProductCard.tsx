@@ -31,6 +31,7 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
       case 'bestbuy': return 'Best Buy';
       case 'ebay': return 'eBay';
       case 'costco': return 'Costco';
+      case 'shopify': return 'Shopify';
       default: return product.source;
     }
   };
@@ -42,6 +43,7 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
       case 'bestbuy': return '/bestbuy-favicon.png';
       case 'ebay': return '/favicon-ebay.png';
       case 'costco': return '/costco-favicon.png';
+      case 'shopify': return '/shopify-favicon.png';
       default: return '';
     }
   };
@@ -53,6 +55,7 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
       case 'bestbuy': return 'bg-yellow-500';
       case 'ebay': return 'bg-purple-600';
       case 'costco': return 'bg-gray-600';
+      case 'shopify': return 'bg-green-600';
       default: return 'bg-gray-600';
     }
   };

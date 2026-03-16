@@ -4,7 +4,7 @@ import { TargetProduct, TargetFeaturedDealsProduct } from './target';
 import { EbayItemSummary } from './ebay';
 import { CostcoProduct } from './costco';
 
-export type RetailerSource = 'walmart' | 'bestbuy' | 'target' | 'ebay' | 'costco';
+export type RetailerSource = 'walmart' | 'bestbuy' | 'target' | 'ebay' | 'costco' | 'shopify';
 
 // Unified product interface that works across all retailers
 export interface ShippingInfo {
@@ -316,6 +316,10 @@ export interface UnifiedSearchResponse {
       error?: string;
     };
     costco?: {
+      count: number;
+      error?: string;
+    };
+    shopify?: {
       count: number;
       error?: string;
     };
