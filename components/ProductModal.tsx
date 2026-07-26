@@ -1,9 +1,29 @@
 'use client';
 
 import { UnifiedProduct } from '@/types/unified';
-import { X, Star, Truck, Zap, Package, ExternalLink, ShoppingCart } from 'lucide-react';
+import { X, Star, Truck, Zap, Package, ExternalLink, ShoppingCart, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
+interface CartResult {
+  success: boolean;
+  cart?: {
+    id: string;
+    lineItems: Array<{
+      title?: string;
+      price?: number;
+      quantity: number;
+      totals?: Array<{ type: string; amount: number; label: string }>;
+    }>;
+    totals: Array<{ type: string; amount: number; label: string }>;
+    currency?: string;
+    continueUrl: string;
+    expiresAt?: string;
+  };
+  errors?: Array<{ code: string; content: string }>;
+  warnings?: Array<{ code: string; content: string }>;
+  error?: string;
+}
 
 interface ProductModalProps {
   product: UnifiedProduct;
@@ -12,6 +32,8 @@ interface ProductModalProps {
 }
 
 export default function ProductModal({ product, isOpen, onClose }: ProductModalProps) {
+  const [cartState, setCartState] = useState<'idle' | 'creating' | 'created' | 'error'>('idle');
+  const [cartResult, setCartResult] = useState<CartResult | null>(null);
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -132,6 +154,51 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
   const sourceFavicon = getSourceFavicon();
   const sourceColor = getSourceColor();
   const isShopify = product.source === 'shopify';
+
+  const handleAddToCart = async () => {
+    if (!product.variantId || !product.sellerDomain) {
+      // Fall back to cart permalink if we don't have Cart MCP data
+      window.open(product.checkoutUrl || product.productUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    setCartState('creating');
+    try {
+      const response = await fetch('/api/shopify/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          variantId: product.variantId,
+          quantity: 1,
+          shopDomain: product.sellerDomain,
+          context: { address_country: 'US' },
+        }),
+      });
+
+      const data: CartResult = await response.json();
+
+      if (data.success) {
+        setCartResult(data);
+        setCartState('created');
+      } else {
+        // Cart MCP failed — fall back to cart permalink
+        console.warn('Cart MCP failed, falling back to permalink:', data.error);
+        window.open(product.checkoutUrl || product.productUrl, '_blank', 'noopener,noreferrer');
+        setCartState('idle');
+      }
+    } catch (err) {
+      console.error('Cart creation failed:', err);
+      // Fall back to cart permalink on network error
+      window.open(product.checkoutUrl || product.productUrl, '_blank', 'noopener,noreferrer');
+      setCartState('idle');
+    }
+  };
+
+  const handleProceedToCheckout = () => {
+    if (cartResult?.cart?.continueUrl) {
+      window.open(cartResult.cart.continueUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
 
   return (
     <div 
@@ -319,18 +386,72 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
 
             {/* Action buttons */}
             <div className="mt-auto space-y-2">
-              {isShopify && product.checkoutUrl ? (
+              {isShopify ? (
                 <>
-                  {/* Shopify: Add to Cart (opens checkout_url which adds variant to merchant cart) */}
-                  <a
-                    href={product.checkoutUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
-                  >
-                    <ShoppingCart size={18} />
-                    Add to Cart
-                  </a>
+                  {/* Shopify: Add to Cart via Cart MCP */}
+                  {cartState === 'created' && cartResult?.cart ? (
+                    <>
+                      {/* Cart totals summary */}
+                      <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 space-y-2">
+                        <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
+                          <CheckCircle2 size={18} />
+                          <span className="font-semibold text-sm">Added to Cart</span>
+                        </div>
+                        {cartResult.cart.lineItems.map((li, i) => (
+                          <div key={i} className="flex justify-between text-sm">
+                            <span className="text-gray-600 dark:text-gray-400 truncate max-w-[200px]">
+                              {li.title || 'Item'} × {li.quantity}
+                            </span>
+                            {li.price !== undefined && (
+                              <span className="font-medium text-gray-900 dark:text-gray-100">
+                                ${li.price.toFixed(2)}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                        {cartResult.cart.totals.filter(t => t.type === 'total').map((t, i) => (
+                          <div key={i} className="flex justify-between text-sm font-semibold border-t border-green-200 dark:border-green-800 pt-1.5">
+                            <span className="text-gray-900 dark:text-gray-100">{t.label}</span>
+                            <span className="text-gray-900 dark:text-gray-100">${t.amount.toFixed(2)}</span>
+                          </div>
+                        ))}
+                        {cartResult.warnings && cartResult.warnings.length > 0 && (
+                          <div className="flex items-start gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+                            <AlertCircle size={14} className="mt-0.5 shrink-0" />
+                            <span>{cartResult.warnings[0].content}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Proceed to Checkout button */}
+                      <button
+                        onClick={handleProceedToCheckout}
+                        className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
+                      >
+                        <ShoppingCart size={18} />
+                        Proceed to Checkout
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={handleAddToCart}
+                      disabled={cartState === 'creating'}
+                      className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
+                    >
+                      {cartState === 'creating' ? (
+                        <>
+                          <Loader2 size={18} className="animate-spin" />
+                          Creating Cart…
+                        </>
+                      ) : (
+                        <>
+                          <ShoppingCart size={18} />
+                          Add to Cart
+                        </>
+                      )}
+                    </button>
+                  )}
+
                   {/* Shopify: View Product Page (opens merchant's product page) */}
                   <a
                     href={product.productUrl}

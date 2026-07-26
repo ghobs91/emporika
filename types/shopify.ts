@@ -266,3 +266,53 @@ export interface ShopifyLookupParams {
   };
   view?: string;
 }
+
+// ── Cart MCP ───────────────────────────────────────────────────────────
+// Based on: https://shopify.dev/docs/agents/carts-and-checkout/cart-mcp
+
+export interface ShopifyCartLineItem {
+  id?: string;
+  item: {
+    id: string; // gid://shopify/ProductVariant/{id}
+    title?: string;
+    price?: number;
+    image_url?: string;
+  };
+  quantity: number;
+  totals?: ShopifyCartTotal[];
+}
+
+export interface ShopifyCartTotal {
+  type: 'subtotal' | 'total' | 'tax' | 'fulfillment' | 'items_discount' | string;
+  amount: number; // minor units (cents)
+  display_text: string;
+}
+
+export interface ShopifyCart {
+  ucp: ShopifyUCPMetadata;
+  id: string; // gid://shopify/Cart/{id}
+  line_items: ShopifyCartLineItem[];
+  currency?: string;
+  totals: ShopifyCartTotal[];
+  discounts?: { codes: string[]; applied: unknown[] };
+  fulfillment?: { methods: unknown[] };
+  messages: ShopifyMessage[];
+  continue_url: string;
+  expires_at?: string;
+  links?: Array<{ type: string; title?: string; url: string }>;
+}
+
+export interface ShopifyCartResponse {
+  cart: ShopifyCart;
+}
+
+export interface ShopifyCreateCartParams {
+  variantId: string; // gid://shopify/ProductVariant/{id}
+  quantity?: number;
+  shopDomain: string; // e.g. "lulu-and-georgia.myshopify.com"
+  context?: {
+    address_country?: string;
+    address_region?: string;
+    postal_code?: string;
+  };
+}

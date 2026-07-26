@@ -7,6 +7,8 @@ import type {
   ShopifyProductDetailResponse,
   ShopifyLookupParams,
   ShopifyLookupResponse,
+  ShopifyCreateCartParams,
+  ShopifyCart,
 } from '@/types/shopify';
 
 // ── Configuration ─────────────────────────────────────────────────────
@@ -94,11 +96,18 @@ interface JsonRpcResponse<T = unknown> {
 
 let jsonRpcId = 0;
 
-async function rpcCall<T>(
+/**
+ * Generic JSON-RPC call to any UCP endpoint.
+ * Used by both the Global Catalog (catalog.shopify.com) and
+ * merchant-specific endpoints ({shop}.myshopify.com).
+ */
+async function ucpRpcCall<T>(
+  endpoint: string,
   method: string,
-  params: { name: string; arguments: Record<string, unknown> }
+  params: { name: string; arguments: Record<string, unknown> },
+  requiresAuth = false
 ): Promise<T | null> {
-  const bearerToken = await getBearerToken();
+  const bearerToken = requiresAuth ? await getBearerToken() : null;
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -107,15 +116,15 @@ async function rpcCall<T>(
     headers['Authorization'] = `Bearer ${bearerToken}`;
   }
 
-  const id = ++jsonRpcId;
+  const requestId = ++jsonRpcId;
   const body = {
     jsonrpc: '2.0',
     method,
-    id,
+    id: requestId,
     params,
   };
 
-  const response = await fetch(SHOPIFY_MCP_ENDPOINT, {
+  const response = await fetch(endpoint, {
     method: 'POST',
     headers,
     body: JSON.stringify(body),
@@ -123,12 +132,11 @@ async function rpcCall<T>(
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error(`Shopify MCP HTTP ${response.status}:`, errorText.slice(0, 500));
-    // Surface a useful error so the caller can distinguish causes
+    console.error(`Shopify UCP HTTP ${response.status} (${endpoint}):`, errorText.slice(0, 500));
     const err: NodeJS.ErrnoException = new Error(
-      `Shopify MCP returned ${response.status}: ${errorText.slice(0, 200)}`
+      `Shopify UCP returned ${response.status}: ${errorText.slice(0, 200)}`
     );
-    err.code = `SHOPIFY_MCP_HTTP_${response.status}`;
+    err.code = `SHOPIFY_UCP_HTTP_${response.status}`;
     throw err;
   }
 
@@ -154,9 +162,9 @@ async function rpcCall<T>(
 export async function searchShopifyProducts(
   params: ShopifySearchParams
 ): Promise<ShopifySearchResponse | null> {
-  const result = await rpcCall<{
+  const result = await ucpRpcCall<{
     structuredContent: ShopifySearchResponse;
-  }>('tools/call', {
+  }>(SHOPIFY_MCP_ENDPOINT, 'tools/call', {
     name: 'search_catalog',
     arguments: {
       meta: {
@@ -184,9 +192,9 @@ export async function searchShopifyProducts(
 export async function lookupShopifyProducts(
   params: ShopifyLookupParams
 ): Promise<ShopifyLookupResponse | null> {
-  const result = await rpcCall<{
+  const result = await ucpRpcCall<{
     structuredContent: ShopifyLookupResponse;
-  }>('tools/call', {
+  }>(SHOPIFY_MCP_ENDPOINT, 'tools/call', {
     name: 'lookup_catalog',
     arguments: {
       meta: {
@@ -212,9 +220,9 @@ export async function lookupShopifyProducts(
 export async function getShopifyProductDetails(
   params: ShopifyProductDetailsParams
 ): Promise<ShopifyProductDetailResponse | null> {
-  const result = await rpcCall<{
+  const result = await ucpRpcCall<{
     structuredContent: ShopifyProductDetailResponse;
-  }>('tools/call', {
+  }>(SHOPIFY_MCP_ENDPOINT, 'tools/call', {
     name: 'get_product',
     arguments: {
       meta: {
@@ -232,6 +240,64 @@ export async function getShopifyProductDetails(
       },
     },
   });
+
+  return result?.structuredContent ?? null;
+}
+
+// ── Cart MCP ───────────────────────────────────────────────────────────
+
+/**
+ * Build the merchant UCP endpoint URL from a shop domain.
+ * "lulu-and-georgia.myshopify.com" → "https://lulu-and-georgia.myshopify.com/api/ucp/mcp"
+ */
+function merchantEndpoint(shopDomain: string): string {
+  const domain = shopDomain.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  return `https://${domain}/api/ucp/mcp`;
+}
+
+/**
+ * Create a cart on a Shopify merchant's store via Cart MCP.
+ *
+ * The Cart MCP is unauthenticated — no bearer token is required.
+ * Calls the merchant's UCP endpoint directly (not the Global Catalog).
+ *
+ * Returns the cart object with line items, estimated totals, and a
+ * `continue_url` that hands the buyer off to the merchant's checkout.
+ */
+export async function createShopifyCart(
+  params: ShopifyCreateCartParams
+): Promise<ShopifyCart | null> {
+  const endpoint = merchantEndpoint(params.shopDomain);
+
+  // Cart MCP returns the cart object directly in result.structuredContent
+  const result = await ucpRpcCall<{
+    structuredContent: ShopifyCart;
+  }>(
+    endpoint,
+    'tools/call',
+    {
+      name: 'create_cart',
+      arguments: {
+        meta: {
+          'ucp-agent': {
+            profile: SHOPIFY_AGENT_PROFILE,
+          },
+        },
+        cart: {
+          line_items: [
+            {
+              quantity: params.quantity ?? 1,
+              item: {
+                id: params.variantId,
+              },
+            },
+          ],
+          context: params.context ?? { address_country: 'US' },
+        },
+      },
+    },
+    false // Cart MCP is unauthenticated
+  );
 
   return result?.structuredContent ?? null;
 }
@@ -278,6 +344,12 @@ export function convertShopifyToUnified(
     // Seller name (from first variant)
     const sellerName = firstVariant?.seller?.name;
 
+    // Seller domain for Cart MCP calls (e.g. "lulu-and-georgia.myshopify.com")
+    const sellerDomain = firstVariant?.seller?.domain;
+
+    // Variant GID for Cart MCP calls
+    const variantId = firstVariant?.id;
+
     return {
       id: `shopify-${extractUPID(product.id)}`,
       name: sellerName
@@ -288,6 +360,8 @@ export function convertShopifyToUnified(
       image: imageUrl,
       productUrl,
       checkoutUrl,
+      sellerDomain,
+      variantId,
       source: 'shopify' as const,
       availableOnline,
       shortDescription:

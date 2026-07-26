@@ -45,6 +45,7 @@ export default function ProductGrid({ products, isLoading }: ProductGridProps) {
 
       {selectedProduct && (
         <ProductModal
+          key={selectedProduct.id}
           product={selectedProduct}
           isOpen={true}
           onClose={() => setSelectedProduct(null)}

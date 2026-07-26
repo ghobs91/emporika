@@ -36,6 +36,10 @@ export interface UnifiedProduct {
   shipping?: ShippingInfo;
   /** Shopify only: direct checkout URL that adds the variant to cart */
   checkoutUrl?: string;
+  /** Shopify only: seller's myshopify.com domain for Cart MCP calls */
+  sellerDomain?: string;
+  /** Shopify only: variant GID for Cart MCP calls */
+  variantId?: string;
 }
 
 export function normalizeWalmartProduct(product: WalmartProduct): UnifiedProduct {
