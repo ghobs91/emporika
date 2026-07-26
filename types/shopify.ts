@@ -1,152 +1,268 @@
-// Shopify Catalog API Types
+// Shopify Global Catalog MCP API Types
+// Based on: https://shopify.dev/docs/agents/catalog/global-catalog
+
+// ── Search / Lookup response ──────────────────────────────────────────
+
+export interface ShopifySearchResponse {
+  ucp: ShopifyUCPMetadata;
+  products: ShopifyProduct[];
+  pagination: ShopifyPagination;
+}
+
+export interface ShopifyLookupResponse {
+  ucp: ShopifyUCPMetadata;
+  products: ShopifyProduct[];
+  messages?: ShopifyMessage[];
+}
+
+export interface ShopifyProductDetailResponse {
+  ucp: ShopifyUCPMetadata;
+  product: ShopifyProduct;
+}
+
+// ── UCP metadata ──────────────────────────────────────────────────────
+
+export interface ShopifyUCPMetadata {
+  version: string;
+  capabilities: Record<string, Array<{ version: string }>>;
+}
+
+export interface ShopifyPagination {
+  cursor: string;
+  has_next_page: boolean;
+  total_count: number;
+}
+
+export interface ShopifyMessage {
+  type: string;
+  code: string;
+  content: string;
+}
+
+// ── Product ───────────────────────────────────────────────────────────
 
 export interface ShopifyProduct {
-  id: string; // UPID format: gid://shopify/p/{UPID}
+  id: string; // gid://shopify/p/{UPID}
   title: string;
-  description: string;
-  images: ShopifyImage[];
-  options: ShopifyOption[];
-  priceRange: {
-    min: {
-      amount: string;
-      currencyCode: string;
-    };
-    max: {
-      amount: string;
-      currencyCode: string;
-    };
+  description: {
+    html?: string;
+    plain?: string;
   };
-  products: ShopifyProductVariant[];
-  availableForSale: boolean;
-  rating: {
-    value: number;
-    count: number;
-  } | null;
-  inferredFields?: string[];
-  uniqueSellingPoint?: string;
-  topFeatures?: string[];
-  techSpecs?: string[];
-  sharedAttributes?: ShopifyAttribute[];
+  url?: string;
+  categories?: ShopifyCategory[];
+  price_range: {
+    min: ShopifyMoney;
+    max: ShopifyMoney;
+  };
+  media?: ShopifyMedia[];
+  options?: ShopifyProductOption[];
+  variants: ShopifyVariant[];
+  rating?: ShopifyRating | null;
+  selected?: ShopifySelectedOption[];
+  // Extension fields
+  inferred_fields?: string[];
+  unique_selling_point?: string;
+  top_features?: string[];
+  tech_specs?: string[];
+  shared_attributes?: ShopifyAttribute[];
+}
+
+export interface ShopifyCategory {
+  value: string;
+  taxonomy: string;
+}
+
+export interface ShopifyMoney {
+  amount: number; // in minor units (cents)
+  currency: string;
+}
+
+export interface ShopifyMedia {
+  type: 'image' | string;
+  url: string;
+  alt_text?: string;
+}
+
+export interface ShopifyProductOption {
+  name: string;
+  values: ShopifyOptionValue[];
+}
+
+export interface ShopifyOptionValue {
+  label: string;
+  available?: boolean;
+  exists?: boolean;
+}
+
+export interface ShopifySelectedOption {
+  name: string;
+  label: string;
+}
+
+// ── Variant ───────────────────────────────────────────────────────────
+
+export interface ShopifyVariant {
+  id: string; // gid://shopify/ProductVariant/{id}
+  sku?: string;
+  title: string;
+  description?: {
+    plain?: string;
+  };
+  url?: string; // product page URL
+  price?: ShopifyMoney;
+  checkout_url?: string;
+  condition?: string[];
+  eligible?: {
+    native_checkout?: boolean;
+  };
+  availability?: {
+    available: boolean;
+    status: string;
+    running_low?: boolean;
+  };
+  requires?: {
+    shipping: boolean;
+    selling_plan: boolean;
+    components: boolean;
+  };
+  options: ShopifyVariantOption[];
+  media?: ShopifyMedia[];
+  rating?: ShopifyRating | null;
+  tags?: string[];
+  seller: ShopifySeller;
+  inputs?: ShopifyInput[]; // present in lookup responses
+}
+
+export interface ShopifyVariantOption {
+  name: string;
+  label: string;
+}
+
+export interface ShopifyInput {
+  id: string;
+  match: string;
+}
+
+// ── Seller ────────────────────────────────────────────────────────────
+
+export interface ShopifySeller {
+  name: string;
+  id: string; // gid://shopify/Shop/{id}
+  domain?: string;
+  url?: string;
+  links?: ShopifySellerLink[];
+}
+
+export interface ShopifySellerLink {
+  type: string;
   url: string;
 }
 
-export interface ShopifyImage {
-  url: string;
-  altText: string;
-  product: {
-    id: string;
-    title: string;
-    onlineStoreUrl: string;
-    shop: {
-      name: string;
-      onlineStoreUrl: string;
-    };
-  };
+// ── Rating ────────────────────────────────────────────────────────────
+
+export interface ShopifyRating {
+  value: number;
+  scale_max: number;
+  count: number;
 }
 
-export interface ShopifyOption {
-  name: string;
-  values: {
-    value: string;
-    availableForSale: boolean;
-    exists: boolean;
-  }[];
-}
-
-export interface ShopifyProductVariant {
-  id: string;
-  title: string;
-  checkoutUrl: string;
-  description: string;
-  featuredImage: {
-    url: string;
-    altText: string;
-  };
-  onlineStoreUrl: string;
-  price: {
-    amount: string;
-    currencyCode: string;
-  };
-  rating: {
-    value: number;
-    count: number;
-  } | null;
-  availableForSale: boolean;
-  shop: ShopifyShop;
-  selectedProductVariant: {
-    id: string;
-    availableForSale: boolean;
-    options: {
-      name: string;
-      value: string;
-    }[];
-    price: {
-      amount: string;
-      currencyCode: string;
-    };
-    image: {
-      url: string;
-      altText: string;
-    };
-    selectionState?: {
-      type: string;
-      requestedFilters: string[];
-    };
-  };
-  secondhand: boolean;
-  requiresSellingPlan: boolean;
-  eligibleForNativeCheckout: boolean;
-}
-
-export interface ShopifyShop {
-  name: string;
-  paymentSettings: {
-    supportedDigitalWallets: string[];
-    acceptedCardBrands: string[];
-  };
-  onlineStoreUrl: string;
-  privacyPolicy: {
-    url: string;
-  };
-  refundPolicy: {
-    url: string;
-  };
-  termsOfService: {
-    url: string;
-  };
-  shippingPolicy: {
-    url: string;
-  };
-  id: string;
-  permanentDomain: string;
-}
+// ── Attribute (for filters / shared attributes) ───────────────────────
 
 export interface ShopifyAttribute {
   name: string;
   values: string[];
 }
 
-export interface ShopifySearchResponse {
-  offers: ShopifyProduct[];
-  instructions: string;
-}
+// ── Request parameter types ───────────────────────────────────────────
 
 export interface ShopifySearchParams {
   query: string;
-  context?: string;
-  include_secondhand?: boolean;
-  min_price?: number;
-  max_price?: number;
-  ships_to?: string;
-  available_for_sale?: boolean;
-  limit?: number;
+  context?: {
+    address_country?: string;
+    address_region?: string;
+    postal_code?: string;
+    language?: string;
+    currency?: string;
+    intent?: string;
+  };
+  filters?: ShopifySearchFilters;
+  pagination?: {
+    cursor?: string;
+    limit?: number;
+  };
+  view?: string;
+  saved_catalog_slug?: string;
+}
+
+export interface ShopifySearchFilters {
+  available?: boolean;
+  ships_to?: {
+    country: string;
+    region?: string;
+    postal_code?: string;
+  };
+  ships_from?: Array<{ country: string }>;
+  price?: {
+    min?: number; // minor units (cents)
+    max?: number;
+  };
+  condition?: string[];
+  shops?: string[];
+  attributes?: Array<{
+    name: string;
+    values: string[];
+  }>;
+  rating?: {
+    variant?: {
+      min?: number;
+      min_count?: number;
+    };
+  };
+  price_tier?: string[];
+  categories?: Array<{
+    id: string;
+    taxonomy?: string;
+  }>;
 }
 
 export interface ShopifyProductDetailsParams {
-  upid: string;
-  product_options?: {
-    key: string;
-    values: string[];
-  }[];
-  ships_to?: string;
+  id: string; // gid://shopify/p/{UPID} or gid://shopify/ProductVariant/{id}
+  selected?: Array<{ name: string; label: string }>;
+  preferences?: string[];
+  filters?: {
+    ships_to?: { country: string; region?: string; postal_code?: string };
+    ships_from?: Array<{ country: string }>;
+    available?: boolean;
+    condition?: string[];
+    shops?: string[];
+  };
+  context?: {
+    address_country?: string;
+    address_region?: string;
+    postal_code?: string;
+    language?: string;
+    currency?: string;
+    intent?: string;
+  };
+  view?: string;
+}
+
+export interface ShopifyLookupParams {
+  ids: string[]; // 1–50 identifiers
+  filters?: {
+    ships_to?: { country: string; region?: string; postal_code?: string };
+    ships_from?: Array<{ country: string }>;
+    available?: boolean;
+    condition?: string[];
+    shops?: string[];
+  };
+  context?: {
+    address_country?: string;
+    address_region?: string;
+    postal_code?: string;
+    language?: string;
+    currency?: string;
+    intent?: string;
+  };
+  view?: string;
 }

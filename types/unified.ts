@@ -34,6 +34,8 @@ export interface UnifiedProduct {
   freeShipping?: boolean;
   availableOnline?: boolean;
   shipping?: ShippingInfo;
+  /** Shopify only: direct checkout URL that adds the variant to cart */
+  checkoutUrl?: string;
 }
 
 export function normalizeWalmartProduct(product: WalmartProduct): UnifiedProduct {

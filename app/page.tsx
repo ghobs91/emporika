@@ -9,11 +9,13 @@ import ThemeToggle from '@/components/ThemeToggle';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import ShoeSizeFilter from '@/components/ShoeSizeFilter';
 import ClothingSizeFilter from '@/components/ClothingSizeFilter';
-import { UnifiedProduct } from '@/types/unified';
+import { UnifiedProduct, RetailerSource } from '@/types/unified';
 import { ShoppingBag } from 'lucide-react';
 import { useTargetStore } from '@/hooks/useTargetStore';
 
 type SortOption = 'most-popular' | 'price-asc' | 'price-desc' | 'rating-desc';
+
+const ALL_SOURCES: RetailerSource[] = ['walmart', 'bestbuy', 'target', 'ebay', 'costco', 'shopify'];
 
 export default function Home() {
   const [products, setProducts] = useState<UnifiedProduct[]>([]);
@@ -24,6 +26,7 @@ export default function Home() {
   const [sortBy, setSortBy] = useState<SortOption>('most-popular');
   const [selectedShoeSize, setSelectedShoeSize] = useState<string | null>(null);
   const [selectedClothingSize, setSelectedClothingSize] = useState<string | null>(null);
+  const [selectedSources, setSelectedSources] = useState<RetailerSource[]>(ALL_SOURCES);
   const { storeInfo } = useTargetStore();
 
   // Detect if search query is shoe-related
@@ -76,10 +79,11 @@ export default function Home() {
     setSelectedClothingSize(null); // Reset clothing size filter when searching
     
     try {
-      // Build search URL with Target store info if available
+      // Build search URL with Target store info and selected sources
       const params = new URLSearchParams({
         query,
         numItems: '20',
+        sources: selectedSources.join(','),
       });
       
       if (storeInfo) {
@@ -187,7 +191,12 @@ export default function Home() {
             </Link>
             
             <div className="flex-1">
-              <SearchBar onSearch={handleSearch} isLoading={isLoading} />
+              <SearchBar
+                onSearch={handleSearch}
+                isLoading={isLoading}
+                selectedSources={selectedSources}
+                onSourcesChange={setSelectedSources}
+              />
             </div>
             
             <div>
@@ -220,7 +229,12 @@ export default function Home() {
 
             {/* Second row: Search bar on its own line */}
             <div className="w-full">
-              <SearchBar onSearch={handleSearch} isLoading={isLoading} />
+              <SearchBar
+                onSearch={handleSearch}
+                isLoading={isLoading}
+                selectedSources={selectedSources}
+                onSourcesChange={setSelectedSources}
+              />
             </div>
           </div>
         </div>

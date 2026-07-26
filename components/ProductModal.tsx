@@ -1,7 +1,7 @@
 'use client';
 
 import { UnifiedProduct } from '@/types/unified';
-import { X, Star, Truck, Zap, Package, ExternalLink } from 'lucide-react';
+import { X, Star, Truck, Zap, Package, ExternalLink, ShoppingCart } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect } from 'react';
 
@@ -99,6 +99,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
       case 'bestbuy': return 'Best Buy';
       case 'ebay': return 'eBay';
       case 'costco': return 'Costco';
+      case 'shopify': return 'Shopify';
       default: return product.source;
     }
   };
@@ -110,6 +111,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
       case 'bestbuy': return '/bestbuy-favicon.png';
       case 'ebay': return '/favicon-ebay.png';
       case 'costco': return '/costco-favicon.png';
+      case 'shopify': return '/shopify-logo.svg';
       default: return '';
     }
   };
@@ -121,6 +123,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
       case 'bestbuy': return 'bg-yellow-500';
       case 'ebay': return 'bg-purple-600';
       case 'costco': return 'bg-gray-600';
+      case 'shopify': return 'bg-green-600';
       default: return 'bg-gray-600';
     }
   };
@@ -128,6 +131,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
   const sourceLabel = getSourceLabel();
   const sourceFavicon = getSourceFavicon();
   const sourceColor = getSourceColor();
+  const isShopify = product.source === 'shopify';
 
   return (
     <div 
@@ -313,16 +317,44 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
               </div>
             )}
 
-            {/* View on Retailer Button */}
-            <a
-              href={product.productUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
-            >
-              View on {sourceLabel}
-              <ExternalLink size={18} />
-            </a>
+            {/* Action buttons */}
+            <div className="mt-auto space-y-2">
+              {isShopify && product.checkoutUrl ? (
+                <>
+                  {/* Shopify: Add to Cart (opens checkout_url which adds variant to merchant cart) */}
+                  <a
+                    href={product.checkoutUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  >
+                    <ShoppingCart size={18} />
+                    Add to Cart
+                  </a>
+                  {/* Shopify: View Product Page (opens merchant's product page) */}
+                  <a
+                    href={product.productUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full bg-white dark:bg-[#1a1a1a] hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium py-3 px-6 rounded-lg border border-gray-300 dark:border-gray-600 transition-colors flex items-center justify-center gap-2"
+                  >
+                    View Product Page
+                    <ExternalLink size={16} />
+                  </a>
+                </>
+              ) : (
+                /* Non-Shopify: single "View on Retailer" button */
+                <a
+                  href={product.productUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
+                >
+                  View on {sourceLabel}
+                  <ExternalLink size={18} />
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </div>

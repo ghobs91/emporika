@@ -4,37 +4,51 @@ import type {
   ShopifySearchParams,
   ShopifySearchResponse,
   ShopifyProductDetailsParams,
+  ShopifyProductDetailResponse,
+  ShopifyLookupParams,
+  ShopifyLookupResponse,
 } from '@/types/shopify';
 
-const SHOPIFY_MCP_ENDPOINT = 'https://discover.shopifyapps.com/global/mcp';
+// ── Configuration ─────────────────────────────────────────────────────
+
+const SHOPIFY_MCP_ENDPOINT = 'https://catalog.shopify.com/api/ucp/mcp';
 const TOKEN_ENDPOINT = 'https://api.shopify.com/auth/access_token';
 const SHOPIFY_CLIENT_ID = process.env.SHOPIFY_CLIENT_ID;
 const SHOPIFY_CLIENT_SECRET = process.env.SHOPIFY_CLIENT_SECRET;
+// In development / when not explicitly configured, use Shopify's own test fixture.
+// This always works and doesn't require a deployment.
+// Set SHOPIFY_AGENT_PROFILE in .env.local to use the self-hosted profile in production.
+const SHOPIFY_AGENT_PROFILE =
+  process.env.SHOPIFY_AGENT_PROFILE ||
+  'https://shopify.dev/ucp/agent-profiles/2026-04-08/valid-with-capabilities.json';
 
-// Cache for bearer token
+// ── Token cache ───────────────────────────────────────────────────────
+
 let cachedToken: string | null = null;
 let tokenExpiry: number | null = null;
 
 /**
- * Get or refresh the bearer token for Shopify API
+ * Get or refresh the bearer token for Shopify API.
  */
-async function getBearerToken(): Promise<string> {
+async function getBearerToken(): Promise<string | null> {
   // Return cached token if still valid (with 5 minute buffer)
   if (cachedToken && tokenExpiry && Date.now() < tokenExpiry - 5 * 60 * 1000) {
     return cachedToken;
   }
 
-  // Check if credentials are configured
+  // If no credentials are configured, skip token acquisition
+  // (the agent profile alone may be sufficient for the MCP endpoint)
   if (!SHOPIFY_CLIENT_ID || !SHOPIFY_CLIENT_SECRET) {
-    throw new Error('Shopify credentials not configured. Please set SHOPIFY_CLIENT_ID and SHOPIFY_CLIENT_SECRET in .env.local');
+    console.warn(
+      'Shopify credentials not configured. Requests will use agent profile only.'
+    );
+    return null;
   }
 
   try {
     const response = await fetch(TOKEN_ENDPOINT, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         client_id: SHOPIFY_CLIENT_ID,
         client_secret: SHOPIFY_CLIENT_SECRET,
@@ -49,156 +63,248 @@ async function getBearerToken(): Promise<string> {
         statusText: response.statusText,
         body: errorText,
       });
-      throw new Error(`Failed to get token: ${response.statusText} (${response.status}). The provided credentials may be invalid or expired. Please check your SHOPIFY_CLIENT_ID and SHOPIFY_CLIENT_SECRET in .env.local`);
+      // Don't throw — fall back to agent-profile-only requests
+      return null;
     }
 
     const data = await response.json();
     cachedToken = data.access_token;
-    
-    // Tokens typically last 24 hours, but we'll set expiry to 23 hours to be safe
+    // Tokens typically last 24h; expire at 23h to be safe
     tokenExpiry = Date.now() + 23 * 60 * 60 * 1000;
-    
+
     return cachedToken!;
   } catch (error) {
     console.error('Error getting Shopify bearer token:', error);
-    throw error;
+    return null;
   }
 }
 
+// ── JSON-RPC helper ───────────────────────────────────────────────────
+
+interface JsonRpcResponse<T = unknown> {
+  jsonrpc: string;
+  id: number;
+  result?: T;
+  error?: {
+    code: number;
+    message: string;
+    data?: unknown;
+  };
+}
+
+let jsonRpcId = 0;
+
+async function rpcCall<T>(
+  method: string,
+  params: { name: string; arguments: Record<string, unknown> }
+): Promise<T | null> {
+  const bearerToken = await getBearerToken();
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (bearerToken) {
+    headers['Authorization'] = `Bearer ${bearerToken}`;
+  }
+
+  const id = ++jsonRpcId;
+  const body = {
+    jsonrpc: '2.0',
+    method,
+    id,
+    params,
+  };
+
+  const response = await fetch(SHOPIFY_MCP_ENDPOINT, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`Shopify MCP HTTP ${response.status}:`, errorText.slice(0, 500));
+    // Surface a useful error so the caller can distinguish causes
+    const err: NodeJS.ErrnoException = new Error(
+      `Shopify MCP returned ${response.status}: ${errorText.slice(0, 200)}`
+    );
+    err.code = `SHOPIFY_MCP_HTTP_${response.status}`;
+    throw err;
+  }
+
+  const data: JsonRpcResponse = await response.json();
+
+  if (data.error) {
+    console.error(`Shopify RPC error:`, JSON.stringify(data.error));
+    const err: NodeJS.ErrnoException = new Error(
+      `Shopify RPC error ${data.error.code}: ${data.error.message}`
+    );
+    err.code = `SHOPIFY_RPC_${data.error.code}`;
+    throw err;
+  }
+
+  return (data.result as T) ?? null;
+}
+
+// ── Public API ────────────────────────────────────────────────────────
+
 /**
- * Search for products in the Shopify Catalog
+ * Search for products across all Shopify merchants via the Global Catalog.
  */
 export async function searchShopifyProducts(
   params: ShopifySearchParams
-): Promise<ShopifyProduct[]> {
-  try {
-    const bearerToken = await getBearerToken();
-
-    const response = await fetch(SHOPIFY_MCP_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${bearerToken}`,
-      },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        method: 'tools/call',
-        id: 1,
-        params: {
-          name: 'search_global_products',
-          arguments: {
-            query: params.query,
-            context: params.context,
-            include_secondhand: params.include_secondhand ?? false,
-            min_price: params.min_price,
-            max_price: params.max_price,
-            ships_to: params.ships_to ?? 'US',
-            available_for_sale: params.available_for_sale ?? true,
-            limit: params.limit ?? 10,
-          },
+): Promise<ShopifySearchResponse | null> {
+  const result = await rpcCall<{
+    structuredContent: ShopifySearchResponse;
+  }>('tools/call', {
+    name: 'search_catalog',
+    arguments: {
+      meta: {
+        'ucp-agent': {
+          profile: SHOPIFY_AGENT_PROFILE,
         },
-      }),
-    });
+      },
+      catalog: {
+        query: params.query,
+        context: params.context,
+        filters: params.filters,
+        pagination: params.pagination ?? { limit: 10 },
+        view: params.view,
+        saved_catalog_slug: params.saved_catalog_slug,
+      },
+    },
+  });
 
-    if (!response.ok) {
-      throw new Error(`Shopify API error: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-
-    // Parse the text field to get the actual offers object
-    if (data.result && data.result.content && data.result.content[0]) {
-      const offersData: ShopifySearchResponse = JSON.parse(data.result.content[0].text);
-      return offersData.offers || [];
-    }
-
-    return [];
-  } catch (error) {
-    console.error('Error searching Shopify products:', error);
-    return [];
-  }
+  return result?.structuredContent ?? null;
 }
 
 /**
- * Get detailed product information for a specific Universal Product
+ * Look up products or variants by identifier from across all Shopify merchants.
+ */
+export async function lookupShopifyProducts(
+  params: ShopifyLookupParams
+): Promise<ShopifyLookupResponse | null> {
+  const result = await rpcCall<{
+    structuredContent: ShopifyLookupResponse;
+  }>('tools/call', {
+    name: 'lookup_catalog',
+    arguments: {
+      meta: {
+        'ucp-agent': {
+          profile: SHOPIFY_AGENT_PROFILE,
+        },
+      },
+      catalog: {
+        ids: params.ids,
+        filters: params.filters,
+        context: params.context,
+        view: params.view,
+      },
+    },
+  });
+
+  return result?.structuredContent ?? null;
+}
+
+/**
+ * Get full details for a single product with optional variant selection.
  */
 export async function getShopifyProductDetails(
   params: ShopifyProductDetailsParams
-): Promise<ShopifyProduct | null> {
-  try {
-    const bearerToken = await getBearerToken();
-
-    const response = await fetch(SHOPIFY_MCP_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${bearerToken}`,
-      },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        method: 'tools/call',
-        id: 1,
-        params: {
-          name: 'get_global_product_details',
-          arguments: {
-            upid: params.upid,
-            product_options: params.product_options,
-            ships_to: params.ships_to ?? 'US',
-          },
+): Promise<ShopifyProductDetailResponse | null> {
+  const result = await rpcCall<{
+    structuredContent: ShopifyProductDetailResponse;
+  }>('tools/call', {
+    name: 'get_product',
+    arguments: {
+      meta: {
+        'ucp-agent': {
+          profile: SHOPIFY_AGENT_PROFILE,
         },
-      }),
-    });
+      },
+      catalog: {
+        id: params.id,
+        selected: params.selected,
+        preferences: params.preferences,
+        filters: params.filters,
+        context: params.context,
+        view: params.view,
+      },
+    },
+  });
 
-    if (!response.ok) {
-      throw new Error(`Shopify API error: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-
-    if (data.result && data.result.content && data.result.content[0]) {
-      return JSON.parse(data.result.content[0].text);
-    }
-
-    return null;
-  } catch (error) {
-    console.error('Error getting Shopify product details:', error);
-    return null;
-  }
+  return result?.structuredContent ?? null;
 }
 
+// ── Conversion ────────────────────────────────────────────────────────
+
 /**
- * Convert Shopify products to unified format
+ * Convert Shopify Global Catalog products to the unified format
+ * used across the app.
  */
-export function convertShopifyToUnified(products: ShopifyProduct[]): UnifiedProduct[] {
+export function convertShopifyToUnified(
+  products: ShopifyProduct[]
+): UnifiedProduct[] {
   return products.map((product) => {
-    // Get the first product variant for main details
-    const firstVariant = product.products[0];
-    
+    // Prefer the first variant's price, fall back to the price range min
+    const firstVariant = product.variants?.[0];
+    const priceRaw =
+      firstVariant?.price?.amount ?? product.price_range?.min?.amount ?? 0;
+
+    // Image: prefer first media image
+    const imageUrl =
+      product.media?.find((m) => m.type === 'image')?.url ?? '';
+
+    // Product page URL (for "View on Shopify")
+    const productUrl =
+      firstVariant?.url ?? product.url ?? '';
+
+    // Direct checkout URL (for "Add to Cart") — adds variant directly to cart
+    const checkoutUrl = firstVariant?.checkout_url;
+
+    // Original (max) price if there's a range
+    const maxAmount = product.price_range?.max?.amount;
+    const minAmount = product.price_range?.min?.amount;
+    const originalPrice =
+      maxAmount && minAmount && maxAmount > minAmount
+        ? maxAmount / 100
+        : undefined;
+
+    // Availability: true if any variant is available
+    const availableOnline = product.variants?.some(
+      (v) => v.availability?.available !== false
+    ) ?? true;
+
+    // Seller name (from first variant)
+    const sellerName = firstVariant?.seller?.name;
+
     return {
-      id: `shopify-${product.id}`,
-      name: product.title,
-      price: parseFloat(product.priceRange.min.amount),
-      currency: product.priceRange.min.currencyCode,
-      image: product.images[0]?.url || firstVariant?.featuredImage?.url || '',
-      productUrl: firstVariant?.onlineStoreUrl || product.url,
+      id: `shopify-${extractUPID(product.id)}`,
+      name: sellerName
+        ? `${product.title} — ${sellerName}`
+        : product.title,
+      price: priceRaw / 100,
+      originalPrice,
+      image: imageUrl,
+      productUrl,
+      checkoutUrl,
       source: 'shopify' as const,
-      availableOnline: product.availableForSale,
-      shortDescription: product.description,
+      availableOnline,
+      shortDescription:
+        product.description?.plain ??
+        product.description?.html ??
+        undefined,
       customerRating: product.rating?.value,
       reviewCount: product.rating?.count,
-      originalPrice: 
-        product.priceRange.max.amount !== product.priceRange.min.amount
-          ? parseFloat(product.priceRange.max.amount)
-          : undefined,
     };
   });
 }
 
 /**
- * Extract UPID from Shopify product ID
+ * Extract the UPID portion from a Shopify GID.
+ * "gid://shopify/p/abc123" → "abc123"
  */
 export function extractUPID(shopifyId: string): string {
-  // Handle both formats: "shopify-gid://shopify/p/{UPID}" or "gid://shopify/p/{UPID}"
   const match = shopifyId.match(/\/p\/([^?]+)/);
   return match ? match[1] : shopifyId;
 }

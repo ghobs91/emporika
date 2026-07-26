@@ -43,7 +43,7 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
       case 'bestbuy': return '/bestbuy-favicon.png';
       case 'ebay': return '/favicon-ebay.png';
       case 'costco': return '/costco-favicon.png';
-      case 'shopify': return '/shopify-favicon.png';
+      case 'shopify': return '/shopify-logo.svg';
       default: return '';
     }
   };

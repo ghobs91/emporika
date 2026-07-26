@@ -2,13 +2,17 @@
 
 import { useState } from 'react';
 import { Search } from 'lucide-react';
+import RetailerToggle from './RetailerToggle';
+import { RetailerSource } from '@/types/unified';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
   isLoading?: boolean;
+  selectedSources: RetailerSource[];
+  onSourcesChange: (sources: RetailerSource[]) => void;
 }
 
-export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
+export default function SearchBar({ onSearch, isLoading, selectedSources, onSourcesChange }: SearchBarProps) {
   const [query, setQuery] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -30,6 +34,9 @@ export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
           className="w-full pl-11 pr-4 py-2.5 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-[#242424] text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:bg-white dark:focus:bg-[#242424] transition-all duration-200"
           disabled={isLoading}
         />
+      </div>
+      <div className="mt-2">
+        <RetailerToggle selected={selectedSources} onChange={onSourcesChange} />
       </div>
     </form>
   );

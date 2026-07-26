@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Emporika - Unified Shopping Search",
-  description: "Search products across Walmart, Best Buy, Target, and eBay in one place.",
+  description: "Search products across Walmart, Best Buy, Target, eBay, Costco, and Shopify merchants in one place.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

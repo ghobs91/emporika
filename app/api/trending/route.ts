@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { bestBuyAPI } from '@/lib/bestbuy';
 import { targetAPI } from '@/lib/target';
 import { walmartAPI } from '@/lib/walmart';
+import { searchShopifyProducts, convertShopifyToUnified, extractUPID } from '@/lib/shopify';
 import { normalizeBestBuyTrendingProduct, normalizeTargetProduct, normalizeWalmartProduct, UnifiedProduct } from '@/types/unified';
 import { ProductCategory } from '@/types/categories';
 import { groupProductsByCategory } from '@/lib/categorize-product';
@@ -9,6 +10,7 @@ import { BestBuyTrendingResponse } from '@/types/bestbuy';
 import { TargetSearchResponse } from '@/types/target';
 import { WalmartSearchResponse } from '@/types/walmart';
 import { TargetProduct } from '@/types/target';
+import type { ShopifySearchResponse } from '@/types/shopify';
 
 // Set runtime config for serverless function
 export const runtime = 'nodejs';
@@ -60,8 +62,43 @@ export async function GET() {
     
     console.log(`Total API calls to make: ${apiCalls.length}, sources: ${apiSources.join(', ')}`);
     
-    // Fetch from all retailers in parallel
-    const results = await Promise.allSettled(apiCalls);
+    // Shopify Global Catalog — searches for each trending product category
+    // using the high-rating filter from the UCP catalog CLI reference:
+    //   --set '/filters/rating/variant/min=4.5'
+    //   --set '/filters/rating/variant/min_count=50'
+    //   --set '/filters/ships_to/country=US'
+    //   --set '/context/address_country=US'
+    //   --set '/pagination/limit=50'
+    const shopifyCategoryQueries: { category: ProductCategory; query: string }[] = [
+      { category: 'electronics', query: 'headphones' },
+      { category: 'home', query: 'home decor' },
+      { category: 'fashion', query: 'shoes' },
+      { category: 'sports', query: 'fitness' },
+      { category: 'toys', query: 'toys' },
+    ];
+    const shopifyCalls = shopifyCategoryQueries.map(({ query }) =>
+      timeoutPromise(
+        searchShopifyProducts({
+          query,
+          filters: {
+            ships_to: { country: 'US' },
+            available: true,
+            rating: { variant: { min: 4.5, min_count: 50 } },
+          },
+          pagination: { limit: 50 },
+          context: { address_country: 'US' },
+        }),
+        20000
+      )
+    );
+    console.log(`Adding Shopify Global Catalog searches: ${shopifyCategoryQueries.map(c => c.query).join(', ')}`);
+    
+    // Fetch from all retailers in parallel (Shopify runs in parallel alongside)
+    const [results, ...shopifyResultsArr] = await Promise.all([
+      Promise.allSettled(apiCalls),
+      ...shopifyCalls.map((p) => p.then((v) => ({ status: 'fulfilled' as const, value: v })).catch((reason) => ({ status: 'rejected' as const, reason }))),
+    ]);
+    
     const allProducts: UnifiedProduct[] = [];
 
     // Process results from each retailer
@@ -101,6 +138,33 @@ export async function GET() {
         }
       }
     });
+
+    // Process Shopify Global Catalog results — dedupe by UPID across category searches
+    const shopifySeen = new Set<string>();
+    let shopifyTotal = 0;
+    for (let i = 0; i < shopifyResultsArr.length; i++) {
+      const sr = shopifyResultsArr[i];
+      const expectedCategory = shopifyCategoryQueries[i].category;
+      if (sr.status === 'fulfilled' && sr.value) {
+        const resp = sr.value as ShopifySearchResponse | null;
+        const products = resp?.products || [];
+        const filtered = products.filter((p) => {
+          const upid = extractUPID(p.id);
+          if (!upid || shopifySeen.has(upid)) return false;
+          shopifySeen.add(upid);
+          return true;
+        });
+        const unifiedShopify = convertShopifyToUnified(filtered);
+        allProducts.push(...unifiedShopify);
+        shopifyTotal += unifiedShopify.length;
+        console.log(`✓ Shopify (${expectedCategory}) returned ${unifiedShopify.length} highly-rated products`);
+      } else {
+        const reason = sr.status === 'rejected' ? sr.reason : 'No results';
+        console.error(`✗ Shopify (${expectedCategory}) search failed:`,
+          reason instanceof Error ? reason.message : reason);
+      }
+    }
+    console.log(`Shopify total: ${shopifyTotal} highly-rated products across ${shopifyCategoryQueries.length} categories`);
 
     console.log(`Total items fetched: ${allProducts.length}`);
 

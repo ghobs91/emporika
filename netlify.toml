@@ -10,3 +10,10 @@
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Methods = "GET, POST, OPTIONS"
     Access-Control-Allow-Headers = "Content-Type"
+
+# UCP agent profile — fetched by Shopify during negotiation; cache-friendly
+[[headers]]
+  for = "/ucp-agent-profile.json"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Cache-Control = "public, max-age=3600, s-maxage=86400"
