@@ -9,6 +9,9 @@ import ThemeToggle from '@/components/ThemeToggle';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import ShoeSizeFilter from '@/components/ShoeSizeFilter';
 import ClothingSizeFilter from '@/components/ClothingSizeFilter';
+import CartIcon from '@/components/CartIcon';
+import CartDrawer from '@/components/CartDrawer';
+import { CartProvider } from '@/context/CartContext';
 import { UnifiedProduct, RetailerSource } from '@/types/unified';
 import { ShoppingBag } from 'lucide-react';
 import { useTargetStore } from '@/hooks/useTargetStore';
@@ -168,6 +171,7 @@ export default function Home() {
   });
 
   return (
+    <CartProvider>
     <div className="min-h-screen bg-white dark:bg-[#1a1a1a] transition-colors duration-300">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/95 dark:bg-[#1a1a1a]/95 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 transition-all duration-300">
@@ -199,7 +203,8 @@ export default function Home() {
               />
             </div>
             
-            <div>
+            <div className="flex items-center gap-1">
+              <CartIcon />
               <ThemeToggle />
             </div>
           </div>
@@ -222,7 +227,8 @@ export default function Home() {
                 </h1>
               </Link>
               
-              <div>
+              <div className="flex items-center gap-1">
+                <CartIcon />
                 <ThemeToggle />
               </div>
             </div>
@@ -314,6 +320,10 @@ export default function Home() {
 
       {/* PWA Install Prompt */}
       <PWAInstallPrompt />
+
+      {/* Cart Drawer */}
+      <CartDrawer />
     </div>
+    </CartProvider>
   );
 }

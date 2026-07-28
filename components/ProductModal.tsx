@@ -4,6 +4,7 @@ import { UnifiedProduct } from '@/types/unified';
 import { X, Star, Truck, Zap, Package, ExternalLink, ShoppingCart, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { useCart } from '@/context/CartContext';
 
 interface CartResult {
   success: boolean;
@@ -34,6 +35,7 @@ interface ProductModalProps {
 export default function ProductModal({ product, isOpen, onClose }: ProductModalProps) {
   const [cartState, setCartState] = useState<'idle' | 'creating' | 'created' | 'error'>('idle');
   const [cartResult, setCartResult] = useState<CartResult | null>(null);
+  const { addItem, setIsOpen: setCartOpen } = useCart();
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -180,6 +182,24 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
       if (data.success) {
         setCartResult(data);
         setCartState('created');
+
+        // Also add to Emporika's persistent cart
+        const merchantName = product.name.includes(' — ')
+          ? product.name.split(' — ').pop() || 'Shopify Merchant'
+          : 'Shopify Merchant';
+        addItem({
+          productId: product.id,
+          variantId: product.variantId!,
+          shopDomain: product.sellerDomain!,
+          merchantName,
+          title: product.name,
+          price: product.price,
+          image: product.image,
+          quantity: 1,
+          currency: data.cart?.currency || 'USD',
+          continueUrl: data.cart!.continueUrl,
+          cartId: data.cart!.id,
+        });
       } else {
         // Cart MCP failed — fall back to cart permalink
         console.warn('Cart MCP failed, falling back to permalink:', data.error);
@@ -430,6 +450,14 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
                       >
                         <ShoppingCart size={18} />
                         Proceed to Checkout
+                      </button>
+
+                      {/* View Cart button */}
+                      <button
+                        onClick={() => setCartOpen(true)}
+                        className="w-full bg-white dark:bg-[#1a1a1a] hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium py-2.5 px-6 rounded-lg border border-gray-300 dark:border-gray-600 transition-colors text-sm"
+                      >
+                        View Cart
                       </button>
                     </>
                   ) : (
