@@ -31,12 +31,7 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
       case 'bestbuy': return 'Best Buy';
       case 'ebay': return 'eBay';
       case 'costco': return 'Costco';
-      case 'shopify':
-        // Extract merchant name from product title if present, otherwise 'Shopify'
-        if (product.name.includes(' — ')) {
-          return product.name.split(' — ').pop() || 'Shopify';
-        }
-        return 'Shopify';
+      case 'shopify': return 'Shopify';
       default: return product.source;
     }
   };
