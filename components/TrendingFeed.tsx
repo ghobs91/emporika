@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { UnifiedProduct } from '@/types/unified';
 import ProductCard from './ProductCard';
+import ProductModal from './ProductModal';
 import { getAllCategories, ProductCategory } from '@/types/categories';
 
 interface CategoryProducts {
@@ -16,6 +17,7 @@ interface CategoryProducts {
 
 export default function TrendingFeed() {
   const categories = getAllCategories().filter(cat => cat.id !== 'all');
+  const [selectedProduct, setSelectedProduct] = useState<UnifiedProduct | null>(null);
   const [categoryData, setCategoryData] = useState<CategoryProducts[]>(() =>
     categories.map(cat => ({
       category: cat.id,
@@ -105,7 +107,11 @@ export default function TrendingFeed() {
           ) : catData.items.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {catData.items.slice(0, 8).map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onClick={() => setSelectedProduct(product)}
+                />
               ))}
             </div>
           ) : (
@@ -115,6 +121,15 @@ export default function TrendingFeed() {
           )}
         </div>
       ))}
+
+      {selectedProduct && (
+        <ProductModal
+          key={selectedProduct.id}
+          product={selectedProduct}
+          isOpen={true}
+          onClose={() => setSelectedProduct(null)}
+        />
+      )}
     </div>
   );
 }
