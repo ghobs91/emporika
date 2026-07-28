@@ -1,12 +1,53 @@
 'use client';
 
 import { useCart } from '@/context/CartContext';
-import { X, Trash2, ExternalLink, ShoppingCart, Package } from 'lucide-react';
+import { X, Trash2, ExternalLink, ShoppingCart, Package, Loader2 } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function CartDrawer() {
   const { items, isOpen, setIsOpen, removeItem, removeMerchantItems, clearCart, itemsByMerchant } = useCart();
+  const [checkingOut, setCheckingOut] = useState<string | null>(null);
+
+  /** Create a combined Cart MCP cart with all items from a merchant and open checkout */
+  const handleCheckoutAll = async (shopDomain: string) => {
+    const merchantItems = itemsByMerchant[shopDomain];
+    if (!merchantItems?.length) return;
+
+    setCheckingOut(shopDomain);
+    try {
+      const response = await fetch('/api/shopify/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lineItems: merchantItems.map((item) => ({
+            variantId: item.variantId,
+            quantity: item.quantity,
+          })),
+          shopDomain,
+          context: { address_country: 'US' },
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success && data.cart?.continueUrl) {
+        window.open(data.cart.continueUrl, '_blank', 'noopener,noreferrer');
+      } else {
+        // Fallback: open each item's individual checkout
+        console.warn('Combined cart failed, opening items individually:', data.error);
+        for (const item of merchantItems) {
+          window.open(item.continueUrl, '_blank', 'noopener,noreferrer');
+        }
+      }
+    } catch (err) {
+      console.error('Checkout all failed:', err);
+      for (const item of merchantItems) {
+        window.open(item.continueUrl, '_blank', 'noopener,noreferrer');
+      }
+    } finally {
+      setCheckingOut(null);
+    }
+  };
 
   // Close on Escape
   useEffect(() => {
@@ -158,20 +199,21 @@ export default function CartDrawer() {
                   {merchantItems.length > 1 && (
                     <div className="px-5 mt-2">
                       <button
-                        onClick={() => {
-                          // Build a multi-item checkout URL from the most recent cart
-                          // Use the first item's continueUrl as fallback — Cart MCP
-                          // per-merchant carts would need update_cart to combine.
-                          // For simplicity, open the latest cart's continue_url.
-                          const latest = merchantItems.reduce((a, b) =>
-                            a.addedAt > b.addedAt ? a : b
-                          );
-                          window.open(latest.continueUrl, '_blank', 'noopener,noreferrer');
-                        }}
-                        className="w-full bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
+                        onClick={() => handleCheckoutAll(shopDomain)}
+                        disabled={checkingOut === shopDomain}
+                        className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
                       >
-                        <ShoppingCart size={16} />
-                        Checkout all from {merchantNames[shopDomain] || shopDomain}
+                        {checkingOut === shopDomain ? (
+                          <>
+                            <Loader2 size={16} className="animate-spin" />
+                            Creating combined cart…
+                          </>
+                        ) : (
+                          <>
+                            <ShoppingCart size={16} />
+                            Checkout all from {merchantNames[shopDomain] || shopDomain}
+                          </>
+                        )}
                       </button>
                     </div>
                   )}

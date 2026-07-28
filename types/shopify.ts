@@ -306,9 +306,18 @@ export interface ShopifyCartResponse {
   cart: ShopifyCart;
 }
 
-export interface ShopifyCreateCartParams {
+export interface ShopifyCreateCartLineItem {
   variantId: string; // gid://shopify/ProductVariant/{id}
   quantity?: number;
+}
+
+export interface ShopifyCreateCartParams {
+  /** Convenience: single variant ID (shortcut for lineItems with one entry) */
+  variantId?: string;
+  /** Single-item quantity (used with variantId) */
+  quantity?: number;
+  /** Multi-item cart: array of variant/quantity pairs */
+  lineItems?: ShopifyCreateCartLineItem[];
   shopDomain: string; // e.g. "lulu-and-georgia.myshopify.com"
   context?: {
     address_country?: string;

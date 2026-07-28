@@ -269,6 +269,25 @@ export async function createShopifyCart(
 ): Promise<ShopifyCart | null> {
   const endpoint = merchantEndpoint(params.shopDomain);
 
+  // Build line items: use lineItems array if provided, else fall back to variantId
+  const line_items = params.lineItems?.length
+    ? params.lineItems.map((li) => ({
+        quantity: li.quantity ?? 1,
+        item: { id: li.variantId },
+      }))
+    : params.variantId
+      ? [
+          {
+            quantity: params.quantity ?? 1,
+            item: { id: params.variantId },
+          },
+        ]
+      : [];
+
+  if (line_items.length === 0) {
+    throw new Error('createShopifyCart: must provide variantId or lineItems');
+  }
+
   // Cart MCP returns the cart object directly in result.structuredContent
   const result = await ucpRpcCall<{
     structuredContent: ShopifyCart;
@@ -284,14 +303,7 @@ export async function createShopifyCart(
           },
         },
         cart: {
-          line_items: [
-            {
-              quantity: params.quantity ?? 1,
-              item: {
-                id: params.variantId,
-              },
-            },
-          ],
+          line_items,
           context: params.context ?? { address_country: 'US' },
         },
       },
