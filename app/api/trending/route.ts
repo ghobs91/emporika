@@ -63,12 +63,6 @@ export async function GET() {
     console.log(`Total API calls to make: ${apiCalls.length}, sources: ${apiSources.join(', ')}`);
     
     // Shopify Global Catalog — searches for each trending product category
-    // using the high-rating filter from the UCP catalog CLI reference:
-    //   --set '/filters/rating/variant/min=4.5'
-    //   --set '/filters/rating/variant/min_count=50'
-    //   --set '/filters/ships_to/country=US'
-    //   --set '/context/address_country=US'
-    //   --set '/pagination/limit=50'
     const shopifyCategoryQueries: { category: ProductCategory; query: string }[] = [
       { category: 'electronics', query: 'headphones' },
       { category: 'home', query: 'home decor' },
@@ -196,13 +190,48 @@ export async function GET() {
       all: categorizedProducts.all.length,
     });
 
-    // Shuffle products within each category using Fisher-Yates algorithm
+    // Interleave products by source within each category.
+    // Shuffle within each source bucket for variety across reloads,
+    // then round-robin interleave WITHOUT a post-shuffle so the first
+    // N visible slots are guaranteed to contain one from each retailer
+    // that has items in that category.
     Object.keys(categorizedProducts).forEach((category) => {
       const items = categorizedProducts[category as ProductCategory];
-      for (let i = items.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [items[i], items[j]] = [items[j], items[i]];
+
+      // Group by source
+      const sourceBuckets: Record<string, UnifiedProduct[]> = {};
+      for (const item of items) {
+        const src = item.source;
+        if (!sourceBuckets[src]) {
+          sourceBuckets[src] = [];
+        }
+        sourceBuckets[src].push(item);
       }
+
+      // Shuffle within each source bucket so reloads show different items
+      for (const src of Object.keys(sourceBuckets)) {
+        const bucket = sourceBuckets[src];
+        for (let i = bucket.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          const tmp = bucket[i];
+          bucket[i] = bucket[j];
+          bucket[j] = tmp;
+        }
+      }
+
+      // Round-robin interleave across sources — no post-shuffle
+      const sourceKeys = Object.keys(sourceBuckets);
+      const maxLen = Math.max(...sourceKeys.map((s) => sourceBuckets[s].length));
+      const interleaved: UnifiedProduct[] = [];
+      for (let i = 0; i < maxLen; i++) {
+        for (const src of sourceKeys) {
+          if (i < sourceBuckets[src].length) {
+            interleaved.push(sourceBuckets[src][i]);
+          }
+        }
+      }
+
+      categorizedProducts[category as ProductCategory] = interleaved;
     });
 
     return NextResponse.json({ 
