@@ -13,8 +13,10 @@ import CartIcon from '@/components/CartIcon';
 import CartDrawer from '@/components/CartDrawer';
 import { CartProvider } from '@/context/CartContext';
 import { UnifiedProduct, RetailerSource } from '@/types/unified';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, SlidersHorizontal, X } from 'lucide-react';
 import { useTargetStore } from '@/hooks/useTargetStore';
+import SearchFilters, { ActiveFilters } from '@/components/SearchFilters';
+import { ProductFilters, applyProductFilters } from '@/lib/filters';
 
 type SortOption = 'most-popular' | 'price-asc' | 'price-desc' | 'rating-desc';
 
@@ -30,6 +32,8 @@ export default function Home() {
   const [selectedShoeSize, setSelectedShoeSize] = useState<string | null>(null);
   const [selectedClothingSize, setSelectedClothingSize] = useState<string | null>(null);
   const [selectedSources, setSelectedSources] = useState<RetailerSource[]>(ALL_SOURCES);
+  const [filters, setFilters] = useState<ProductFilters>({});
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const { storeInfo } = useTargetStore();
 
   // Detect if search query is shoe-related
@@ -80,12 +84,13 @@ export default function Home() {
     setSortBy('most-popular'); // Reset sort when searching
     setSelectedShoeSize(null); // Reset shoe size filter when searching
     setSelectedClothingSize(null); // Reset clothing size filter when searching
+    setFilters({}); // Reset property filters when searching
     
     try {
       // Build search URL with Target store info and selected sources
       const params = new URLSearchParams({
         query,
-        numItems: '20',
+        numItems: '120',
         sources: selectedSources.join(','),
       });
       
@@ -114,9 +119,12 @@ export default function Home() {
     }
   };
 
+  // Apply property-based filters from the left sidebar
+  let filteredProducts = applyProductFilters(products, filters);
+
   // Filter products by shoe size if a size is selected
-  let filteredProducts = selectedShoeSize
-    ? products.filter((product) => {
+  filteredProducts = selectedShoeSize
+    ? filteredProducts.filter((product) => {
         const searchText = `${product.name} ${product.shortDescription || ''}`.toLowerCase();
         // Look for the size in various formats: "Size 10", "10.5", "size:10", etc.
         const sizePatterns = [
@@ -126,7 +134,7 @@ export default function Home() {
         ];
         return sizePatterns.some(pattern => pattern.test(searchText));
       })
-    : products;
+    : filteredProducts;
 
   // Filter products by clothing size if a size is selected
   filteredProducts = selectedClothingSize
@@ -169,6 +177,15 @@ export default function Home() {
       }
     }
   });
+
+  const activeFilterCount = [
+    filters.minPrice !== undefined || filters.maxPrice !== undefined,
+    filters.minRating !== undefined,
+    filters.onSale,
+    filters.freeShipping,
+    filters.availableOnline,
+    filters.hasReviews,
+  ].filter(Boolean).length;
 
   return (
     <CartProvider>
@@ -247,7 +264,7 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-8 max-w-5xl">
+      <main className="container mx-auto px-6 py-8 max-w-7xl">
         {/* Show trending items when no search has been performed */}
         {!searchQuery && !isLoading && (
           <>
@@ -256,57 +273,132 @@ export default function Home() {
         )}
 
         {/* Show search results when user has searched */}
-        {searchQuery && !isLoading && (
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-xl font-medium text-gray-900 dark:text-gray-100">
-                  Results for &quot;{searchQuery}&quot;
-                  {totalResults > 0 && (
-                    <span className="text-gray-500 dark:text-gray-400 font-normal text-base ml-2">
-                      ({(selectedShoeSize || selectedClothingSize ? filteredProducts.length : totalResults).toLocaleString()} items)
-                    </span>
+        {searchQuery && (
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Desktop filters sidebar */}
+            <aside className="hidden lg:block w-64 shrink-0">
+              <div className="sticky top-28">
+                <SearchFilters
+                  products={products}
+                  filters={filters}
+                  onChange={setFilters}
+                />
+              </div>
+            </aside>
+
+            {/* Mobile filter drawer */}
+            {isFiltersOpen && (
+              <div className="fixed inset-0 z-50 lg:hidden">
+                <div
+                  className="absolute inset-0 bg-black/50"
+                  onClick={() => setIsFiltersOpen(false)}
+                />
+                <div className="absolute left-0 top-0 h-full w-80 max-w-[85vw] bg-white dark:bg-[#1a1a1a] overflow-y-auto p-4 shadow-xl">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      Filters
+                    </h2>
+                    <button
+                      type="button"
+                      onClick={() => setIsFiltersOpen(false)}
+                      className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-[#242424] text-gray-500 dark:text-gray-400"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+                  <SearchFilters
+                    products={products}
+                    filters={filters}
+                    onChange={setFilters}
+                  />
+                  <div className="mt-4">
+                    <button
+                      type="button"
+                      onClick={() => setIsFiltersOpen(false)}
+                      className="w-full py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
+                    >
+                      Show {filteredProducts.length.toLocaleString()} results
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Results area */}
+            <div className="flex-1 min-w-0">
+              {!isLoading && (
+                <div className="mb-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                    <div>
+                      <h2 className="text-xl font-medium text-gray-900 dark:text-gray-100">
+                        Results for &quot;{searchQuery}&quot;
+                        {totalResults > 0 && (
+                          <span className="text-gray-500 dark:text-gray-400 font-normal text-base ml-2">
+                            ({filteredProducts.length.toLocaleString()} items)
+                          </span>
+                        )}
+                      </h2>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setIsFiltersOpen(true)}
+                        className="lg:hidden flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#242424] text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors"
+                      >
+                        <SlidersHorizontal size={16} />
+                        Filters
+                        {activeFilterCount > 0 && (
+                          <span className="ml-1 bg-blue-500 text-white text-xs rounded-full px-1.5 py-0.5">
+                            {activeFilterCount}
+                          </span>
+                        )}
+                      </button>
+                      <label htmlFor="sort-select" className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                        Sort by:
+                      </label>
+                      <select
+                        id="sort-select"
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value as SortOption)}
+                        className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#242424] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer transition-all"
+                      >
+                        <option value="most-popular">Most Popular</option>
+                        <option value="price-asc">Price: Low to High</option>
+                        <option value="price-desc">Price: High to Low</option>
+                        <option value="rating-desc">Rating: High to Low</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <ActiveFilters filters={filters} onChange={setFilters} />
+
+                  {/* Show shoe size filter for shoe-related searches */}
+                  {isShoeSearch && (
+                    <ShoeSizeFilter
+                      onSizeSelect={setSelectedShoeSize}
+                      selectedSize={selectedShoeSize}
+                    />
                   )}
-                </h2>
-              </div>
-              <div className="flex items-center gap-2">
-                <label htmlFor="sort-select" className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                  Sort by:
-                </label>
-                <select
-                  id="sort-select"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as SortOption)}
-                  className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#242424] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer transition-all"
-                >
-                  <option value="most-popular">Most Popular</option>
-                  <option value="price-asc">Price: Low to High</option>
-                  <option value="price-desc">Price: High to Low</option>
-                  <option value="rating-desc">Rating: High to Low</option>
-                </select>
-              </div>
+
+                  {/* Show clothing size filter for clothing-related searches */}
+                  {isClothingSearch && (
+                    <ClothingSizeFilter
+                      onSizeSelect={setSelectedClothingSize}
+                      selectedSize={selectedClothingSize}
+                      clothingType={clothingType}
+                    />
+                  )}
+                </div>
+              )}
+
+              <ProductGrid products={sortedProducts} isLoading={isLoading} />
             </div>
-            
-            {/* Show shoe size filter for shoe-related searches */}
-            {isShoeSearch && (
-              <ShoeSizeFilter 
-                onSizeSelect={setSelectedShoeSize}
-                selectedSize={selectedShoeSize}
-              />
-            )}
-            
-            {/* Show clothing size filter for clothing-related searches */}
-            {isClothingSearch && (
-              <ClothingSizeFilter 
-                onSizeSelect={setSelectedClothingSize}
-                selectedSize={selectedClothingSize}
-                clothingType={clothingType}
-              />
-            )}
           </div>
         )}
 
-        <ProductGrid products={sortedProducts} isLoading={isLoading} />
+        {!searchQuery && (
+          <ProductGrid products={sortedProducts} isLoading={isLoading} />
+        )}
       </main>
 
       {/* Footer */}
