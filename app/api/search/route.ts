@@ -53,8 +53,10 @@ export async function GET(request: NextRequest) {
     }
 
     const sources = parseSources(searchParams.get('sources'));
-    const numItems = searchParams.get('numItems') ? parseInt(searchParams.get('numItems')!) : 25;
-    const itemsPerSource = Math.ceil(numItems / Math.max(sources.length, 1));
+    const numItems = searchParams.get('numItems') ? parseInt(searchParams.get('numItems')!) : 120;
+    // Each source should return at least 20 items so we get meaningful results
+    // regardless of how many sources are selected.
+    const itemsPerSource = Math.max(20, Math.ceil(numItems / Math.max(sources.length, 1)));
     
     // Get Target-specific parameters
     const targetStoreId = searchParams.get('targetStoreId');
