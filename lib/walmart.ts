@@ -20,7 +20,13 @@ export class WalmartAPI {
       this.privateKey = Buffer.from(process.env.WALMART_PRIVATE_KEY_BASE64, 'base64').toString('utf8');
     } else {
       const keyPath = path.join(process.cwd(), 'WM_IO_private_key.pem');
-      this.privateKey = fs.readFileSync(keyPath, 'utf8');
+      try {
+        this.privateKey = fs.readFileSync(keyPath, 'utf8');
+      } catch {
+        // Key file not found — Walmart API calls will fail with a clear error at runtime
+        this.privateKey = '';
+        console.warn('WM_IO_private_key.pem not found and WALMART_PRIVATE_KEY_BASE64 not set. Walmart API will not work.');
+      }
     }
     
     this.keyVersion = keyVersion;
