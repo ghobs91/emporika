@@ -1,122 +1,116 @@
 # Deploying Emporika to Netlify
 
-This guide walks through deploying the Emporika application to Netlify.
-
 ## Prerequisites
 
 1. A Netlify account
-2. Walmart API credentials (Consumer ID and Private Key)
-3. Best Buy API credentials (API Key)
-4. Git repository (GitHub, GitLab, or Bitbucket)
+2. Git repository (GitHub, GitLab, or Bitbucket)
 
-## Step 1: Prepare Your Environment Variables
+## Step 1: Set Environment Variables in Netlify
 
-You'll need to set the following environment variables in Netlify:
+Go to **Netlify > Site settings > Environment variables** and add the following.  
+Empty/optional vars can be skipped.
 
-1. **WALMART_CONSUMER_ID**: Your Walmart API Consumer ID
-2. **WALMART_KEY_VERSION**: Usually "1"
-3. **WALMART_PRIVATE_KEY_BASE64**: Your private key encoded as base64
-4. **BESTBUY_API_KEY**: Your Best Buy API key
+### eBay (required for eBay search)
+| Variable | Required | Notes |
+|---|---|---|
+| `EBAY_CLIENT_ID` | ✅ | App ID (Client ID) from developer.ebay.com |
+| `EBAY_CLIENT_SECRET` | ✅ | Cert ID (Client Secret) from developer.ebay.com |
+| `EBAY_SANDBOX` | ❌ | Set to `true` if using sandbox keys; omit for production |
 
-To generate the base64-encoded private key, run:
+### Walmart (required)
+| Variable | Required |
+|---|---|
+| `WALMART_CONSUMER_ID` | ✅ |
+| `WALMART_KEY_VERSION` | ✅ (usually `"1"`) |
+| `WALMART_PRIVATE_KEY_BASE64` | ✅ |
+
+### Best Buy (required)
+| Variable | Required |
+|---|---|
+| `BESTBUY_API_KEY` | ✅ |
+
+### Target (optional)
+| Variable | Required | Default |
+|---|---|---|
+| `TARGET_STORE_ID` | ❌ | `"1264"` |
+| `TARGET_ZIP` | ❌ | `"10001"` |
+
+### Costco (optional)
+| Variable | Required |
+|---|---|
+| `COSTCO_COOKIES` | ❌ |
+| `COSTCO_API_KEY` | ❌ |
+| `COSTCO_REFRESH_SECRET` | ❌ |
+
+### Shopify (optional)
+| Variable | Required |
+|---|---|
+| `SHOPIFY_CLIENT_ID` | ❌ |
+| `SHOPIFY_CLIENT_SECRET` | ❌ |
+
+### Internal
+| Variable | Required |
+|---|---|
+| `CRON_SECRET` | ❌ (secures cron endpoints) |
+
+## Step 2: Set Env Vars via CLI (or use the Netlify UI)
 
 ```bash
-cat WM_IO_private_key.pem | base64 | tr -d '\n'
+# eBay (add these now)
+netlify env:set EBAY_CLIENT_ID "your-client-id"
+netlify env:set EBAY_CLIENT_SECRET "your-client-secret"
+# Only if using sandbox:
+# netlify env:set EBAY_SANDBOX "true"
+
+# Walmart
+netlify env:set WALMART_CONSUMER_ID "your-consumer-id"
+netlify env:set WALMART_KEY_VERSION "1"
+netlify env:set WALMART_PRIVATE_KEY_BASE64 "your-base64-key"
+
+# Best Buy
+netlify env:set BESTBUY_API_KEY "your-api-key"
+
+# Optional retailers
+netlify env:set COSTCO_COOKIES "..."
+netlify env:set SHOPIFY_CLIENT_ID "..."
+netlify env:set SHOPIFY_CLIENT_SECRET "..."
 ```
 
-Copy the entire output (it will be one long string).
-
-## Step 2: Push to Git
-
-Make sure your code is pushed to a Git repository:
+## Step 3: Push & Deploy
 
 ```bash
 git add .
-git commit -m "Prepare for Netlify deployment"
+git commit -m "Add eBay credentials and deployment config"
 git push
 ```
 
-## Step 3: Deploy to Netlify
+Netlify auto-detects Next.js and will pick up the `netlify.toml` config.
 
-### Option A: Using Netlify Web UI
+## Step 4: Verify
 
-1. Go to [Netlify](https://app.netlify.com/)
-2. Click "Add new site" → "Import an existing project"
-3. Connect to your Git provider and select your repository
-4. Netlify will auto-detect Next.js settings:
-   - **Build command**: `next build` (auto-detected)
-   - **Publish directory**: `.next` (auto-detected)
-5. Click "Show advanced" → "Add environment variable"
-6. Add each environment variable:
-   - `WALMART_CONSUMER_ID`
-   - `WALMART_KEY_VERSION`
-   - `WALMART_PRIVATE_KEY_BASE64`
-   - `BESTBUY_API_KEY`
-7. Click "Deploy site"
-
-### Option B: Using Netlify CLI
-
-1. Install Netlify CLI:
-   ```bash
-   npm install -g netlify-cli
-   ```
-
-2. Login to Netlify:
-   ```bash
-   netlify login
-   ```
-
-3. Initialize and deploy:
-   ```bash
-   netlify init
-   netlify env:set WALMART_CONSUMER_ID "your_consumer_id"
-   netlify env:set WALMART_KEY_VERSION "1"
-   netlify env:set WALMART_PRIVATE_KEY_BASE64 "your_base64_key"
-   netlify env:set BESTBUY_API_KEY "your_bestbuy_api_key"
-   netlify deploy --prod
-   ```
-
-## Step 4: Verify Deployment
-
-Once deployed, test your site:
-
-1. Visit your Netlify URL (e.g., `https://your-site.netlify.app`)
-2. Try searching for products
-3. Check the trending feed
-4. Open browser DevTools to check for any API errors
+1. Visit your Netlify URL
+2. Search for a product — eBay results should appear in the grid
+3. Check browser DevTools > Network for any API errors
 
 ## Troubleshooting
 
-### API Routes Not Working
+### eBay `invalid_client` error
 
-If API routes return 404:
-- Ensure you're using Next.js 15+ which Netlify supports natively
-- Check the Netlify function logs in your dashboard
+1. Run the diagnostic script locally first:
+   ```bash
+   export $(grep -E '^EBAY_' .env.local | xargs)
+   node scripts/diagnose-ebay.mjs
+   ```
+2. Make sure you used the **App ID (Client ID)** and **Cert ID (Client Secret)** — not the Dev ID.
+3. Sandbox keys need `EBAY_SANDBOX=true`.
+4. Production keys should NOT have `EBAY_SANDBOX` set.
 
-### Authentication Errors
+### API Routes 404
 
-If you get Walmart API authentication errors:
-- Verify your `WALMART_PRIVATE_KEY_BASE64` is correct (no extra newlines or spaces)
-- Ensure your Consumer ID and Key Version are correct
-- Check that your private key matches your Consumer ID
+- Netlify supports Next.js 15+ natively — no extra config needed.
+- Check the Netlify function logs in your dashboard.
 
 ### Build Failures
 
-- Check the build logs in Netlify dashboard
-- Ensure all dependencies are in `package.json`
-- Verify Node version is set to 20 in `netlify.toml`
-
-## Configuration Files
-
-The deployment uses:
-- **netlify.toml**: Netlify configuration (Node version, headers)
-- **.env.example**: Template for environment variables
-- **next.config.ts**: Next.js configuration (image domains)
-
-## Custom Domain (Optional)
-
-To add a custom domain:
-1. Go to your site in Netlify
-2. Click "Domain settings"
-3. Click "Add custom domain"
-4. Follow the DNS configuration instructions
+- Check build logs in Netlify dashboard.
+- Verify Node version is set to 20 in `netlify.toml`.

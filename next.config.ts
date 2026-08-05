@@ -33,6 +33,14 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'target.scene7.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'i.ebayimg.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.ebayimg.com',
+      },
     ],
   },
 };

@@ -3,6 +3,29 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  # eBay — set these in Netlify > Site settings > Environment variables for runtime
+  EBAY_CLIENT_ID = ""
+  EBAY_CLIENT_SECRET = ""
+  # Set to "true" if using eBay sandbox keys; remove or set "false" for production
+  EBAY_SANDBOX = ""
+  # Walmart
+  WALMART_CONSUMER_ID = ""
+  WALMART_KEY_VERSION = "1"
+  WALMART_PRIVATE_KEY_BASE64 = ""
+  # Best Buy
+  BESTBUY_API_KEY = ""
+  # Target (optional — defaults work for the public API)
+  TARGET_STORE_ID = ""
+  TARGET_ZIP = ""
+  # Costco
+  COSTCO_COOKIES = ""
+  COSTCO_API_KEY = ""
+  COSTCO_REFRESH_SECRET = ""
+  # Shopify
+  SHOPIFY_CLIENT_ID = ""
+  SHOPIFY_CLIENT_SECRET = ""
+  # Cron / refresh
+  CRON_SECRET = ""
 
 [[headers]]
   for = "/api/*"

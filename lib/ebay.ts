@@ -12,11 +12,14 @@ export class EbayAPI {
   constructor(clientId: string, clientSecret: string) {
     this.clientId = clientId;
     this.clientSecret = clientSecret;
-    
-    // Detect sandbox credentials (contain 'SBX' or 'SANDBOX')
-    this.isSandbox = clientId.includes('SBX') || clientId.includes('SANDBOX') || 
+
+    // Allow explicit override; otherwise try to detect sandbox credentials
+    // (eBay sandbox keys often, but not always, contain 'SBX' or 'SANDBOX').
+    const envSandbox = process.env.EBAY_SANDBOX?.toLowerCase();
+    this.isSandbox = envSandbox === 'true' || envSandbox === '1' ||
+                     clientId.includes('SBX') || clientId.includes('SANDBOX') ||
                      clientSecret.includes('SBX') || clientSecret.includes('SANDBOX');
-    
+
     // Use appropriate endpoints
     if (this.isSandbox) {
       this.apiBase = 'https://api.sandbox.ebay.com/buy/browse/v1';
@@ -36,7 +39,15 @@ export class EbayAPI {
       return this.accessToken;
     }
 
-    const credentials = Buffer.from(`${this.clientId}:${this.clientSecret}`).toString('base64');
+    // RFC 6749 §2.3.1: URL-encode the client id/secret before base64 encoding
+    // so special characters don't corrupt the Basic auth value.
+    const credentials = Buffer.from(
+      `${encodeURIComponent(this.clientId)}:${encodeURIComponent(this.clientSecret)}`
+    ).toString('base64');
+
+    const scope = this.isSandbox
+      ? 'https://api.sandbox.ebay.com/oauth/api_scope'
+      : 'https://api.ebay.com/oauth/api_scope';
 
     const response = await fetch(this.oauthBase, {
       method: 'POST',
@@ -46,7 +57,7 @@ export class EbayAPI {
       },
       body: new URLSearchParams({
         grant_type: 'client_credentials',
-        scope: 'https://api.ebay.com/oauth/api_scope',
+        scope,
       }),
     });
 
