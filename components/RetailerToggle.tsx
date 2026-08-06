@@ -1,6 +1,7 @@
 'use client';
 
 import { RetailerSource } from '@/types/unified';
+import Image from 'next/image';
 
 interface RetailerToggleProps {
   selected: RetailerSource[];
@@ -18,6 +19,11 @@ const RETAILERS: { source: RetailerSource; label: string; color: string; icon: s
 
 export default function RetailerToggle({ selected, onChange }: RetailerToggleProps) {
   const toggle = (source: RetailerSource) => {
+    // If all retailers are currently selected, first tap narrows to just that one
+    if (selected.length === RETAILERS.length) {
+      onChange([source]);
+      return;
+    }
     if (selected.includes(source)) {
       // Don't allow deselecting the last retailer
       if (selected.length <= 1) return;
@@ -52,20 +58,27 @@ export default function RetailerToggle({ selected, onChange }: RetailerTogglePro
         {allSelected ? 'All' : `${selected.length}/${RETAILERS.length}`}
       </button>
 
-      {RETAILERS.map(({ source, label, color }) => {
+      {RETAILERS.map(({ source, label, color, icon }) => {
         const active = selected.includes(source);
         return (
           <button
             key={source}
             type="button"
             onClick={() => toggle(source)}
-            className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full transition-all duration-150 border ${
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full transition-all duration-150 border ${
               active
                 ? `${color} text-white border-transparent shadow-sm`
                 : 'bg-transparent text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500'
             }`}
           >
-            <span className="w-2 h-2 rounded-full bg-current opacity-60" />
+            <Image
+              src={icon}
+              alt={label}
+              width={14}
+              height={14}
+              className={`rounded-sm ${!active ? 'opacity-50' : ''}`}
+              unoptimized
+            />
             {label}
           </button>
         );

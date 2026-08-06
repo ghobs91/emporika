@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import SearchBar from '@/components/SearchBar';
 import ProductGrid from '@/components/ProductGrid';
@@ -77,6 +77,19 @@ export default function Home() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isScrolled]);
+
+  // Re-search when retailer filters change (skip initial render)
+  const sourcesInitialized = useRef(false);
+  useEffect(() => {
+    if (!sourcesInitialized.current) {
+      sourcesInitialized.current = true;
+      return;
+    }
+    if (searchQuery) {
+      handleSearch(searchQuery);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedSources]);
 
   const handleSearch = async (query: string) => {
     setIsLoading(true);
