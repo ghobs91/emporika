@@ -1,7 +1,7 @@
 'use client';
 
 import { UnifiedProduct } from '@/types/unified';
-import { Star, ExternalLink } from 'lucide-react';
+import { Star, ExternalLink, Truck, Zap, Clock } from 'lucide-react';
 import Image from 'next/image';
 
 interface ProductCardProps {
@@ -56,6 +56,10 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
     ? product.name.split(' — ')[0]
     : product.name;
 
+  const shippingDays = product.shipping?.estimatedDates?.min
+    ? Math.max(1, Math.ceil((new Date(product.shipping.estimatedDates.min).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
+    : null;
+
   const handleExternalLinkClick = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
@@ -105,6 +109,11 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
           )}
           <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
             {sourceLabel}
+            {product.source === 'shopify' && product.name.includes(' — ') && (
+              <span className="text-gray-400 dark:text-gray-500">
+                {' · '}{product.name.split(' — ').pop()}
+              </span>
+            )}
           </span>
         </div>
 
@@ -118,6 +127,42 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
             {product.reviewCount && (
               <span className="text-xs text-gray-400 dark:text-gray-500">
                 ({product.reviewCount.toLocaleString()})
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Shipping speeds */}
+        {product.shipping && (
+          <div className="flex flex-wrap gap-1 mb-2">
+            {product.shipping.freeShipping && (
+              <span className="inline-flex items-center gap-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-1.5 py-0.5 rounded text-[10px] font-medium">
+                <Truck size={10} />
+                Free shipping
+              </span>
+            )}
+            {product.shipping.twoDay && (
+              <span className="inline-flex items-center gap-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-1.5 py-0.5 rounded text-[10px] font-medium">
+                <Zap size={10} />
+                2 day shipping
+              </span>
+            )}
+            {product.shipping.twoThreeDay && (
+              <span className="inline-flex items-center gap-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 px-1.5 py-0.5 rounded text-[10px] font-medium">
+                <Zap size={10} />
+                2-3 day shipping
+              </span>
+            )}
+            {shippingDays && (
+              <span className="inline-flex items-center gap-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 px-1.5 py-0.5 rounded text-[10px] font-medium">
+                <Clock size={10} />
+                {shippingDays} day shipping
+              </span>
+            )}
+            {product.shipping.speed && !product.shipping.freeShipping && !product.shipping.twoDay && (
+              <span className="inline-flex items-center gap-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-1.5 py-0.5 rounded text-[10px] font-medium">
+                <Truck size={10} />
+                {product.shipping.speed}
               </span>
             )}
           </div>

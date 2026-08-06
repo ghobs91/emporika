@@ -10,6 +10,8 @@ export type RetailerSource = 'walmart' | 'bestbuy' | 'target' | 'ebay' | 'costco
 export interface ShippingInfo {
   freeShipping?: boolean;
   twoDay?: boolean; // Walmart 2-day eligible
+  twoThreeDay?: boolean; // Walmart 2-3 day shipping available
+  speed?: string; // e.g., "Standard", "Expedited", "Express" from Best Buy levels
   levels?: Array<{
     name: string; // e.g., "Standard", "Expedited", "Express"
     price: number;
@@ -69,6 +71,9 @@ export function normalizeWalmartProduct(product: WalmartProduct): UnifiedProduct
   if (product.isTwoDayShippingEligible !== undefined) {
     shipping.twoDay = product.isTwoDayShippingEligible;
   }
+  if (product.twoThreeDayShippingRate !== undefined) {
+    shipping.twoThreeDay = true;
+  }
   
   return {
     id: `walmart-${product.itemId}`,
@@ -98,6 +103,15 @@ export function normalizeBestBuyProduct(product: BestBuyProduct): UnifiedProduct
       name: level.serviceLevelName,
       price: level.unitShippingPrice,
     }));
+    // Extract a speed label from the fastest (last) level, e.g. "Express", "Expedited"
+    const fastest = product.shippingLevelsOfService[product.shippingLevelsOfService.length - 1];
+    const name = fastest.serviceLevelName.toLowerCase();
+    if (name.includes('express') || name.includes('expedited') || name.includes('next day') || name.includes('overnight')) {
+      shipping.speed = fastest.serviceLevelName;
+    } else if (product.shippingLevelsOfService.length > 1) {
+      // Use the second level if Standard is the first
+      shipping.speed = product.shippingLevelsOfService[1].serviceLevelName;
+    }
   }
   
   return {
