@@ -8,6 +8,7 @@ export interface ProductFilters {
   freeShipping?: boolean;
   availableOnline?: boolean;
   hasReviews?: boolean;
+  shippingSpeed?: 'free' | 'twoDay' | 'twoThreeDay';
 }
 
 export interface PriceBucket {
@@ -30,6 +31,12 @@ export const RATING_OPTIONS: { label: string; value: number | undefined }[] = [
   { label: '3★ & up', value: 3 },
   { label: '2★ & up', value: 2 },
   { label: 'Any rating', value: undefined },
+];
+
+export const SHIPPING_SPEED_OPTIONS: { label: string; value: ProductFilters['shippingSpeed'] }[] = [
+  { label: 'Free shipping', value: 'free' },
+  { label: '2-day shipping', value: 'twoDay' },
+  { label: '2-3 day shipping', value: 'twoThreeDay' },
 ];
 
 /**
@@ -71,6 +78,16 @@ export function applyProductFilters(
     if (filters.hasReviews && !(product.reviewCount && product.reviewCount > 0)) {
       return false;
     }
+    // Shipping speed filter
+    if (filters.shippingSpeed === 'free') {
+      if (!product.freeShipping && !product.shipping?.freeShipping) return false;
+    }
+    if (filters.shippingSpeed === 'twoDay') {
+      if (!product.shipping?.twoDay) return false;
+    }
+    if (filters.shippingSpeed === 'twoThreeDay') {
+      if (!product.shipping?.twoThreeDay) return false;
+    }
     return true;
   });
 }
@@ -104,6 +121,8 @@ export function getFilterCounts(products: UnifiedProduct[]) {
     availableOnline: products.filter((p) => p.availableOnline !== false).length,
     hasReviews: products.filter((p) => p.reviewCount && p.reviewCount > 0)
       .length,
+    twoDay: products.filter((p) => p.shipping?.twoDay).length,
+    twoThreeDay: products.filter((p) => p.shipping?.twoThreeDay).length,
   };
 }
 

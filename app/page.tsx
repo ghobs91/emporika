@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import SearchBar from '@/components/SearchBar';
 import ProductGrid from '@/components/ProductGrid';
+import ProductCard from '@/components/ProductCard';
 import TrendingFeed from '@/components/TrendingFeed';
 import ThemeToggle from '@/components/ThemeToggle';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
@@ -13,10 +14,16 @@ import CartIcon from '@/components/CartIcon';
 import CartDrawer from '@/components/CartDrawer';
 import { CartProvider } from '@/context/CartContext';
 import { UnifiedProduct, RetailerSource } from '@/types/unified';
-import { ShoppingBag, SlidersHorizontal, X } from 'lucide-react';
+import { ShoppingBag, SlidersHorizontal, X, Sparkles } from 'lucide-react';
 import { useTargetStore } from '@/hooks/useTargetStore';
 import SearchFilters, { ActiveFilters } from '@/components/SearchFilters';
 import { ProductFilters, applyProductFilters } from '@/lib/filters';
+import { useIntelligentSearch } from '@/hooks/useIntelligentSearch';
+import WebLLMStatusIndicator, { SearchModeToggle } from '@/components/WebLLMStatus';
+import SearchStatus from '@/components/SearchStatus';
+import ProductResultCard from '@/components/ProductResultCard';
+import ClarificationPrompt from '@/components/ClarificationPrompt';
+import SearchPromptPills from '@/components/SearchPromptPills';
 
 type SortOption = 'most-popular' | 'price-asc' | 'price-desc' | 'rating-desc';
 
@@ -35,6 +42,7 @@ export default function Home() {
   const [filters, setFilters] = useState<ProductFilters>({});
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const { storeInfo } = useTargetStore();
+  const { state: aiState, search: aiSearch, toggleAiMode } = useIntelligentSearch();
 
   // Detect if search query is shoe-related
   const isShoeSearch = searchQuery.toLowerCase().match(/\b(shoe|shoes|sneaker|sneakers|boot|boots|sandal|sandals|slipper|slippers|heel|heels|loafer|loafers|oxford|oxfords|moccasin|moccasins|clog|clogs)\b/);
@@ -98,6 +106,15 @@ export default function Home() {
     setSelectedShoeSize(null); // Reset shoe size filter when searching
     setSelectedClothingSize(null); // Reset clothing size filter when searching
     setFilters({}); // Reset property filters when searching
+
+    // ── Intelligent search (POST /api/search) ──
+    if (aiState.aiEnabled) {
+      console.log('[AI Search] Firing POST /api/search for:', query);
+      aiSearch(query, undefined, selectedSources).catch((err) => {
+        console.error('AI search failed:', err);
+      });
+    }
+
     
     try {
       // Build search URL with Target store info and selected sources
@@ -227,14 +244,13 @@ export default function Home() {
             <div className="flex-1">
               <SearchBar
                 onSearch={handleSearch}
-                isLoading={isLoading}
-                selectedSources={selectedSources}
-                onSourcesChange={setSelectedSources}
+                isLoading={isLoading || aiState.isLoading}
               />
             </div>
             
             <div className="flex items-center gap-1">
               <CartIcon />
+              <SearchModeToggle aiEnabled={aiState.aiEnabled} onToggle={toggleAiMode} />
               <ThemeToggle />
             </div>
           </div>
@@ -259,6 +275,7 @@ export default function Home() {
               
               <div className="flex items-center gap-1">
                 <CartIcon />
+              <SearchModeToggle aiEnabled={aiState.aiEnabled} onToggle={toggleAiMode} />
                 <ThemeToggle />
               </div>
             </div>
@@ -267,9 +284,7 @@ export default function Home() {
             <div className="w-full">
               <SearchBar
                 onSearch={handleSearch}
-                isLoading={isLoading}
-                selectedSources={selectedSources}
-                onSourcesChange={setSelectedSources}
+                isLoading={isLoading || aiState.isLoading}
               />
             </div>
           </div>
@@ -279,8 +294,32 @@ export default function Home() {
       {/* Main Content */}
       <main className="container mx-auto px-6 py-8 max-w-7xl">
         {/* Show trending items when no search has been performed */}
-        {!searchQuery && !isLoading && (
+        {!searchQuery && !isLoading && !aiState.isLoading && (
           <>
+            <div className="max-w-2xl mx-auto text-center mb-12">
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+                What are you shopping for?
+              </h2>
+              <p className="text-gray-500 dark:text-gray-400 mb-6">
+                Describe what you want in plain English — including style, budget, and priorities.
+              </p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {[
+                  'Waterproof trail running shoes under $150, wide sizes',
+                  '4K portable projector for a bright living room, low input lag',
+                  'White stone coffee table 50"-60" wide, under $2000',
+                ].map((example) => (
+                  <button
+                    key={example}
+                    type="button"
+                    onClick={() => handleSearch(example)}
+                    className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors"
+                  >
+                    {example}
+                  </button>
+                ))}
+              </div>
+            </div>
             <TrendingFeed />
           </>
         )}
@@ -295,6 +334,8 @@ export default function Home() {
                   products={products}
                   filters={filters}
                   onChange={setFilters}
+                  selectedSources={selectedSources}
+                  onSourcesChange={setSelectedSources}
                 />
               </div>
             </aside>
@@ -323,6 +364,8 @@ export default function Home() {
                     products={products}
                     filters={filters}
                     onChange={setFilters}
+                    selectedSources={selectedSources}
+                    onSourcesChange={setSelectedSources}
                   />
                   <div className="mt-4">
                     <button
@@ -341,17 +384,17 @@ export default function Home() {
             <div className="flex-1 min-w-0">
               {!isLoading && (
                 <div className="mb-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                    <div>
-                      <h2 className="text-xl font-medium text-gray-900 dark:text-gray-100">
-                        Results for &quot;{searchQuery}&quot;
-                        {totalResults > 0 && (
-                          <span className="text-gray-500 dark:text-gray-400 font-normal text-base ml-2">
-                            ({filteredProducts.length.toLocaleString()} items)
-                          </span>
-                        )}
-                      </h2>
+                  {!aiState.aiEnabled && (
+                    <div className="mb-4">
+                      <SearchPromptPills query={searchQuery} onChange={(q) => handleSearch(q)} />
+                      {totalResults > 0 && (
+                        <span className="text-xs text-gray-400 dark:text-gray-500">
+                          {filteredProducts.length.toLocaleString()} items
+                        </span>
+                      )}
                     </div>
+                  )}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
@@ -404,13 +447,85 @@ export default function Home() {
                 </div>
               )}
 
-              <ProductGrid products={sortedProducts} isLoading={isLoading} />
+              {/* AI mode: show ranked intelligent results; otherwise classic grid */}
+              {aiState.aiEnabled && aiState.response?.results && aiState.response.results.length > 0 ? (
+                <div className="space-y-3">
+                  <div className="mb-4">
+                    <SearchPromptPills query={aiState.query} onChange={(q) => handleSearch(q)} />
+                    <div className="flex items-center gap-2">
+                      <Sparkles size={14} className="text-purple-500" />
+                      <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        AI-ranked · {aiState.response.metadata.timingMs.total}ms
+                      </span>
+                      {aiState.webllmStatus.status === 'ready' && (
+                        <WebLLMStatusIndicator status="ready" />
+                      )}
+                      {aiState.webllmStatus.status === 'fast' && (
+                        <WebLLMStatusIndicator status="fast" />
+                      )}
+                    </div>
+                  </div>
+
+                  <SearchStatus
+                    status={aiState.response.status}
+                    metadata={aiState.response.metadata}
+                    isLoading={aiState.isLoading}
+                    query={aiState.query}
+                  />
+
+                  {aiState.response.clarification && (
+                    <ClarificationPrompt
+                      field={aiState.response.clarification.field}
+                      question={aiState.response.clarification.question}
+                      reason={aiState.response.clarification.reason}
+                      onDismiss={() => {}}
+                    />
+                  )}
+
+                  {aiState.response.suggestionForNoResults && aiState.response.suggestionForNoResults.length > 0 && (
+                    <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-4">
+                      <p className="text-sm text-blue-800 dark:text-blue-200 mb-2">Suggestions to find more results:</p>
+                      <ul className="text-sm text-blue-700 dark:text-blue-300 list-disc pl-5 space-y-1">
+                        {aiState.response.suggestionForNoResults.map((s, i) => (
+                          <li key={i}>{s}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {aiState.response.results.map((ranked) => {
+                      const best = ranked.bestOffer?.offer;
+                      const product: import('@/types/unified').UnifiedProduct = {
+                        id: ranked.product.canonicalId,
+                        name: ranked.product.title,
+                        price: best?.price?.amount ?? 0,
+                        originalPrice: best?.listPrice && best.listPrice.amount > (best.price?.amount ?? 0) ? best.listPrice.amount : undefined,
+                        image: ranked.product.imageUrls?.[0] ?? best?.imageUrls?.[0] ?? '',
+                        productUrl: best?.productUrl ?? '#',
+                        source: (best?.providerId ?? 'shopify') as import('@/types/unified').RetailerSource,
+                        shortDescription: ranked.reasonsToChoose.slice(0, 2).join(' · '),
+                      };
+                      return (
+                        <div key={ranked.product.canonicalId} className="relative">
+                          <div className="absolute -top-2 -left-2 z-10 w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/50 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 text-xs font-bold flex items-center justify-center shadow-sm">
+                            {ranked.rank}
+                          </div>
+                          <ProductCard product={product} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <ProductGrid products={sortedProducts} isLoading={isLoading || aiState.isLoading} />
+              )}
             </div>
           </div>
         )}
 
         {!searchQuery && (
-          <ProductGrid products={sortedProducts} isLoading={isLoading} />
+          <ProductGrid products={sortedProducts} isLoading={isLoading || aiState.isLoading} />
         )}
       </main>
 

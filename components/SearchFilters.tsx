@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from 'react';
 import { SlidersHorizontal, X, ChevronDown, ChevronUp } from 'lucide-react';
-import { UnifiedProduct } from '@/types/unified';
+import { UnifiedProduct, RetailerSource } from '@/types/unified';
+import Image from 'next/image';
 import {
   ProductFilters,
   PRICE_BUCKETS,
@@ -16,6 +17,8 @@ interface SearchFiltersProps {
   products: UnifiedProduct[];
   filters: ProductFilters;
   onChange: (filters: ProductFilters) => void;
+  selectedSources?: RetailerSource[];
+  onSourcesChange?: (sources: RetailerSource[]) => void;
 }
 
 interface FilterSectionProps {
@@ -84,6 +87,8 @@ export default function SearchFilters({
   products,
   filters,
   onChange,
+  selectedSources,
+  onSourcesChange,
 }: SearchFiltersProps) {
   const availableBuckets = useMemo(
     () => getAvailablePriceBuckets(products),
@@ -98,6 +103,7 @@ export default function SearchFilters({
     filters.freeShipping,
     filters.availableOnline,
     filters.hasReviews,
+    filters.shippingSpeed,
   ].filter(Boolean).length;
 
   const togglePriceBucket = (bucket: (typeof PRICE_BUCKETS)[number]) => {
@@ -208,9 +214,89 @@ export default function SearchFilters({
           />
         </div>
       </FilterSection>
+
+      <FilterSection title="Shipping Speed" defaultOpen>
+        <div className="space-y-2">
+          {[
+            { value: undefined, label: 'Any speed' as const },
+            { value: 'free' as const, label: 'Free shipping', count: counts.freeShipping },
+            { value: 'twoDay' as const, label: '2-day shipping', count: counts.twoDay },
+            { value: 'twoThreeDay' as const, label: '2-3 day shipping', count: counts.twoThreeDay },
+          ].map((option) => (
+            <label
+              key={option.label}
+              className="flex items-center justify-between gap-2 cursor-pointer group"
+            >
+              <span className="flex items-center gap-2 min-w-0">
+                <input
+                  type="radio"
+                  name="shippingSpeed"
+                  checked={filters.shippingSpeed === option.value}
+                  onChange={() => onChange({ ...filters, shippingSpeed: option.value })}
+                  className="border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500/50 bg-white dark:bg-[#1a1a1a]"
+                />
+                <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white">
+                  {option.label}
+                </span>
+              </span>
+              {option.count !== undefined && option.count > 0 && (
+                <span className="text-xs text-gray-400 dark:text-gray-500 shrink-0">
+                  {option.count.toLocaleString()}
+                </span>
+              )}
+            </label>
+          ))}
+        </div>
+      </FilterSection>
+
+      {selectedSources && onSourcesChange && (
+        <FilterSection title="Retailers" defaultOpen>
+          <div className="flex flex-wrap gap-1.5">
+            {RETAILERS.map((retailer) => {
+              const active = selectedSources.includes(retailer.source);
+              return (
+                <button
+                  key={retailer.source}
+                  type="button"
+                  onClick={() => {
+                    const next = active
+                      ? selectedSources.filter((s) => s !== retailer.source)
+                      : [...selectedSources, retailer.source];
+                    onSourcesChange(next.length > 0 ? next : [retailer.source]);
+                  }}
+                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border transition-all ${
+                    active
+                      ? `${retailer.color} text-white border-transparent`
+                      : 'bg-transparent text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500'
+                  }`}
+                >
+                  <Image
+                    src={retailer.icon}
+                    alt={retailer.label}
+                    width={12}
+                    height={12}
+                    className={`rounded-sm ${active ? '' : 'opacity-60'}`}
+                    unoptimized
+                  />
+                  {retailer.label}
+                </button>
+              );
+            })}
+          </div>
+        </FilterSection>
+      )}
     </div>
   );
 }
+
+const RETAILERS: { source: RetailerSource; label: string; color: string; icon: string }[] = [
+  { source: 'walmart', label: 'Walmart', color: 'bg-blue-600', icon: '/walmart-favicon.png' },
+  { source: 'bestbuy', label: 'Best Buy', color: 'bg-yellow-500', icon: '/bestbuy-favicon.png' },
+  { source: 'target', label: 'Target', color: 'bg-red-600', icon: '/target-favicon.png' },
+  { source: 'ebay', label: 'eBay', color: 'bg-purple-600', icon: '/favicon-ebay.png' },
+  { source: 'costco', label: 'Costco', color: 'bg-gray-600', icon: '/costco-favicon.png' },
+  { source: 'shopify', label: 'Shopify', color: 'bg-green-600', icon: '/shopify-logo.svg' },
+];
 
 interface ActiveFilterChipProps {
   label: string;
@@ -285,6 +371,19 @@ export function ActiveFilters({ filters, onChange }: ActiveFiltersProps) {
       key: 'hasReviews',
       label: 'Has reviews',
       remove: () => onChange({ ...filters, hasReviews: false }),
+    });
+  }
+
+  if (filters.shippingSpeed) {
+    const labels: Record<string, string> = {
+      free: 'Free shipping',
+      twoDay: '2-day shipping',
+      twoThreeDay: '2-3 day shipping',
+    };
+    chips.push({
+      key: 'shippingSpeed',
+      label: labels[filters.shippingSpeed] || filters.shippingSpeed,
+      remove: () => onChange({ ...filters, shippingSpeed: undefined }),
     });
   }
 
