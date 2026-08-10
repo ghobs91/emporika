@@ -16,6 +16,8 @@ import {
   UnifiedProduct,
   RetailerSource,
 } from '@/types/unified';
+import { searchRequestSchema } from '@/search/schemas';
+import { executeSearch } from '@/search/orchestrator';
 
 const VALID_SORT_VALUES = ['relevance', 'price', 'title', 'bestseller', 'customerRating', 'new'] as const;
 const VALID_ORDER_VALUES = ['ascending', 'descending'] as const;
@@ -39,6 +41,46 @@ function parseSources(param: string | null): RetailerSource[] {
     .map((s) => s.trim().toLowerCase())
     .filter((s): s is RetailerSource => valid.includes(s as RetailerSource));
 }
+
+// ── POST: Intelligent natural-language search with planning ────────────
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const parsed = searchRequestSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        {
+          status: 'error',
+          error: 'Invalid request',
+          details: parsed.error.issues.map(i => `${i.path.join('.')}: ${i.message}`),
+        },
+        { status: 400 }
+      );
+    }
+
+    const result = await executeSearch(parsed.data);
+
+    if (result.status === 'error') {
+      return NextResponse.json(result, { status: 502 });
+    }
+
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error('Intelligent search API error:', error);
+    return NextResponse.json(
+      {
+        status: 'error',
+        error: 'Search failed',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// ── GET: Simple keyword-based search (backward compatible) ──────────────
 
 export async function GET(request: NextRequest) {
   try {
