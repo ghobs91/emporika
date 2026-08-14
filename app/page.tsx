@@ -10,24 +10,30 @@ import ThemeToggle from '@/components/ThemeToggle';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import ShoeSizeFilter from '@/components/ShoeSizeFilter';
 import ClothingSizeFilter from '@/components/ClothingSizeFilter';
-import CartIcon from '@/components/CartIcon';
 import CartDrawer from '@/components/CartDrawer';
+import Sidebar from '@/components/Sidebar';
+import CategoryPillRail from '@/components/CategoryPillRail';
+import DealsCarousel from '@/components/DealsCarousel';
+import CartSummarySection from '@/components/CartSummarySection';
 import { CartProvider } from '@/context/CartContext';
 import { UnifiedProduct, RetailerSource } from '@/types/unified';
-import { ShoppingBag, SlidersHorizontal, X, Sparkles } from 'lucide-react';
+import { ShoppingBag, SlidersHorizontal, X } from 'lucide-react';
 import { useTargetStore } from '@/hooks/useTargetStore';
 import SearchFilters, { ActiveFilters } from '@/components/SearchFilters';
 import { ProductFilters, applyProductFilters } from '@/lib/filters';
 import { useIntelligentSearch } from '@/hooks/useIntelligentSearch';
-import WebLLMStatusIndicator, { SearchModeToggle } from '@/components/WebLLMStatus';
-import SearchStatus from '@/components/SearchStatus';
+import { SearchModeToggle } from '@/components/WebLLMStatus';
+import SortSelect, { SortOption } from '@/components/SortSelect';
 import ProductResultCard from '@/components/ProductResultCard';
+import Pagination from '@/components/Pagination';
 import ClarificationPrompt from '@/components/ClarificationPrompt';
 import SearchPromptPills from '@/components/SearchPromptPills';
 
-type SortOption = 'most-popular' | 'price-asc' | 'price-desc' | 'rating-desc';
-
 const ALL_SOURCES: RetailerSource[] = ['walmart', 'bestbuy', 'target', 'ebay', 'costco', 'shopify'];
+
+// Results are fetched once per search (server caps at 120) and paginated
+// locally so turning pages never re-hits retailer APIs.
+const RESULTS_PER_PAGE = 24;
 
 export default function Home() {
   const [products, setProducts] = useState<UnifiedProduct[]>([]);
@@ -41,6 +47,7 @@ export default function Home() {
   const [selectedSources, setSelectedSources] = useState<RetailerSource[]>(ALL_SOURCES);
   const [filters, setFilters] = useState<ProductFilters>({});
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const { storeInfo } = useTargetStore();
   const { state: aiState, search: aiSearch, toggleAiMode } = useIntelligentSearch();
 
@@ -106,6 +113,7 @@ export default function Home() {
     setSelectedShoeSize(null); // Reset shoe size filter when searching
     setSelectedClothingSize(null); // Reset clothing size filter when searching
     setFilters({}); // Reset property filters when searching
+    setCurrentPage(1); // Reset pagination when searching
 
     // ── Intelligent search (POST /api/search) ──
     if (aiState.aiEnabled) {
@@ -217,11 +225,66 @@ export default function Home() {
     filters.hasReviews,
   ].filter(Boolean).length;
 
+  // Any filter/sort/size change re-paginates from the first page
+  const handleFiltersChange = (next: ProductFilters) => {
+    setFilters(next);
+    setCurrentPage(1);
+  };
+
+  const handleSortChange = (next: SortOption) => {
+    setSortBy(next);
+    setCurrentPage(1);
+  };
+
+  // ── Pagination ──────────────────────────────────────────────────────
+  // AI results are ranked server-side; preserve that order for "most-popular"
+  // but honor the user's sort choice for the other options.
+  const aiResults = aiState.response?.results ?? [];
+  const sortedAiResults =
+    sortBy === 'most-popular'
+      ? aiResults
+      : [...aiResults].sort((a, b) => {
+          const priceA = a.bestOffer?.offer.price?.amount;
+          const priceB = b.bestOffer?.offer.price?.amount;
+          switch (sortBy) {
+            case 'price-asc':
+              return (priceA ?? Infinity) - (priceB ?? Infinity);
+            case 'price-desc':
+              return (priceB ?? -Infinity) - (priceA ?? -Infinity);
+            case 'rating-desc': {
+              // Offers without a seller rating go to the end
+              const ratingA = a.bestOffer?.offer.seller?.rating ?? -1;
+              const ratingB = b.bestOffer?.offer.seller?.rating ?? -1;
+              return ratingB - ratingA;
+            }
+            default:
+              return 0;
+          }
+        });
+
+  const aiTotalPages = Math.max(1, Math.ceil(sortedAiResults.length / RESULTS_PER_PAGE));
+  const aiPage = Math.min(currentPage, aiTotalPages);
+  const aiPageItems = sortedAiResults.slice(
+    (aiPage - 1) * RESULTS_PER_PAGE,
+    aiPage * RESULTS_PER_PAGE
+  );
+
+  const classicTotalPages = Math.max(1, Math.ceil(sortedProducts.length / RESULTS_PER_PAGE));
+  const classicPage = Math.min(currentPage, classicTotalPages);
+  const classicPageItems = sortedProducts.slice(
+    (classicPage - 1) * RESULTS_PER_PAGE,
+    classicPage * RESULTS_PER_PAGE
+  );
+
   return (
     <CartProvider>
-    <div className="min-h-screen bg-white dark:bg-[#1a1a1a] transition-colors duration-300">
+    <div className="min-h-screen flex bg-white dark:bg-[#1a1a1a] transition-colors duration-300">
+      {/* Left icon sidebar (desktop lg+ only) */}
+      <Sidebar />
+
+      <div className="flex-1 min-w-0 flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/95 dark:bg-[#1a1a1a]/95 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 transition-all duration-300">
+      <header className="sticky top-0 z-50 bg-gradient-to-b from-white/90 to-white/60 dark:from-[#1a1a1a]/80 dark:to-[#1a1a1a]/50 backdrop-blur-xl backdrop-saturate-150 border-b border-white/50 dark:border-white/10 shadow-sm shadow-black/5 dark:shadow-black/20 transition-all duration-300">
         <div className={`container mx-auto px-6 transition-all duration-300 ${
           isScrolled ? 'py-3' : 'py-5'
         }`}>
@@ -241,69 +304,76 @@ export default function Home() {
               </h1>
             </Link>
             
+            {/* Search appears in the header once the user scrolls (the hero
+                bar "merges" up) or has started searching. */}
             <div className="flex-1">
-              <SearchBar
-                onSearch={handleSearch}
-                isLoading={isLoading || aiState.isLoading}
-              />
+              {(isScrolled || !!searchQuery) && (
+                <SearchBar
+                  onSearch={handleSearch}
+                  isLoading={isLoading || aiState.isLoading}
+                />
+              )}
             </div>
             
             <div className="flex items-center gap-1">
-              <CartIcon />
               <SearchModeToggle aiEnabled={aiState.aiEnabled} onToggle={toggleAiMode} />
               <ThemeToggle />
             </div>
           </div>
 
-          {/* Mobile layout: Two rows - nav bar on top, search below */}
-          <div className="md:hidden">
-            {/* First row: Logo and theme toggle */}
-            <div className="flex items-center justify-between mb-3">
-              <Link href="/" className={`flex items-center transition-all duration-300 hover:opacity-75 cursor-pointer ${
-                isScrolled ? 'gap-2' : 'gap-3'
-              }`}>
-                <ShoppingBag 
-                  size={isScrolled ? 20 : 24} 
-                  className="text-blue-500 dark:text-blue-400 transition-all duration-300" 
+          {/* Mobile layout: single clean row — logo, search, actions */}
+          <div className="md:hidden flex items-center gap-3">
+            <Link href="/" className="flex items-center shrink-0 transition-all duration-300 hover:opacity-75 cursor-pointer">
+              <ShoppingBag
+                size={24}
+                className="text-blue-500 dark:text-blue-400 transition-all duration-300"
+              />
+              <h1 className="hidden sm:block ml-2 font-semibold text-lg text-gray-900 dark:text-white whitespace-nowrap">
+                Emporika
+              </h1>
+            </Link>
+
+            <div className="flex-1 min-w-0">
+              {(isScrolled || !!searchQuery) && (
+                <SearchBar
+                  onSearch={handleSearch}
+                  isLoading={isLoading || aiState.isLoading}
                 />
-                <h1 className={`font-semibold text-gray-900 dark:text-white transition-all duration-300 whitespace-nowrap ${
-                  isScrolled ? 'text-lg' : 'text-xl'
-                }`}>
-                  Emporika
-                </h1>
-              </Link>
-              
-              <div className="flex items-center gap-1">
-                <CartIcon />
-              <SearchModeToggle aiEnabled={aiState.aiEnabled} onToggle={toggleAiMode} />
-                <ThemeToggle />
-              </div>
+              )}
             </div>
 
-            {/* Second row: Search bar on its own line */}
-            <div className="w-full">
-              <SearchBar
-                onSearch={handleSearch}
-                isLoading={isLoading || aiState.isLoading}
-              />
+            <div className="flex items-center gap-1 shrink-0">
+              <SearchModeToggle aiEnabled={aiState.aiEnabled} onToggle={toggleAiMode} />
+              <ThemeToggle />
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-6 py-8 max-w-7xl">
-        {/* Show trending items when no search has been performed */}
+      {/* Main Content — extra bottom padding on mobile clears the floating dock */}
+      <main className="container mx-auto px-4 sm:px-6 pt-8 pb-28 lg:pb-8 max-w-7xl">
+        {/* Empty state: centered hero search, category rail, deals, cart, trending */}
         {!searchQuery && !isLoading && !aiState.isLoading && (
           <>
-            <div className="max-w-2xl mx-auto text-center mb-12">
-              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
-                What are you shopping for?
+            <section className="flex flex-col items-center justify-center text-center pt-8 pb-12 md:pt-16 md:pb-16 min-h-[50vh]">
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white">
+                What are you shopping for today?
               </h2>
-              <p className="text-gray-500 dark:text-gray-400 mb-6">
+              <p className="mt-3 text-gray-500 dark:text-gray-400 md:text-lg">
                 Describe what you want in plain English — including style, budget, and priorities.
               </p>
-              <div className="flex flex-wrap justify-center gap-2">
+              {/* Hero search bar — hidden once it has "merged" into the
+                  sticky header on scroll. */}
+              {!isScrolled && (
+                <div className="mt-8 w-full max-w-2xl">
+                  <SearchBar
+                    size="large"
+                    onSearch={handleSearch}
+                    isLoading={isLoading || aiState.isLoading}
+                  />
+                </div>
+              )}
+              <div className="mt-6 flex flex-wrap justify-center gap-2 max-w-3xl">
                 {[
                   'Waterproof trail running shoes under $150, wide sizes',
                   '4K portable projector for a bright living room, low input lag',
@@ -313,14 +383,23 @@ export default function Home() {
                     key={example}
                     type="button"
                     onClick={() => handleSearch(example)}
-                    className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors"
+                    className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 bg-white dark:bg-[#242424] border border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 rounded-full transition-colors"
                   >
                     {example}
                   </button>
                 ))}
               </div>
+            </section>
+
+            <CategoryPillRail onSelect={(name) => handleSearch(name)} />
+
+            <DealsCarousel />
+
+            <CartSummarySection />
+
+            <div id="trending-feed">
+              <TrendingFeed />
             </div>
-            <TrendingFeed />
           </>
         )}
 
@@ -330,10 +409,11 @@ export default function Home() {
             {/* Desktop filters sidebar */}
             <aside className="hidden lg:block w-64 shrink-0">
               <div className="sticky top-28">
+                <SortSelect value={sortBy} onChange={handleSortChange} />
                 <SearchFilters
                   products={products}
                   filters={filters}
-                  onChange={setFilters}
+                  onChange={handleFiltersChange}
                   selectedSources={selectedSources}
                   onSourcesChange={setSelectedSources}
                 />
@@ -360,10 +440,11 @@ export default function Home() {
                       <X size={20} />
                     </button>
                   </div>
+                  <SortSelect value={sortBy} onChange={handleSortChange} />
                   <SearchFilters
                     products={products}
                     filters={filters}
-                    onChange={setFilters}
+                    onChange={handleFiltersChange}
                     selectedSources={selectedSources}
                     onSourcesChange={setSelectedSources}
                   />
@@ -409,29 +490,18 @@ export default function Home() {
                           </span>
                         )}
                       </button>
-                      <label htmlFor="sort-select" className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                        Sort by:
-                      </label>
-                      <select
-                        id="sort-select"
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value as SortOption)}
-                        className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#242424] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer transition-all"
-                      >
-                        <option value="most-popular">Most Popular</option>
-                        <option value="price-asc">Price: Low to High</option>
-                        <option value="price-desc">Price: High to Low</option>
-                        <option value="rating-desc">Rating: High to Low</option>
-                      </select>
                     </div>
                   </div>
 
-                  <ActiveFilters filters={filters} onChange={setFilters} />
+                  <ActiveFilters filters={filters} onChange={handleFiltersChange} />
 
                   {/* Show shoe size filter for shoe-related searches */}
                   {isShoeSearch && (
                     <ShoeSizeFilter
-                      onSizeSelect={setSelectedShoeSize}
+                      onSizeSelect={(size) => {
+                        setSelectedShoeSize(size);
+                        setCurrentPage(1);
+                      }}
                       selectedSize={selectedShoeSize}
                     />
                   )}
@@ -439,7 +509,10 @@ export default function Home() {
                   {/* Show clothing size filter for clothing-related searches */}
                   {isClothingSearch && (
                     <ClothingSizeFilter
-                      onSizeSelect={setSelectedClothingSize}
+                      onSizeSelect={(size) => {
+                        setSelectedClothingSize(size);
+                        setCurrentPage(1);
+                      }}
                       selectedSize={selectedClothingSize}
                       clothingType={clothingType}
                     />
@@ -452,26 +525,7 @@ export default function Home() {
                 <div className="space-y-3">
                   <div className="mb-4">
                     <SearchPromptPills query={aiState.query} onChange={(q) => handleSearch(q)} />
-                    <div className="flex items-center gap-2">
-                      <Sparkles size={14} className="text-purple-500" />
-                      <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                        AI-ranked · {aiState.response.metadata.timingMs.total}ms
-                      </span>
-                      {aiState.webllmStatus.status === 'ready' && (
-                        <WebLLMStatusIndicator status="ready" />
-                      )}
-                      {aiState.webllmStatus.status === 'fast' && (
-                        <WebLLMStatusIndicator status="fast" />
-                      )}
-                    </div>
                   </div>
-
-                  <SearchStatus
-                    status={aiState.response.status}
-                    metadata={aiState.response.metadata}
-                    isLoading={aiState.isLoading}
-                    query={aiState.query}
-                  />
 
                   {aiState.response.clarification && (
                     <ClarificationPrompt
@@ -494,7 +548,7 @@ export default function Home() {
                   )}
 
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {aiState.response.results.map((ranked) => {
+                    {aiPageItems.map((ranked) => {
                       const best = ranked.bestOffer?.offer;
                       const product: import('@/types/unified').UnifiedProduct = {
                         id: ranked.product.canonicalId,
@@ -516,17 +570,31 @@ export default function Home() {
                       );
                     })}
                   </div>
+
+                  <Pagination
+                    currentPage={aiPage}
+                    totalPages={aiTotalPages}
+                    totalItems={sortedAiResults.length}
+                    pageSize={RESULTS_PER_PAGE}
+                    onPageChange={setCurrentPage}
+                  />
                 </div>
               ) : (
-                <ProductGrid products={sortedProducts} isLoading={isLoading || aiState.isLoading} />
+                <>
+                  <ProductGrid products={classicPageItems} isLoading={isLoading || aiState.isLoading} />
+                  <Pagination
+                    currentPage={classicPage}
+                    totalPages={classicTotalPages}
+                    totalItems={sortedProducts.length}
+                    pageSize={RESULTS_PER_PAGE}
+                    onPageChange={setCurrentPage}
+                  />
+                </>
               )}
             </div>
           </div>
         )}
 
-        {!searchQuery && (
-          <ProductGrid products={sortedProducts} isLoading={isLoading || aiState.isLoading} />
-        )}
       </main>
 
       {/* Footer */}
@@ -543,6 +611,7 @@ export default function Home() {
 
       {/* Cart Drawer */}
       <CartDrawer />
+      </div>
     </div>
     </CartProvider>
   );

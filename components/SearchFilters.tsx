@@ -146,6 +146,43 @@ export default function SearchFilters({
         )}
       </div>
 
+      {selectedSources && onSourcesChange && (
+        <FilterSection title="Retailers" defaultOpen>
+          <div className="flex flex-wrap gap-1.5">
+            {RETAILERS.map((retailer) => {
+              const active = selectedSources.includes(retailer.source);
+              return (
+                <button
+                  key={retailer.source}
+                  type="button"
+                  onClick={() => {
+                    const next = active
+                      ? selectedSources.filter((s) => s !== retailer.source)
+                      : [...selectedSources, retailer.source];
+                    onSourcesChange(next.length > 0 ? next : [retailer.source]);
+                  }}
+                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border transition-all ${
+                    active
+                      ? `${retailer.color} text-white border-transparent`
+                      : 'bg-transparent text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500'
+                  }`}
+                >
+                  <Image
+                    src={retailer.icon}
+                    alt={retailer.label}
+                    width={12}
+                    height={12}
+                    className={`rounded-sm ${active ? '' : 'opacity-60'}`}
+                    unoptimized
+                  />
+                  {retailer.label}
+                </button>
+              );
+            })}
+          </div>
+        </FilterSection>
+      )}
+
       {availableBuckets.length > 0 && (
         <FilterSection title="Price" defaultOpen>
           <div className="space-y-2">
@@ -248,43 +285,6 @@ export default function SearchFilters({
           ))}
         </div>
       </FilterSection>
-
-      {selectedSources && onSourcesChange && (
-        <FilterSection title="Retailers" defaultOpen>
-          <div className="flex flex-wrap gap-1.5">
-            {RETAILERS.map((retailer) => {
-              const active = selectedSources.includes(retailer.source);
-              return (
-                <button
-                  key={retailer.source}
-                  type="button"
-                  onClick={() => {
-                    const next = active
-                      ? selectedSources.filter((s) => s !== retailer.source)
-                      : [...selectedSources, retailer.source];
-                    onSourcesChange(next.length > 0 ? next : [retailer.source]);
-                  }}
-                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border transition-all ${
-                    active
-                      ? `${retailer.color} text-white border-transparent`
-                      : 'bg-transparent text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500'
-                  }`}
-                >
-                  <Image
-                    src={retailer.icon}
-                    alt={retailer.label}
-                    width={12}
-                    height={12}
-                    className={`rounded-sm ${active ? '' : 'opacity-60'}`}
-                    unoptimized
-                  />
-                  {retailer.label}
-                </button>
-              );
-            })}
-          </div>
-        </FilterSection>
-      )}
     </div>
   );
 }

@@ -83,7 +83,7 @@ export default function TrendingFeed() {
       {categoryData.map((catData) => (
         <section
           key={catData.category}
-          className="bg-[#f8f9fa] dark:bg-[#1a1a1a] rounded-2xl p-4 md:p-5 border border-gray-200 dark:border-gray-800"
+          className="bg-[#f8f9fa] dark:bg-[#1a1a1a] rounded-3xl p-4 md:p-6 border border-gray-200 dark:border-gray-800"
         >
           {/* Section header */}
           <div className="flex items-start justify-between gap-4 mb-4">
@@ -122,11 +122,11 @@ export default function TrendingFeed() {
           ) : catData.isLoading ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="animate-pulse bg-white dark:bg-[#242424] border border-gray-200 dark:border-gray-800 rounded-2xl h-72" />
+                <div key={i} className="animate-pulse bg-white dark:bg-[#242424] border border-gray-200 dark:border-gray-800 rounded-3xl h-72" />
               ))}
             </div>
           ) : catData.items.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {catData.items.slice(0, 6).map((product) => (
                 <ProductCard
                   key={product.id}

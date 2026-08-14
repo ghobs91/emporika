@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/*
+ * Class-based dark mode. The app toggles dark mode by adding the `.dark`
+ * class to <html> (see app/layout.tsx pre-hydration script and ThemeToggle),
+ * so `dark:*` utilities must respond to the class instead of the
+ * default `prefers-color-scheme` media query.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --breakpoint-sm: 40rem;
   --breakpoint-md: 48rem;
