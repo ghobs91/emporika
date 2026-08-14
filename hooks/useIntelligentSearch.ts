@@ -13,6 +13,13 @@ import type { RetailerSource } from '@/types/unified';
 
 export type { SearchStatusType, SearchApiResponse };
 
+/**
+ * How many ranked results to request per search. The server caps at 120
+ * (schema limit); the UI paginates this list locally so we never re-hit
+ * retailer APIs just to show the next page.
+ */
+const MAX_RESULTS = 120;
+
 export interface IntelligentSearchState {
   response: SearchApiResponse | null;
   isLoading: boolean;
@@ -107,6 +114,7 @@ export function useIntelligentSearch() {
           preferences: {
             ...preferences,
             ...(selectedSources ? { includedProviders: selectedSources } : {}),
+            maxResults: MAX_RESULTS,
           },
           // No candidatePlan on first search — WebLLM may not be ready yet
           // Server falls back to deterministic planner
@@ -168,6 +176,7 @@ export function useIntelligentSearch() {
               preferences: {
                 ...preferences,
                 ...(selectedSources ? { includedProviders: selectedSources } : {}),
+                maxResults: MAX_RESULTS,
               },
               candidatePlan: planResult.plan,
             }),

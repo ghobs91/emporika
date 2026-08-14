@@ -109,7 +109,7 @@ export const shopperPreferencesSchema = z.object({
   includedProviders: z.array(providerIdSchema).optional(),
   excludedProviders: z.array(providerIdSchema).optional(),
   allowedConditions: z.array(conditionSchema).optional(),
-  maxResults: z.number().int().min(1).max(50).optional(),
+  maxResults: z.number().int().min(1).max(120).optional(),
   strictness: z.enum(['strict', 'balanced']).optional(),
 });
 

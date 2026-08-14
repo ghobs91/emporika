@@ -303,7 +303,8 @@ export interface CanonicalProduct {
 export interface RankedOffer {
   offer: NormalizedOffer;
   offerScore: number;
-  scoreBreakdown: Array<{
+  /** Omitted from API responses to keep payloads lean — internal to ranking. */
+  scoreBreakdown?: Array<{
     criterion: string;
     rawValue?: number | string | boolean;
     weightedContribution: number;
@@ -320,7 +321,8 @@ export interface RankedProduct {
   productScore: number;
   bestOffer?: RankedOffer;
   alternateOffers: RankedOffer[];
-  scoreBreakdown: Array<{
+  /** Omitted from API responses to keep payloads lean — internal to ranking. */
+  scoreBreakdown?: Array<{
     criterion: string;
     rawValue?: number | string | boolean;
     weightedContribution: number;

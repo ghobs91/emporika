@@ -299,7 +299,7 @@ function scoreProduct(
 
   // Product-level score breakdown mirrors the best offer plus coverage
   const productBreakdown = bestOffer
-    ? bestOffer.scoreBreakdown.map(b => ({ ...b }))
+    ? (bestOffer.scoreBreakdown ?? []).map(b => ({ ...b }))
     : [];
 
   // Add source coverage as a bonus
@@ -375,4 +375,28 @@ export function rankProducts(
   });
 
   return scored;
+}
+
+// ── Wire serialization ──────────────────────────────────────────────────
+
+/**
+ * Strip per-criterion score breakdowns before sending results to clients.
+ *
+ * The breakdowns are useful for debugging and explanation UIs, but they can
+ * double the payload size for large result sets (each offer carries ~8
+ * criterion entries). No client consumes them, so they are omitted from API
+ * responses. The ranker itself still produces them internally.
+ */
+export function toWireResults(ranked: RankedProduct[]): RankedProduct[] {
+  return ranked.map(r => ({
+    ...r,
+    scoreBreakdown: undefined,
+    bestOffer: r.bestOffer
+      ? { ...r.bestOffer, scoreBreakdown: undefined }
+      : undefined,
+    alternateOffers: r.alternateOffers.map(o => ({
+      ...o,
+      scoreBreakdown: undefined,
+    })),
+  }));
 }

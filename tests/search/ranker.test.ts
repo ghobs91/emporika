@@ -1,7 +1,7 @@
 // ── Ranking engine tests ────────────────────────────────────────────────
 
 import { describe, it, expect } from 'vitest';
-import { rankProducts } from '@/search/ranker';
+import { rankProducts, toWireResults } from '@/search/ranker';
 import type { CanonicalProduct, SearchPlan, NormalizedOffer } from '@/search/types';
 
 function makeOffer(overrides: Partial<NormalizedOffer> = {}): NormalizedOffer {
@@ -102,7 +102,39 @@ describe('Ranking engine', () => {
     const product = makeProduct([makeOffer()]);
     const ranked = rankProducts([product], basePlan);
 
-    expect(ranked[0].scoreBreakdown.length).toBeGreaterThan(0);
-    expect(ranked[0].scoreBreakdown.every(b => typeof b.weightedContribution === 'number')).toBe(true);
+    expect(ranked[0].scoreBreakdown?.length ?? 0).toBeGreaterThan(0);
+    expect((ranked[0].scoreBreakdown ?? []).every(b => typeof b.weightedContribution === 'number')).toBe(true);
+  });
+});
+
+describe('toWireResults', () => {
+  it('strips score breakdowns but preserves everything else', () => {
+    const product = makeProduct([makeOffer(), makeOffer({ providerId: 'bestbuy' })]);
+    const ranked = rankProducts([product], basePlan);
+
+    const wire = toWireResults(ranked);
+
+    expect(wire).toHaveLength(1);
+    expect(wire[0].scoreBreakdown).toBeUndefined();
+    expect(wire[0].bestOffer?.scoreBreakdown).toBeUndefined();
+    for (const alt of wire[0].alternateOffers) {
+      expect(alt.scoreBreakdown).toBeUndefined();
+    }
+
+    // Core fields survive
+    expect(wire[0].rank).toBe(1);
+    expect(wire[0].product.canonicalId).toBe('cp-test');
+    expect(wire[0].bestOffer?.offer.providerId).toBeDefined();
+    expect(wire[0].alternateOffers).toHaveLength(1);
+  });
+
+  it('does not mutate the input ranked list', () => {
+    const product = makeProduct([makeOffer()]);
+    const ranked = rankProducts([product], basePlan);
+
+    toWireResults(ranked);
+
+    expect(ranked[0].scoreBreakdown?.length).toBeGreaterThan(0);
+    expect(ranked[0].bestOffer?.scoreBreakdown?.length).toBeGreaterThan(0);
   });
 });

@@ -3,7 +3,7 @@
 // Used when WebLLM is unavailable or its output fails validation.
 // Produces a SearchPlan from a raw query string using simple heuristics.
 
-import type { SearchPlan, ProviderId } from './types';
+import type { SearchPlan, ProviderId, ShopperPreferences } from './types';
 
 /**
  * Parse a natural-language query into a SearchPlan without any LLM.
@@ -17,6 +17,7 @@ export function createFallbackPlan(
     budget?: { max?: number; min?: number; currency?: string };
     excludedBrands?: string[];
     preferredBrands?: string[];
+    includedProviders?: ProviderId[];
     excludedProviders?: ProviderId[];
     allowedConditions?: Array<'new' | 'used' | 'refurbished' | 'open_box'>;
   }
@@ -126,13 +127,20 @@ export function createFallbackPlan(
   // ── Determine eligible providers ─────────────────────────────────────
 
   const excludedProviders = preferences?.excludedProviders || [];
+  const includedProviders = preferences?.includedProviders;
 
   return {
     version: '1',
     canonicalIntent: query,
     searches: searches.slice(0, 5),
     sourceStrategy: {
-      preferredProviders: availableProviders.filter(p => !excludedProviders.includes(p)),
+      // When the user has explicitly selected retailers, only those are
+      // eligible; otherwise everything except explicitly excluded ones.
+      preferredProviders: availableProviders.filter(p =>
+        includedProviders?.length
+          ? includedProviders.includes(p)
+          : !excludedProviders.includes(p)
+      ),
       excludedProviders,
       searchMode: 'all_eligible',
     },
@@ -149,4 +157,48 @@ export function createFallbackPlan(
     ranking,
     confidence: 0.7, // Fallback planner is reasonably confident but not perfect
   };
+}
+
+/**
+ * Resolve the final list of providers to search for a plan.
+ *
+ * Hard constraints, applied in order:
+ *  1. The plan's preferred providers (or everything available).
+ *  2. Exclusions from the plan and/or user preferences.
+ *  3. User-selected retailers (`preferences.includedProviders`) — when
+ *     present, this is authoritative: de-selected retailers are searched
+ *     NEVER, and retailers the user selected but the plan did not prefer
+ *     are re-included.
+ *  4. `preferred_only` search mode caps at 3, unless the user pinned
+ *     specific retailers (explicit selection wins over planner heuristics).
+ *  5. Providers without credentials are dropped.
+ */
+export function resolveEligibleProviders(
+  plan: Pick<SearchPlan, 'sourceStrategy'>,
+  preferences:
+    | Pick<ShopperPreferences, 'includedProviders' | 'excludedProviders'>
+    | undefined,
+  availableProviders: ProviderId[]
+): ProviderId[] {
+  const included = preferences?.includedProviders;
+
+  // Explicit user selection is authoritative over the plan's preferences
+  let eligible: ProviderId[] = included?.length
+    ? included
+    : (plan.sourceStrategy.preferredProviders ?? availableProviders);
+
+  // Explicit exclusions (plan-level and user-level)
+  const excluded = new Set<ProviderId>([
+    ...(plan.sourceStrategy.excludedProviders || []),
+    ...(preferences?.excludedProviders || []),
+  ]);
+  eligible = eligible.filter(p => !excluded.has(p));
+
+  // Narrow to top picks only when the user hasn't pinned retailers
+  if (plan.sourceStrategy.searchMode === 'preferred_only' && !included?.length) {
+    eligible = eligible.slice(0, 3);
+  }
+
+  // Drop providers without credentials
+  return eligible.filter(p => availableProviders.includes(p));
 }

@@ -16,14 +16,14 @@ import type {
   ProviderSearchResult,
 } from './types';
 import { validatePlan } from './schemas';
-import { createFallbackPlan } from './planner';
+import { createFallbackPlan, resolveEligibleProviders } from './planner';
 import { getProvider, getAvailableProviders } from './providers/adapter';
 import { getCapabilities } from './providers/capabilities';
 import { normalizeProviderResults } from './normalize';
 import { resolveEntities } from './entity-resolution';
 import { computeOfferComparability } from './offer-normalize';
 import { applyHardFilters } from './filter';
-import { rankProducts } from './ranker';
+import { rankProducts, toWireResults } from './ranker';
 import { createTelemetry } from './telemetry';
 import { ClarificationRequiredError, AllProvidersFailedError } from './errors';
 
@@ -110,23 +110,11 @@ export async function executeSearch(request: SearchRequest): Promise<SearchApiRe
 
   // ── Step 4: Determine eligible providers ─────────────────────────────
 
-  let eligibleProviders = plan.sourceStrategy.preferredProviders ||
-    availableProviders;
-
-  // Apply explicit exclusions
-  const excluded = new Set<ProviderId>([
-    ...(plan.sourceStrategy.excludedProviders || []),
-    ...(request.preferences?.excludedProviders || []),
-  ]);
-  eligibleProviders = eligibleProviders.filter(p => !excluded.has(p));
-
-  // Apply source strategy
-  if (plan.sourceStrategy.searchMode === 'preferred_only') {
-    eligibleProviders = eligibleProviders.slice(0, 3);
-  }
-
-  // Filter out providers without credentials
-  eligibleProviders = eligibleProviders.filter(p => availableProviders.includes(p));
+  const eligibleProviders = resolveEligibleProviders(
+    plan,
+    request.preferences,
+    availableProviders
+  );
 
   if (eligibleProviders.length === 0) {
     return {
@@ -282,9 +270,9 @@ export async function executeSearch(request: SearchRequest): Promise<SearchApiRe
   const ranked = rankProducts(filteredProducts, plan, request.preferences);
   timing.ranking = Math.round(performance.now() - rankStart);
 
-  // Limit to requested max results
-  const maxResults = request.preferences?.maxResults || 10;
-  const topResults = ranked.slice(0, maxResults);
+  // Limit to requested max results (client paginates locally from here)
+  const maxResults = request.preferences?.maxResults || 50;
+  const topResults = toWireResults(ranked.slice(0, maxResults));
 
   timing.total = Math.round(performance.now() - overallStart);
 

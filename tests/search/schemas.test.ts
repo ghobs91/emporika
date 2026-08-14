@@ -1,7 +1,7 @@
 // ── SearchPlan validation tests ─────────────────────────────────────────
 
 import { describe, it, expect } from 'vitest';
-import { validatePlan, searchPlanSchema, WEIGHT_SUM_TOLERANCE } from '@/search/schemas';
+import { validatePlan, searchPlanSchema, shopperPreferencesSchema, WEIGHT_SUM_TOLERANCE } from '@/search/schemas';
 
 const validPlan = {
   version: '1' as const,
@@ -111,5 +111,17 @@ describe('SearchPlan validation', () => {
     const result = validatePlan(plan);
     // Within tolerance
     expect(result.valid).toBe(true);
+  });
+});
+
+describe('Shopper preferences validation', () => {
+  it('accepts maxResults up to 120 (pagination support)', () => {
+    expect(shopperPreferencesSchema.safeParse({ maxResults: 1 }).success).toBe(true);
+    expect(shopperPreferencesSchema.safeParse({ maxResults: 120 }).success).toBe(true);
+  });
+
+  it('rejects maxResults above 120', () => {
+    const result = shopperPreferencesSchema.safeParse({ maxResults: 121 });
+    expect(result.success).toBe(false);
   });
 });
