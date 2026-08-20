@@ -100,7 +100,8 @@ Rules:
 Architecture for browser-local AI planning using `@mlc-ai/web-llm`:
 
 - **Default model**: Qwen3-1.7B-q4f16_1-MLC
-- **Low-memory fallback**: Qwen3-1.7B-q4f16_1-MLC
+- **Low-memory fallback**: Qwen3-4B-q4f16_1-MLC
+- **Enhanced model**: Qwen3-8B-q4f16_1-MLC
 - **Role**: Parse natural-language queries into `SearchPlan` JSON
 - **Not used for**: Factual product data, pricing, filtering, ranking
 
@@ -126,9 +127,15 @@ TARGET_ZIP=
 # eBay API
 EBAY_CLIENT_ID=
 EBAY_CLIENT_SECRET=
+EBAY_SANDBOX=false   # set true when using eBay sandbox keys
 
 # Costco
 COSTCO_COOKIES=
+COSTCO_API_KEY=
+COSTCO_REFRESH_SECRET=
+
+# Cron auth (when set, /api/cron/refresh-costco requires this as Bearer token)
+CRON_SECRET=
 
 # Shopify
 SHOPIFY_CLIENT_ID=
@@ -138,7 +145,9 @@ SHOPIFY_AGENT_PROFILE=
 # WebLLM (optional, progressive enhancement)
 NEXT_PUBLIC_WEBLLM_ENABLED=true
 NEXT_PUBLIC_WEBLLM_DEFAULT_MODEL=Qwen3-1.7B-q4f16_1-MLC
-NEXT_PUBLIC_WEBLLM_LOW_MEMORY_MODEL=Qwen3-1.7B-q4f16_1-MLC
+NEXT_PUBLIC_WEBLLM_LOW_MEMORY_MODEL=Qwen3-4B-q4f16_1-MLC
+NEXT_PUBLIC_WEBLLM_ENHANCED_MODEL=Qwen3-8B-q4f16_1-MLC
+NEXT_PUBLIC_BASE_URL=   # base URL for cron self-calls (optional; VERCEL_URL is auto-set on Vercel)
 
 # Search configuration
 SEARCH_MAX_PROVIDER_QUERIES=5
@@ -161,7 +170,7 @@ npm run test:watch # Watch mode
 
 ## Testing
 
-Vitest with 19 tests across 3 test files:
+Vitest with 33 tests across 4 test files:
 
 ```bash
 npm test
@@ -171,6 +180,7 @@ Test categories:
 - **Schema validation**: SearchPlan parsing, rejection of invalid plans, weight validation
 - **Ranking engine**: Price/availability/condition scoring, determinism, breakdown generation
 - **Entity resolution**: Title matching, dissimilarity detection, empty input handling
+- **Provider selection**: Capability-based provider eligibility and query fan-out
 
 Tests do not require WebGPU, browser model download, live retailer APIs, or Shopify MCP access.
 
@@ -208,42 +218,68 @@ The search orchestrator accepts any valid `SearchPlan` regardless of source.
 ```
 emporika/
 ├── app/
-│   ├── api/search/route.ts     # GET (simple) + POST (intelligent) search API
-│   └── page.tsx                # Main search UI
-├── components/
-│   ├── ProductResultCard.tsx    # Intelligent ranked product card
-│   ├── SearchStatus.tsx         # Source coverage & status
-│   ├── WebLLMStatus.tsx         # AI planner status indicator
-│   ├── ClarificationPrompt.tsx  # Clarification question UI
-│   └── ...                      # Existing components (SearchBar, ProductCard, etc.)
+│   ├── api/
+│   │   ├── search/route.ts               # GET (simple) + POST (intelligent) search API
+│   │   ├── trending/route.ts             # Trending products feed
+│   │   ├── target/nearest-store/route.ts # Nearest Target store lookup
+│   │   ├── shopify/cart/route.ts         # Shopify cart operations
+│   │   ├── costco/
+│   │   │   ├── set-cookie/route.ts       # Store Costco session cookie
+│   │   │   └── refresh-cookie/route.ts   # Refresh Costco session cookie
+│   │   └── cron/refresh-costco/route.ts  # Cron entry point (Vercel Cron in vercel.json)
+│   ├── images/                           # Retailer favicons
+│   ├── offline/page.tsx                  # PWA offline page
+│   ├── layout.tsx                        # Root layout
+│   └── page.tsx                          # Main search UI
+├── components/                           # UI: SearchBar, ProductCard, ProductResultCard,
+│                                         # SearchStatus, WebLLMStatus, ClarificationPrompt,
+│                                         # SearchFilters, Sidebar, Pagination, SortSelect,
+│                                         # RetailerToggle, CartDrawer, TrendingFeed, PWAInstallPrompt, ...
+├── context/
+│   └── CartContext.tsx                   # Client-side cart state
+├── hooks/
+│   ├── useIntelligentSearch.ts           # Intelligent search flow
+│   ├── useMerchantCheckout.ts            # Merchant checkout handling
+│   └── useTargetStore.ts                 # Target store selection
 ├── search/
-│   ├── types.ts                 # All domain types
-│   ├── schemas.ts               # Zod schemas (SearchPlan, request)
-│   ├── orchestrator.ts          # Main search pipeline
-│   ├── planner.ts               # Deterministic fallback planner
-│   ├── normalize.ts             # Candidate normalization
-│   ├── entity-resolution.ts     # Cross-retailer ER
-│   ├── offer-normalize.ts       # Offer comparability
-│   ├── filter.ts                # Deterministic hard filters
-│   ├── ranker.ts                # Deterministic ranking engine
-│   ├── errors.ts                # Typed error classes
-│   ├── telemetry.ts             # Structured logging
+│   ├── types.ts                          # All domain types
+│   ├── schemas.ts                        # Zod schemas (SearchPlan, request)
+│   ├── orchestrator.ts                   # Main search pipeline
+│   ├── planner.ts                        # Deterministic fallback planner
+│   ├── normalize.ts                      # Candidate normalization
+│   ├── entity-resolution.ts              # Cross-retailer ER
+│   ├── offer-normalize.ts                # Offer comparability
+│   ├── filter.ts                         # Deterministic hard filters
+│   ├── ranker.ts                         # Deterministic ranking engine
+│   ├── errors.ts                         # Typed error classes
+│   ├── telemetry.ts                      # Structured logging
 │   └── providers/
-│       ├── capabilities.ts      # Provider capability definitions
-│       └── adapter.ts           # Provider adapters (wraps existing API clients)
+│       ├── capabilities.ts               # Provider capability definitions
+│       └── adapter.ts                    # Provider adapters (wraps existing API clients)
 ├── lib/
 │   ├── webllm/
-│   │   ├── types.ts             # WebLLM adapter interface
-│   │   ├── client.ts            # WebLLM client (singleton)
-│   │   ├── prompts.ts           # Versioned prompts
-│   │   └── mock-adapter.ts      # Mock adapter (always degrades gracefully)
-│   └── ...                      # Existing retailer API clients
-├── hooks/
-│   └── useIntelligentSearch.ts  # React hook for intelligent search flow
+│   │   ├── types.ts                      # WebLLM adapter interface + model defaults
+│   │   ├── client.ts                     # WebLLM client (singleton)
+│   │   ├── mock-adapter.ts               # Mock adapter (always degrades gracefully)
+│   │   ├── real-adapter.ts               # Real WebLLM adapter
+│   │   ├── worker.ts                     # WebLLM worker wiring
+│   │   └── prompts.ts                    # Versioned prompts
+│   ├── bestbuy.ts / ebay.ts / target.ts / walmart.ts / costco.ts / shopify.ts  # Retailer API clients
+│   ├── costco-cookie-cache.ts            # In-memory Costco cookie cache
+│   ├── costco-cookie-fetcher.ts          # Costco cookie fetcher
+│   └── retailer.ts                       # Retailer registry
 ├── tests/
 │   └── search/
-│       ├── schemas.test.ts      # SearchPlan validation tests
-│       ├── ranker.test.ts       # Ranking engine tests
-│       └── entity-resolution.test.ts  # Entity resolution tests
-└── types/                       # Existing retailer-specific type definitions
+│       ├── schemas.test.ts               # SearchPlan validation tests
+│       ├── ranker.test.ts                # Ranking engine tests
+│       ├── entity-resolution.test.ts     # Entity resolution tests
+│       └── provider-selection.test.ts    # Provider eligibility tests
+├── types/                                # Retailer-specific type definitions
+├── scripts/
+│   └── diagnose-ebay.mjs                 # eBay integration diagnostics
+├── public/                               # Static assets, PWA icons, sw.js (generated)
+├── netlify.toml                          # Netlify config (headers, Node 20)
+├── vercel.json                           # Vercel config (Costco cookie refresh cron)
+├── next.config.ts                        # Next.js + PWA config, image domains
+└── vitest.config.ts                      # Vitest (node env, @ → root alias)
 ```
