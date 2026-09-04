@@ -25,6 +25,9 @@ export interface ShopifyProductDetailResponse {
 export interface ShopifyUCPMetadata {
   version: string;
   capabilities: Record<string, Array<{ version: string }>>;
+  /** Forwarded business rules for the next request (UCP Request Constraints). Opaque to us — passed through to callers. */
+  request_constraints?: unknown;
+  payment_handlers?: Record<string, unknown>;
 }
 
 export interface ShopifyPagination {
@@ -37,6 +40,8 @@ export interface ShopifyMessage {
   type: string;
   code: string;
   content: string;
+  /** UCP error severity: recoverable | requires_buyer_input | requires_buyer_review (absent on older payloads). */
+  severity?: string;
 }
 
 // ── Product ───────────────────────────────────────────────────────────
@@ -321,7 +326,32 @@ export interface ShopifyCreateCartParams {
   shopDomain: string; // e.g. "lulu-and-georgia.myshopify.com"
   context?: {
     address_country?: string;
-    address_region?: string;
     postal_code?: string;
   };
+  /** Caller-provided idempotency key for safe retries (generated server-side if omitted). Sent as meta `idempotency-key`. */
+  idempotencyKey?: string;
+}
+
+export interface ShopifyGetCartParams {
+  shopDomain: string; // e.g. "lulu-and-georgia.myshopify.com"
+  cartId: string; // gid://shopify/Cart/{id}
+  idempotencyKey?: string;
+}
+
+export interface ShopifyUpdateCartParams {
+  shopDomain: string;
+  cartId: string; // gid://shopify/Cart/{id}
+  /** Full replacement line items (PUT semantics — send the complete desired state, not a diff). */
+  lineItems: ShopifyCreateCartLineItem[];
+  context?: {
+    address_country?: string;
+    postal_code?: string;
+  };
+  idempotencyKey?: string;
+}
+
+export interface ShopifyCancelCartParams {
+  shopDomain: string;
+  cartId: string; // gid://shopify/Cart/{id}
+  idempotencyKey?: string;
 }

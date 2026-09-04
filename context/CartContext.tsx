@@ -81,6 +81,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) => prev.filter((i) => i.id !== id));
   }, []);
 
+  const updateItem = useCallback(
+    (id: string, patch: Partial<Omit<CartItem, 'id' | 'addedAt'>>) => {
+      setItems((prev) => prev.map((i) => (i.id === id ? { ...i, ...patch } : i)));
+    },
+    []
+  );
+
   const removeMerchantItems = useCallback((shopDomain: string) => {
     setItems((prev) => prev.filter((i) => i.shopDomain !== shopDomain));
   }, []);
@@ -104,6 +111,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       value={{
         items,
         addItem,
+        updateItem,
         removeItem,
         removeMerchantItems,
         clearCart,

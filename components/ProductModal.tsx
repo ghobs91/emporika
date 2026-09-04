@@ -8,6 +8,9 @@ import { useCart } from '@/context/CartContext';
 
 interface CartResult {
   success: boolean;
+  action?: 'proceed' | 'buyer_input_required' | 'retry_or_fallback';
+  idempotencyKey?: string;
+  requestConstraints?: unknown;
   cart?: {
     id: string;
     lineItems: Array<{
@@ -21,7 +24,7 @@ interface CartResult {
     continueUrl: string;
     expiresAt?: string;
   };
-  errors?: Array<{ code: string; content: string }>;
+  errors?: Array<{ code: string; content: string; severity?: string }>;
   warnings?: Array<{ code: string; content: string }>;
   error?: string;
 }

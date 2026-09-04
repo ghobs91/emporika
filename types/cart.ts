@@ -30,6 +30,7 @@ export interface CartItem {
 export interface CartContextType {
   items: CartItem[];
   addItem: (item: Omit<CartItem, 'id' | 'addedAt'>) => void;
+  updateItem: (id: string, patch: Partial<Omit<CartItem, 'id' | 'addedAt'>>) => void;
   removeItem: (id: string) => void;
   removeMerchantItems: (shopDomain: string) => void;
   clearCart: () => void;

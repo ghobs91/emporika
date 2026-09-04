@@ -2,13 +2,25 @@
 
 import { useCart } from '@/context/CartContext';
 import { useMerchantCheckout } from '@/hooks/useMerchantCheckout';
-import { X, Trash2, ExternalLink, ShoppingCart, Package, Loader2 } from 'lucide-react';
+import type { CartItem } from '@/types/cart';
+import { X, Trash2, ExternalLink, ShoppingCart, Package, Loader2, Minus, Plus } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect } from 'react';
 
 export default function CartDrawer() {
-  const { items, isOpen, setIsOpen, removeItem, removeMerchantItems, clearCart, itemsByMerchant } = useCart();
-  const { checkingOut, checkoutMerchant } = useMerchantCheckout();
+  const { items, isOpen, setIsOpen, removeItem, updateItem, clearCart, itemsByMerchant } = useCart();
+  const { checkingOut, checkoutMerchant, refreshMerchantCart, removeMerchantCart } = useMerchantCheckout();
+
+  /** Quantity edit: patch locally, then re-sync the combined merchant cart (PUT-equivalent re-create). */
+  const changeQty = (shopDomain: string, merchantItems: CartItem[], item: CartItem, delta: number) => {
+    const next = item.quantity + delta;
+    if (next < 1 || checkingOut === shopDomain) return;
+    updateItem(item.id, { quantity: next });
+    void refreshMerchantCart(
+      shopDomain,
+      merchantItems.map((i) => (i.id === item.id ? { ...i, quantity: next } : i))
+    );
+  };
 
   // Close on Escape
   useEffect(() => {
@@ -88,7 +100,7 @@ export default function CartDrawer() {
                       {merchantNames[shopDomain] || shopDomain}
                     </h3>
                     <button
-                      onClick={() => removeMerchantItems(shopDomain)}
+                      onClick={() => void removeMerchantCart(shopDomain)}
                       className="text-xs text-gray-400 hover:text-red-500 transition-colors flex items-center gap-1"
                     >
                       <Trash2 size={12} />
@@ -125,11 +137,28 @@ export default function CartDrawer() {
                           <span className="text-sm font-semibold text-gray-900 dark:text-white">
                             {formatPrice(item.price)}
                           </span>
-                          {item.quantity > 1 && (
-                            <span className="text-xs text-gray-500">
-                              × {item.quantity}
+                          {/* Quantity stepper — re-syncs the merchant cart remotely */}
+                          <span className="flex items-center gap-1 ml-1">
+                            <button
+                              onClick={() => changeQty(shopDomain, merchantItems, item, -1)}
+                              disabled={item.quantity <= 1 || checkingOut === shopDomain}
+                              aria-label="Decrease quantity"
+                              className="p-0.5 text-gray-500 hover:text-gray-900 dark:hover:text-white disabled:opacity-30 transition-colors"
+                            >
+                              <Minus size={12} />
+                            </button>
+                            <span className="text-xs text-gray-600 dark:text-gray-300 min-w-4 text-center">
+                              {item.quantity}
                             </span>
-                          )}
+                            <button
+                              onClick={() => changeQty(shopDomain, merchantItems, item, 1)}
+                              disabled={checkingOut === shopDomain}
+                              aria-label="Increase quantity"
+                              className="p-0.5 text-gray-500 hover:text-gray-900 dark:hover:text-white disabled:opacity-30 transition-colors"
+                            >
+                              <Plus size={12} />
+                            </button>
+                          </span>
                         </div>
                       </div>
 

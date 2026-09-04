@@ -8,6 +8,9 @@ import type {
   ShopifyLookupParams,
   ShopifyLookupResponse,
   ShopifyCreateCartParams,
+  ShopifyGetCartParams,
+  ShopifyUpdateCartParams,
+  ShopifyCancelCartParams,
   ShopifyCart,
 } from '@/types/shopify';
 
@@ -100,12 +103,18 @@ let jsonRpcId = 0;
  * Generic JSON-RPC call to any UCP endpoint.
  * Used by both the Global Catalog (catalog.shopify.com) and
  * merchant-specific endpoints ({shop}.myshopify.com).
+ *
+ * Rate-limit behavior (per Shopify Cart MCP docs): on HTTP 429, retries
+ * after the `Retry-After` delay (capped at 10s) with a small jittered
+ * backoff, up to 2 retries. Safe because every call carries an
+ * `idempotency-key` in meta.
  */
 async function ucpRpcCall<T>(
   endpoint: string,
   method: string,
   params: { name: string; arguments: Record<string, unknown> },
-  requiresAuth = false
+  requiresAuth = false,
+  retries = 2
 ): Promise<T | null> {
   const bearerToken = requiresAuth ? await getBearerToken() : null;
 
@@ -129,6 +138,15 @@ async function ucpRpcCall<T>(
     headers,
     body: JSON.stringify(body),
   });
+
+  if (response.status === 429 && retries > 0) {
+    const parsed = parseInt(response.headers.get('Retry-After') || '', 10);
+    const retryAfter = Math.min(Number.isNaN(parsed) ? 1 : Math.max(parsed, 0), 10);
+    const delayMs = retryAfter * 1000 + Math.floor(Math.random() * 250);
+    console.warn(`Shopify UCP rate-limited (${endpoint}), retrying in ${delayMs}ms (${retries} left)`);
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+    return ucpRpcCall<T>(endpoint, method, params, requiresAuth, retries - 1);
+  }
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -154,6 +172,27 @@ async function ucpRpcCall<T>(
   return (data.result as T) ?? null;
 }
 
+// ── UCP request metadata ────────────────────────────────────────────────
+
+/**
+ * Build the `meta` object required on every UCP tools/call.
+ * Includes the agent profile plus an `idempotency-key` so retries of the
+ * same logical operation (notably create_cart) are safe. Callers may pass
+ * their own key to correlate retries; otherwise one is generated.
+ */
+function buildMeta(idempotencyKey?: string): Record<string, unknown> {
+  return {
+    'ucp-agent': {
+      profile: SHOPIFY_AGENT_PROFILE,
+    },
+    'idempotency-key':
+      idempotencyKey ??
+      (typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`),
+  };
+}
+
 // ── Public API ────────────────────────────────────────────────────────
 
 /**
@@ -167,11 +206,7 @@ export async function searchShopifyProducts(
   }>(SHOPIFY_MCP_ENDPOINT, 'tools/call', {
     name: 'search_catalog',
     arguments: {
-      meta: {
-        'ucp-agent': {
-          profile: SHOPIFY_AGENT_PROFILE,
-        },
-      },
+      meta: buildMeta(),
       catalog: {
         query: params.query,
         context: params.context,
@@ -197,11 +232,7 @@ export async function lookupShopifyProducts(
   }>(SHOPIFY_MCP_ENDPOINT, 'tools/call', {
     name: 'lookup_catalog',
     arguments: {
-      meta: {
-        'ucp-agent': {
-          profile: SHOPIFY_AGENT_PROFILE,
-        },
-      },
+      meta: buildMeta(),
       catalog: {
         ids: params.ids,
         filters: params.filters,
@@ -225,11 +256,7 @@ export async function getShopifyProductDetails(
   }>(SHOPIFY_MCP_ENDPOINT, 'tools/call', {
     name: 'get_product',
     arguments: {
-      meta: {
-        'ucp-agent': {
-          profile: SHOPIFY_AGENT_PROFILE,
-        },
-      },
+      meta: buildMeta(),
       catalog: {
         id: params.id,
         selected: params.selected,
@@ -297,15 +324,102 @@ export async function createShopifyCart(
     {
       name: 'create_cart',
       arguments: {
-        meta: {
-          'ucp-agent': {
-            profile: SHOPIFY_AGENT_PROFILE,
-          },
-        },
+        meta: buildMeta(params.idempotencyKey),
         cart: {
           line_items,
           context: params.context ?? { address_country: 'US' },
         },
+      },
+    },
+    false // Cart MCP is unauthenticated
+  );
+
+  return result?.structuredContent ?? null;
+}
+
+/**
+ * Retrieve the current state of a merchant cart via Cart MCP.
+ * Read-only — safe to call after a create that returned recoverable errors
+ * to pick up the merchant-validated totals before surfacing them.
+ */
+export async function getShopifyCart(
+  params: ShopifyGetCartParams
+): Promise<ShopifyCart | null> {
+  const result = await ucpRpcCall<{
+    structuredContent: ShopifyCart;
+  }>(
+    merchantEndpoint(params.shopDomain),
+    'tools/call',
+    {
+      name: 'get_cart',
+      arguments: {
+        meta: buildMeta(params.idempotencyKey),
+        id: params.cartId,
+      },
+    },
+    false // Cart MCP is unauthenticated
+  );
+
+  return result?.structuredContent ?? null;
+}
+
+/**
+ * Replace a merchant cart's contents via Cart MCP.
+ *
+ * PUT semantics: every call replaces the FULL cart state, so callers must
+ * send the complete desired `lineItems` array — never a diff. Used for
+ * quantity edits and recoverable-error retries (e.g. drop an unavailable
+ * variant and resubmit the rest).
+ */
+export async function updateShopifyCart(
+  params: ShopifyUpdateCartParams
+): Promise<ShopifyCart | null> {
+  if (!params.lineItems?.length) {
+    throw new Error('updateShopifyCart: lineItems must be a non-empty array (PUT semantics)');
+  }
+
+  const result = await ucpRpcCall<{
+    structuredContent: ShopifyCart;
+  }>(
+    merchantEndpoint(params.shopDomain),
+    'tools/call',
+    {
+      name: 'update_cart',
+      arguments: {
+        meta: buildMeta(params.idempotencyKey),
+        id: params.cartId,
+        cart: {
+          line_items: params.lineItems.map((li) => ({
+            quantity: li.quantity ?? 1,
+            item: { id: li.variantId },
+          })),
+          context: params.context ?? { address_country: 'US' },
+        },
+      },
+    },
+    false // Cart MCP is unauthenticated
+  );
+
+  return result?.structuredContent ?? null;
+}
+
+/**
+ * Cancel a merchant cart via Cart MCP. Best-effort cleanup — callers
+ * should still drop local references even if this throws.
+ */
+export async function cancelShopifyCart(
+  params: ShopifyCancelCartParams
+): Promise<ShopifyCart | null> {
+  const result = await ucpRpcCall<{
+    structuredContent: ShopifyCart;
+  }>(
+    merchantEndpoint(params.shopDomain),
+    'tools/call',
+    {
+      name: 'cancel_cart',
+      arguments: {
+        meta: buildMeta(params.idempotencyKey),
+        id: params.cartId,
       },
     },
     false // Cart MCP is unauthenticated
