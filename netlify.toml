@@ -12,8 +12,16 @@
     Access-Control-Allow-Headers = "Content-Type"
 
 # UCP agent profile — fetched by Shopify during negotiation; cache-friendly
+# Served at two URLs with identical content (source: lib/ucp/profile.ts):
+# /ucp-agent-profile.json (static) and /.well-known/ucp (discovery route)
 [[headers]]
   for = "/ucp-agent-profile.json"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Cache-Control = "public, max-age=3600, s-maxage=86400"
+
+[[headers]]
+  for = "/.well-known/ucp"
   [headers.values]
     Access-Control-Allow-Origin = "*"
     Cache-Control = "public, max-age=3600, s-maxage=86400"

@@ -55,16 +55,11 @@ For production, set `SHOPIFY_AGENT_PROFILE` in `.env.local` (or Netlify env vars
 SHOPIFY_AGENT_PROFILE=https://emporika.netlify.app/ucp-agent-profile.json
 ```
 
-The profile source is at `public/ucp-agent-profile.json`. It declares the full set of UCP capabilities matching Shopify's test fixture — including checkout, cart, fulfillment, discount, and catalog — for complete negotiation support:
+The profile source of truth is `lib/ucp/profile.ts`, served at both `/ucp-agent-profile.json` (static copy in `public/`) and `/.well-known/ucp` (discovery route). It deliberately declares only what Emporika implements — cart (Cart MCP handoff via `continue_url`) plus catalog search/lookup — and omits native checkout, fulfillment, discount, buyer consent, and order until those are implemented:
 
 | Capability | Purpose |
 |---|---|
-| `dev.ucp.shopping.checkout` | Enable UCP checkout (add-to-cart) |
-| `dev.ucp.shopping.cart` | Cart management |
-| `dev.ucp.shopping.fulfillment` | Shipping and fulfillment |
-| `dev.ucp.shopping.discount` | Discount handling |
-| `dev.ucp.shopping.buyer_consent` | Buyer consent capture |
-| `dev.ucp.shopping.order` | Order management |
+| `dev.ucp.shopping.cart` | Cart management (`create_cart` → `continue_url` handoff) |
 | `dev.ucp.shopping.catalog.search` | Search products across all Shopify merchants |
 | `dev.ucp.shopping.catalog.lookup` | Resolve product/variant IDs |
 | `dev.shopify.catalog` | Shopify storefront catalog extension |
@@ -109,7 +104,9 @@ SHOPIFY_CLIENT_SECRET=your_client_secret_here
 
 | File | Purpose |
 |---|---|
-| `public/ucp-agent-profile.json` | Self-hosted UCP agent profile with full capabilities |
+| `public/ucp-agent-profile.json` | Static copy of the UCP agent profile (truthful scope: cart + catalog) |
+| `app/.well-known/ucp/route.ts` | UCP discovery endpoint serving the same profile |
+| `lib/ucp/profile.ts` | Single source of truth for the agent profile |
 | `public/shopify-logo.svg` | Shopify shopping bag logo for UI badges |
 | `types/shopify.ts` | TypeScript types for Global Catalog MCP request/response shapes |
 | `types/unified.ts` | `UnifiedProduct` with `checkoutUrl` field for Shopify add-to-cart |
@@ -120,7 +117,7 @@ SHOPIFY_CLIENT_SECRET=your_client_secret_here
 | `components/ProductModal.tsx` | Dual Shopify buttons: **Add to Cart** (checkoutUrl) + **View Product Page** (productUrl) |
 | `components/RetailerToggle.tsx` | Pill-button toggle for all 6 retailers including Shopify |
 | `components/SearchBar.tsx` | Search bar with inline RetailerToggle |
-| `netlify.toml` | Cache headers for `ucp-agent-profile.json` |
+| `netlify.toml` | Cache headers for `ucp-agent-profile.json` and `/.well-known/ucp` |
 
 ### Request Example (search_catalog)
 

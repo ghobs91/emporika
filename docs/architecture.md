@@ -84,7 +84,7 @@ sequenceDiagram
 ## External service integrations
 
 - Retailer APIs: Walmart, Best Buy, Target, eBay, Costco (all server-side clients in `lib/`).
-- Shopify Global Catalog MCP (`lib/shopify.ts`) — auth via `SHOPIFY_CLIENT_ID`/`SHOPIFY_CLIENT_SECRET`; agent profile fetched during negotiation (`SHOPIFY_AGENT_PROFILE`, `/ucp-agent-profile.json`).
+- Shopify Global Catalog MCP (`lib/shopify.ts`) — auth via `SHOPIFY_CLIENT_ID`/`SHOPIFY_CLIENT_SECRET`; agent profile fetched during negotiation (`SHOPIFY_AGENT_PROFILE`, source of truth `lib/ucp/profile.ts` served at `/ucp-agent-profile.json` and `/.well-known/ucp`). Truthful scope: cart + catalog search/lookup only.
 - Vercel Cron (defined in `vercel.json`) — hourly Costco cookie refresh.
 
 ## Authentication/authorization
