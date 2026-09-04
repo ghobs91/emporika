@@ -17,7 +17,7 @@ import {
   RetailerSource,
 } from '@/types/unified';
 import { searchRequestSchema } from '@/search/schemas';
-import { executeSearch } from '@/search/orchestrator';
+import { executeSearch, executeSearchStream } from '@/search/orchestrator';
 
 const VALID_SORT_VALUES = ['relevance', 'price', 'title', 'bestseller', 'customerRating', 'new'] as const;
 const VALID_ORDER_VALUES = ['ascending', 'descending'] as const;
@@ -60,6 +60,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const wantsStream = request.nextUrl.searchParams.get('stream') === '1';
+    if (wantsStream) {
+      return streamSearch(parsed.data);
+    }
+
     const result = await executeSearch(parsed.data);
 
     if (result.status === 'error') {
@@ -78,6 +83,52 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+/**
+ * SSE delivery for ?stream=1. Unexpected throws close the stream without a
+ * `final` event — clients treat that as "fall back to batched POST".
+ */
+async function streamSearch(validated: Parameters<typeof executeSearch>[0]) {
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    async start(controller) {
+      const send = (event: string, data: unknown) => {
+        controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
+      };
+      try {
+        await executeSearchStream(validated, (e) => {
+          if (e.type === 'provider') {
+            send('provider', {
+              providerId: e.providerId,
+              resultCount: e.resultCount,
+              partial: e.partial,
+            });
+          } else if (e.type === 'partial') {
+            send('partial', {
+              results: e.results,
+              providersDone: e.providersDone,
+              providersPending: e.providersPending,
+              totalCandidates: e.totalCandidates,
+            });
+          } else {
+            send('final', e.response);
+          }
+        });
+        controller.close();
+      } catch (error) {
+        controller.error(error);
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    },
+  });
 }
 
 // ── GET: Simple keyword-based search (backward compatible) ──────────────
