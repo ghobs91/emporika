@@ -100,6 +100,13 @@ export default function ProductResultCard({ ranked, rank }: ProductResultCardPro
                 {bestOffer.offer.availability === 'in_stock' && (
                   <span className="text-xs text-green-600 dark:text-green-400">In stock</span>
                 )}
+                {bestOffer.offer.fulfillment?.shippingCost !== undefined && (
+                  <span className={`text-xs ${bestOffer.offer.fulfillment.shippingCost.amount === 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                    {bestOffer.offer.fulfillment.shippingCost.amount === 0
+                      ? 'Free shipping'
+                      : `+$${bestOffer.offer.fulfillment.shippingCost.amount.toFixed(2)} shipping`}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -191,6 +198,11 @@ function AlternateOfferRow({
         )}
         {offer.availability === 'in_stock' && (
           <span className="text-green-600 dark:text-green-400">· In stock</span>
+        )}
+        {offer.fulfillment?.shippingCost !== undefined && (
+          <span className={offer.fulfillment.shippingCost.amount === 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'}>
+            · {offer.fulfillment.shippingCost.amount === 0 ? 'Free shipping' : `+$${offer.fulfillment.shippingCost.amount.toFixed(2)} ship`}
+          </span>
         )}
       </div>
       <div className="flex items-center gap-1.5">

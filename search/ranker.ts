@@ -40,11 +40,17 @@ function scoreOffer(
     switch (criterion) {
       case 'price': {
         if (offer.price) {
-          // Lower price = higher score (inverse normalized)
-          // We normalize roughly: anything above $1000 scores 0, below scores linearly
-          const normalized = Math.max(0, 1 - offer.price.amount / 1000);
+          // Landed cost = item price + cheapest known shipping. Bounded
+          // inverse curve (no cliff at $1000 like a linear scale has):
+          // $50 → 0.80, $200 → 0.50, $1000 → 0.17, $5000 → 0.04.
+          const shipping = offer.fulfillment?.shippingCost?.amount ?? 0;
+          const landed = offer.price.amount + shipping;
+          const normalized = 1 / (1 + landed / 200);
           raw = normalized;
-          reason = `Listed price: ${offer.price.currency} ${offer.price.amount.toFixed(2)}`;
+          reason =
+            shipping > 0
+              ? `Landed ${offer.price.currency} ${landed.toFixed(2)} (incl. ${shipping.toFixed(2)} shipping)`
+              : `Listed price: ${offer.price.currency} ${offer.price.amount.toFixed(2)}`;
         } else {
           // Missing price: penalize
           raw = -0.5;

@@ -88,6 +88,52 @@ describe('Ranking engine', () => {
     expect(ranked[0].product).toBe(newItem);
   });
 
+  it('ranks by landed cost (price + shipping), not sticker price', () => {
+    const cheapPlusShip = makeProduct([
+      makeOffer({
+        price: { amount: 90, currency: 'USD' },
+        fulfillment: { shippingSupported: true, shippingCost: { amount: 20, currency: 'USD' } },
+      }),
+    ]);
+    const flatHundred = makeProduct([
+      makeOffer({
+        price: { amount: 100, currency: 'USD' },
+        fulfillment: { shippingSupported: true, shippingCost: { amount: 0, currency: 'USD' } },
+      }),
+    ]);
+
+    const ranked = rankProducts([cheapPlusShip, flatHundred], basePlan);
+    expect(ranked[0].product).toBe(flatHundred);
+  });
+
+  it('scores prices above $1000 on a sane bounded curve', () => {
+    const mid = makeProduct([makeOffer({ price: { amount: 1200, currency: 'USD' } })]);
+    const high = makeProduct([makeOffer({ price: { amount: 2500, currency: 'USD' } })]);
+
+    const ranked = rankProducts([high, mid], basePlan);
+    expect(ranked[0].product).toBe(mid);
+    expect(ranked[0].productScore).toBeGreaterThan(0);
+    expect(ranked[1].productScore).toBeGreaterThan(0);
+  });
+
+  it('treats unknown shipping as sticker price (no penalty, no bonus)', () => {
+    const withShip = makeProduct([
+      makeOffer({
+        price: { amount: 100, currency: 'USD' },
+        fulfillment: { shippingSupported: true, shippingCost: { amount: 10, currency: 'USD' } },
+      }),
+    ]);
+    const unknownShip = makeProduct([
+      makeOffer({
+        price: { amount: 100, currency: 'USD' },
+        fulfillment: { shippingSupported: true },
+      }),
+    ]);
+
+    const ranked = rankProducts([withShip, unknownShip], basePlan);
+    expect(ranked[0].product).toBe(unknownShip);
+  });
+
   it('produces deterministic results', () => {
     const offers = [makeOffer(), makeOffer({ providerId: 'bestbuy' })];
     const product = makeProduct(offers);

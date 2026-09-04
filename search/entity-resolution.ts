@@ -105,18 +105,25 @@ export function resolveEntities(
 
     const cluster: NormalizedOffer[] = [offers[i]];
     used.add(i);
+    // Method/confidence of the first successful join into this cluster.
+    let clusterMethod: CanonicalProduct['identity']['matchMethod'] = 'unmatched';
+    let clusterConfidence: 'high' | 'medium' | 'low' = 'high';
 
     for (let j = i + 1; j < offers.length; j++) {
       if (used.has(j)) continue;
 
       const matchResult = matchOffers(offers[i], offers[j]);
       if (matchResult.matched) {
+        if (cluster.length === 1) {
+          clusterMethod = matchResult.method;
+          clusterConfidence = matchResult.confidence;
+        }
         cluster.push(offers[j]);
         used.add(j);
       }
     }
 
-    products.push(buildCanonicalProduct(cluster, ++canonicalIdCounter, offers[i]));
+    products.push(buildCanonicalProduct(cluster, ++canonicalIdCounter, offers[i], clusterMethod, clusterConfidence));
   }
 
   return products;
@@ -134,17 +141,76 @@ function matchOffers(a: NormalizedOffer, b: NormalizedOffer): MatchResult {
     return { matched: true, method: 'shopify_upid', confidence: 'high' };
   }
 
-  // Shopify UPID: within Shopify only, same UPID means same product
-  if (a.providerId === 'shopify' && b.providerId === 'shopify') {
-    // For now, same product within Shopify is caught above
-    // Cross-UPID matching would require UPID access from candidate hints
+  const ha = a.identityHints ?? {};
+  const hb = b.identityHints ?? {};
+
+  const sameId = (x?: string, y?: string) =>
+    !!x && !!y && x.trim().toLowerCase() === y.trim().toLowerCase();
+
+  // Shopify UPID: same product across variant-level offers
+  if (sameId(ha.shopifyUpid, hb.shopifyUpid)) {
+    return { matched: true, method: 'shopify_upid', confidence: 'high' };
   }
 
-  // Try exact title match as a fallback for identical titles across providers
+  // Exact GTIN / UPC / EAN matches are high-confidence cross-retailer identity
+  if (sameId(ha.gtin, hb.gtin)) {
+    return { matched: true, method: 'gtin', confidence: 'high' };
+  }
+  if (sameId(ha.upc, hb.upc)) {
+    return { matched: true, method: 'upc', confidence: 'high' };
+  }
+  if (sameId(ha.ean, hb.ean)) {
+    return { matched: true, method: 'ean', confidence: 'high' };
+  }
+
+  // MPN match requires brand agreement (MPNs are only unique per brand)
+  if (
+    sameId(ha.mpn, hb.mpn) &&
+    ha.brand !== undefined && hb.brand !== undefined &&
+    normalizeBrand(ha.brand) === normalizeBrand(hb.brand)
+  ) {
+    return { matched: true, method: 'mpn_brand_model', confidence: 'high' };
+  }
+
+  // ── Title-similarity fallback with vetoes ────────────────────────────
+
+  // Brand veto: both brands known and different → different products,
+  // no matter how similar the titles ("Sony headphones" vs "Bose headphones").
+  if (
+    ha.brand !== undefined && hb.brand !== undefined &&
+    normalizeBrand(ha.brand) !== normalizeBrand(hb.brand)
+  ) {
+    return { matched: false, method: 'unmatched', confidence: 'low' };
+  }
+
+  // Identical modulo punctuation/spacing/case ("WH-1000XM5" vs "WH1000XM5",
+  // "128 GB" vs "128GB") — same product even when token sets differ.
+  const alnum = (t: string) => t.toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (alnum(a.title) === alnum(b.title)) {
+    return { matched: true, method: 'normalized_title', confidence: 'medium' };
+  }
+
+  // Model-token veto: both titles carry model-like tokens (letters+digits,
+  // e.g. XM4/XM5, 128GB/256GB) with no overlap → different generations or
+  // variants of the same family. Never merge those.
+  const modelsA = modelTokens(a.title);
+  const modelsB = modelTokens(b.title);
+  if (modelsA.size > 0 && modelsB.size > 0) {
+    let overlap = false;
+    for (const t of modelsA) {
+      if (modelsB.has(t)) {
+        overlap = true;
+        break;
+      }
+    }
+    if (!overlap) {
+      return { matched: false, method: 'unmatched', confidence: 'low' };
+    }
+  }
+
   const sim = titleSimilarity(a.title, b.title);
 
   if (sim > 0.90) {
-    // High similarity — likely the same product, especially if brands match
     return { matched: true, method: 'normalized_title', confidence: 'medium' };
   }
 
@@ -155,24 +221,39 @@ function matchOffers(a: NormalizedOffer, b: NormalizedOffer): MatchResult {
   return { matched: false, method: 'unmatched', confidence: 'low' };
 }
 
+/**
+ * Model-like tokens: contain both letters and digits (XM5, 1000XM4, 128GB,
+ * 55IN). Compared after stripping non-alphanumerics so "WH-1000XM5" and
+ * "WH1000XM5" still agree.
+ */
+function modelTokens(title: string): Set<string> {
+  const tokens = new Set<string>();
+  for (const raw of title.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean)) {
+    if (raw.length >= 3 && /[a-z]/.test(raw) && /\d/.test(raw)) {
+      tokens.add(raw);
+    }
+  }
+  return tokens;
+}
+
 // ── Canonical product builder ──────────────────────────────────────────
 
 function buildCanonicalProduct(
   offers: NormalizedOffer[],
   index: number,
-  primaryOffer: NormalizedOffer
+  primaryOffer: NormalizedOffer,
+  matchMethod: CanonicalProduct['identity']['matchMethod'],
+  matchConfidence: 'high' | 'medium' | 'low'
 ): CanonicalProduct {
   const sourceProviders = [...new Set(offers.map(o => o.providerId))];
   const sourceSearches = [...new Set(offers.flatMap(o => o.evidence.sourceSearches))];
 
-  // Compute match confidence: lowest common denominator
-  let matchConfidence: 'high' | 'medium' | 'low' = 'high';
-  let matchMethod: CanonicalProduct['identity']['matchMethod'] = 'unmatched';
-
-  if (offers.length > 1) {
-    matchConfidence = 'low';
-    matchMethod = 'normalized_title';
-  }
+  // Canonical identity comes from the primary offer's hints (falling back
+  // to the first defined value in the cluster). This also powers
+  // brand-exclusion filtering downstream — previously always undefined.
+  const primaryHints = primaryOffer.identityHints ?? {};
+  const firstHint = (key: 'gtin' | 'upc' | 'ean' | 'mpn' | 'brand' | 'model') =>
+    primaryHints[key] ?? offers.map(o => o.identityHints?.[key]).find(v => v !== undefined);
 
   // Collect unique warnings / missing data
   const warnings = [...new Set(offers.flatMap(o => {
@@ -193,13 +274,19 @@ function buildCanonicalProduct(
   return {
     canonicalId: `cp-${index}`,
     identity: {
+      gtin: firstHint('gtin'),
+      upc: firstHint('upc'),
+      ean: firstHint('ean'),
+      mpn: firstHint('mpn'),
+      brand: firstHint('brand'),
+      model: firstHint('model'),
       title: primaryOffer.title,
       confidence: matchConfidence,
       matchMethod,
     },
     title: primaryOffer.title,
     description: undefined,
-    brand: undefined,
+    brand: firstHint('brand'),
     imageUrls: imageUrls.length > 0 ? imageUrls : undefined,
     offers,
     sourceProviders,

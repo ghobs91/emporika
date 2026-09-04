@@ -56,12 +56,11 @@ const walmartAdapter: RetailerSearchProvider = {
         providerProductId: String(item.itemId),
         canonicalProductHints: {
           upc: item.upc ? [item.upc] : undefined,
-          brand: item.name?.split(' ')[0],
           model: item.modelNumber,
         },
         title: item.name,
         description: item.shortDescription,
-        brand: item.name?.split(' ')[0],
+        brand: undefined, // Walmart API exposes no brand field — never fake it
         imageUrls: [item.largeImage, item.mediumImage, item.thumbnailImage].filter(Boolean) as string[],
         productUrl: item.productUrl,
         price: toMoney(item.salePrice),
@@ -70,10 +69,11 @@ const walmartAdapter: RetailerSearchProvider = {
         availability: item.availableOnline !== false ? 'in_stock' : 'out_of_stock',
         fulfillment: {
           shippingSupported: true,
+          shippingCost: item.standardShipRate !== undefined ? toMoney(item.standardShipRate) : undefined,
         },
         rawFieldAvailability: {
           name: true, price: true, image: true, url: true,
-          brand: !!item.name, rating: !!item.customerRating,
+          brand: false, rating: !!item.customerRating,
           reviews: !!item.numReviews, description: !!item.shortDescription,
           upc: !!item.upc, shipping: true, availability: true,
         },
@@ -157,6 +157,9 @@ const bestbuyAdapter: RetailerSearchProvider = {
         availability: item.onlineAvailability ? 'in_stock' : 'out_of_stock',
         fulfillment: {
           shippingSupported: true,
+          shippingCost: item.shippingLevelsOfService?.length
+            ? toMoney(Math.min(...item.shippingLevelsOfService.map(l => l.unitShippingPrice)))
+            : undefined,
         },
         rawFieldAvailability: {
           name: true, price: true, image: true, url: true,
@@ -231,7 +234,7 @@ const targetAdapter: RetailerSearchProvider = {
           providerId: 'target' as ProviderId,
           providerProductId: `target-${product.tcin}-${index}`,
           canonicalProductHints: {
-            brand: product.item?.product_description?.title?.split(' ')[0],
+            brand: product.item?.primary_brand?.name,
           },
           title: product.item?.product_description?.title || 'Untitled',
           description: (product.item?.product_description as { bullet_descriptions?: string[] })?.bullet_descriptions?.join(' ') || undefined,
@@ -321,6 +324,9 @@ const ebayAdapter: RetailerSearchProvider = {
         const hasFreeShipping = item.shippingOptions?.some(
           opt => opt.shippingCost?.value === '0' || opt.shippingCost?.value === '0.0'
         );
+        const shippingCosts = (item.shippingOptions || [])
+          .map(opt => (opt.shippingCost?.value !== undefined ? parseFloat(opt.shippingCost.value) : NaN))
+          .filter(n => !Number.isNaN(n));
 
         return {
           providerId: 'ebay' as ProviderId,
@@ -339,6 +345,7 @@ const ebayAdapter: RetailerSearchProvider = {
           availability: 'in_stock', // eBay search results are generally available
           fulfillment: {
             shippingSupported: true,
+            shippingCost: shippingCosts.length ? toMoney(Math.min(...shippingCosts)) : undefined,
           },
           seller: item.seller ? {
             name: item.seller.username,

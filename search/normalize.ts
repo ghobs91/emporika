@@ -45,6 +45,21 @@ export function normalizeCandidate(
     uncertaintyFlags.push('no_gtin_upc');
   }
 
+  // Carry identity hints forward for entity resolution (first values only).
+  const hints = candidate.canonicalProductHints;
+  const identityHints =
+    hints || candidate.brand
+      ? {
+          ...(hints?.shopifyUpid ? { shopifyUpid: hints.shopifyUpid } : {}),
+          ...(hints?.gtin?.[0] ? { gtin: hints.gtin[0] } : {}),
+          ...(hints?.upc?.[0] ? { upc: hints.upc[0] } : {}),
+          ...(hints?.ean?.[0] ? { ean: hints.ean[0] } : {}),
+          ...(hints?.mpn?.[0] ? { mpn: hints.mpn[0] } : {}),
+          ...(candidate.brand || hints?.brand ? { brand: candidate.brand ?? hints!.brand } : {}),
+          ...(hints?.model ? { model: hints.model } : {}),
+        }
+      : undefined;
+
   return {
     offerId,
     providerId: candidate.providerId,
@@ -53,6 +68,7 @@ export function normalizeCandidate(
     productUrl: candidate.productUrl,
     title: candidate.title,
     condition: candidate.condition || 'unknown',
+    identityHints,
     comparableVariant: candidate.variants?.[0] ? {
       id: candidate.variants[0].providerVariantId,
       selectedOptions: candidate.variants[0].selectedOptions || [],

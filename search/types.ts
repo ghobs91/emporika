@@ -94,6 +94,8 @@ export interface ProviderProductCandidate {
   fulfillment?: {
     shippingSupported?: boolean;
     shippingEstimate?: string;
+    /** Cheapest known shipping option in major units (0 = free). Absent when the provider reports no usable rate. */
+    shippingCost?: Money;
     pickupSupported?: boolean;
     pickupLocation?: string;
   };
@@ -230,6 +232,16 @@ export interface NormalizedOffer {
   productUrl?: string;
   title: string;
   condition: 'new' | 'used' | 'refurbished' | 'open_box' | 'unknown';
+  /** Normalized identity hints carried over from the provider candidate (first values only). Drives entity resolution. */
+  identityHints?: {
+    shopifyUpid?: string;
+    gtin?: string;
+    upc?: string;
+    ean?: string;
+    mpn?: string;
+    brand?: string;
+    model?: string;
+  };
   comparableVariant?: {
     id?: string;
     selectedOptions: Array<{ name: string; value: string }>;
@@ -244,6 +256,8 @@ export interface NormalizedOffer {
   fulfillment?: {
     shippingSupported?: boolean;
     shippingEstimate?: string;
+    /** Cheapest known shipping option in major units (0 = free). Absent when the provider reports no usable rate. */
+    shippingCost?: Money;
     pickupSupported?: boolean;
     pickupLocation?: string;
   };
@@ -346,6 +360,8 @@ export interface SearchMetadata {
   plannerSource: 'webllm' | 'fallback' | 'none';
   plannerModelId?: string;
   planConfidence?: number;
+  /** True when this response was served from the result cache (timingMs reflects the original computation). */
+  cacheHit?: boolean;
   providersSearched: ProviderId[];
   providersFailed: Array<{ providerId: ProviderId; errorType: string }>;
   totalCandidates: number;

@@ -59,11 +59,8 @@ describe('Entity resolution', () => {
 
     const products = resolveEntities([offerA, offerB]);
 
-    // XM4 and XM5 are different generations — should stay separate
-    // (title similarity is high enough to cluster them in our current implementation,
-    // but in production this would require model number comparison)
-    // For now, verify they're in the result set
-    expect(products.length).toBeGreaterThanOrEqual(1);
+    // XM4 and XM5 carry disjoint model tokens — different generations stay separate
+    expect(products).toHaveLength(2);
   });
 
   it('keeps weak matches separate', () => {
@@ -77,5 +74,97 @@ describe('Entity resolution', () => {
   it('handles empty input', () => {
     const products = resolveEntities([]);
     expect(products).toHaveLength(0);
+  });
+
+  it('merges cross-retailer offers on exact GTIN with high confidence', () => {
+    const offerA = makeOffer({
+      providerId: 'walmart',
+      providerProductId: 'w1',
+      title: 'Sony WH-1000XM5 Wireless Noise Canceling Headphones',
+      identityHints: { gtin: '027242923012', brand: 'Sony' },
+    });
+    const offerB = makeOffer({
+      providerId: 'bestbuy',
+      providerProductId: 'b1',
+      title: 'Sony - WH1000XM5 Wireless Noise-Canceling Headphones - Black',
+      identityHints: { gtin: '027242923012', brand: 'Sony' },
+    });
+
+    const products = resolveEntities([offerA, offerB]);
+    expect(products).toHaveLength(1);
+    expect(products[0].identity.matchMethod).toBe('gtin');
+    expect(products[0].identity.confidence).toBe('high');
+    expect(products[0].brand).toBe('Sony');
+  });
+
+  it('merges on exact UPC across retailers', () => {
+    const offerA = makeOffer({
+      providerId: 'walmart',
+      providerProductId: 'w1',
+      title: 'Logitech MX Master 3S Mouse',
+      identityHints: { upc: '097855176300' },
+    });
+    const offerB = makeOffer({
+      providerId: 'bestbuy',
+      providerProductId: 'b1',
+      title: 'Logitech - MX Master 3S Wireless Mouse',
+      identityHints: { upc: '097855176300' },
+    });
+
+    const products = resolveEntities([offerA, offerB]);
+    expect(products).toHaveLength(1);
+    expect(products[0].identity.matchMethod).toBe('upc');
+  });
+
+  it('does NOT merge when both brands are known and differ', () => {
+    const offerA = makeOffer({
+      title: 'Wireless Noise Canceling Headphones Black',
+      identityHints: { brand: 'Sony' },
+    });
+    const offerB = makeOffer({
+      title: 'Wireless Noise Canceling Headphones Black',
+      providerId: 'bestbuy',
+      identityHints: { brand: 'Bose' },
+    });
+
+    const products = resolveEntities([offerA, offerB]);
+    expect(products).toHaveLength(2);
+  });
+
+  it('still merges when only one side reports a brand', () => {
+    const offerA = makeOffer({
+      title: 'Waterproof Trail Running Shoes Size 10',
+      identityHints: { brand: 'Salomon' },
+    });
+    const offerB = makeOffer({
+      title: 'Waterproof Trail Running Shoes - Size 10',
+      providerId: 'bestbuy',
+    });
+
+    const products = resolveEntities([offerA, offerB]);
+    expect(products).toHaveLength(1);
+    expect(products[0].brand).toBe('Salomon');
+  });
+
+  it('treats dash-variant model tokens as agreeing', () => {
+    const offerA = makeOffer({ title: 'Sony WH-1000XM5 Headphones' });
+    const offerB = makeOffer({
+      title: 'Sony WH1000XM5 Headphones',
+      providerId: 'bestbuy',
+    });
+
+    const products = resolveEntities([offerA, offerB]);
+    expect(products).toHaveLength(1);
+  });
+
+  it('does NOT merge different storage variants', () => {
+    const offerA = makeOffer({ title: 'Apple iPhone 15 Pro 128GB Natural Titanium' });
+    const offerB = makeOffer({
+      title: 'Apple iPhone 15 Pro 256GB Natural Titanium',
+      providerId: 'bestbuy',
+    });
+
+    const products = resolveEntities([offerA, offerB]);
+    expect(products).toHaveLength(2);
   });
 });
