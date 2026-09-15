@@ -1,8 +1,8 @@
 // ── Search result cache ─────────────────────────────────────────────────
 //
 // Short-TTL in-memory cache for full search responses. Keyed on the
-// normalized request (query + destination + preferences + candidate plan),
-// so only byte-identical logical searches hit.
+// normalized request (query + destination + preferences + candidate plan +
+// sort), so only byte-identical logical searches hit.
 //
 // Only cacheable statuses are stored ('results', 'no_results') — never
 // errors, clarification requests, or partial results (transient provider
@@ -45,6 +45,7 @@ export function buildSearchCacheKey(request: SearchRequest): string {
     d: request.destination ?? null,
     p: request.preferences ?? {},
     c: request.candidatePlan ?? null,
+    s: request.sort ?? 'relevance',
   });
 }
 

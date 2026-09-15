@@ -125,6 +125,9 @@ export const searchRequestSchema = z.object({
     .optional(),
   preferences: shopperPreferencesSchema.optional(),
   candidatePlan: searchPlanSchema.optional(),
+  sort: z
+    .enum(['relevance', 'most-popular', 'price-asc', 'price-desc', 'rating-desc'])
+    .optional(),
 });
 
 export type ValidatedSearchRequest = z.infer<typeof searchRequestSchema>;

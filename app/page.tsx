@@ -32,6 +32,14 @@ import SearchPromptPills from '@/components/SearchPromptPills';
 
 const ALL_SOURCES: RetailerSource[] = ['walmart', 'bestbuy', 'target', 'ebay', 'costco', 'shopify'];
 
+// Maps the UI sort to the server's ordering key (applied before the result cap).
+const SORT_TO_SEARCH_SORT: Record<SortOption, import('@/search/types').SearchSort> = {
+  'most-popular': 'most-popular',
+  'price-asc': 'price-asc',
+  'price-desc': 'price-desc',
+  'rating-desc': 'rating-desc',
+};
+
 // Results are fetched once per search (server caps at 120) and paginated
 // locally so turning pages never re-hits retailer APIs.
 const RESULTS_PER_PAGE = 24;
@@ -153,7 +161,7 @@ export default function Home() {
         country: 'US',
         ...(storeInfo?.zip ? { postalCode: storeInfo.zip } : {}),
       };
-      aiSearch(query, undefined, selectedSources, destination).catch((err) => {
+      aiSearch(query, undefined, selectedSources, destination, SORT_TO_SEARCH_SORT['most-popular']).catch((err) => {
         console.error('AI search failed:', err);
       });
     }
@@ -281,34 +289,23 @@ export default function Home() {
   const handleSortChange = (next: SortOption) => {
     setSortBy(next);
     setCurrentPage(1);
+    // The server applies the order before capping results, so a real sort
+    // change must re-run the search (cheap: responses are cached per sort).
+    if (aiState.aiEnabled && searchQuery) {
+      const destination = {
+        country: 'US',
+        ...(storeInfo?.zip ? { postalCode: storeInfo.zip } : {}),
+      };
+      aiSearch(searchQuery, undefined, selectedSources, destination, SORT_TO_SEARCH_SORT[next]).catch((err) => {
+        console.error('AI re-sort failed:', err);
+      });
+    }
   };
 
   // ── Pagination ──────────────────────────────────────────────────────
-  // The selected sort is applied to the displayed list in both modes.
-  // "Most Popular" uses review volume (then rating), falling back to the
-  // server relevance rank as a stable tiebreaker.
-  const aiResults = aiState.response?.results ?? [];
-  const sortedAiResults = [...aiResults].sort((a, b) => {
-    switch (sortBy) {
-      case 'price-asc':
-        return (a.bestOffer?.offer.price?.amount ?? Infinity) - (b.bestOffer?.offer.price?.amount ?? Infinity);
-      case 'price-desc':
-        return (b.bestOffer?.offer.price?.amount ?? -Infinity) - (a.bestOffer?.offer.price?.amount ?? -Infinity);
-      case 'rating-desc': {
-        const rating = (b.product.rating ?? -1) - (a.product.rating ?? -1);
-        if (rating !== 0) return rating;
-        return (b.product.reviewCount ?? -1) - (a.product.reviewCount ?? -1);
-      }
-      case 'most-popular':
-      default: {
-        const reviews = (b.product.reviewCount ?? -1) - (a.product.reviewCount ?? -1);
-        if (reviews !== 0) return reviews;
-        const rating = (b.product.rating ?? -1) - (a.product.rating ?? -1);
-        if (rating !== 0) return rating;
-        return a.rank - b.rank;
-      }
-    }
-  });
+  // The server applies the requested ordering before capping results and
+  // renumbers ranks to match, so the returned order is already correct here.
+  const sortedAiResults = aiState.response?.results ?? [];
 
   const aiTotalPages = Math.max(1, Math.ceil(sortedAiResults.length / RESULTS_PER_PAGE));
   const aiPage = Math.min(currentPage, aiTotalPages);

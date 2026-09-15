@@ -172,7 +172,7 @@ npm run test:watch # Watch mode
 
 ## Testing
 
-Vitest with 103 tests across 12 test files:
+Vitest with 107 tests across 13 test files:
 
 ```bash
 npm test

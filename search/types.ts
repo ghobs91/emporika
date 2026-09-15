@@ -365,11 +365,25 @@ export interface RankedProduct {
 
 // ── API request / response ─────────────────────────────────────────────
 
+/** Client-selected ordering, applied server-side before the result cap. */
+export type SearchSort =
+  | 'relevance'
+  | 'most-popular'
+  | 'price-asc'
+  | 'price-desc'
+  | 'rating-desc';
+
 export interface SearchRequest {
   query: string;
   destination?: { country: string; postalCode?: string };
   preferences?: ShopperPreferences;
   candidatePlan?: SearchPlan;
+  /**
+   * Ordering for the returned result set. Applied before `maxResults` is
+   * sliced so the requested order determines which items survive the cap.
+   * Defaults to the server's relevance ranking.
+   */
+  sort?: SearchSort;
 }
 
 export interface SearchMetadata {

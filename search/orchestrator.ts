@@ -14,6 +14,7 @@ import type {
   SearchApiResponse,
   SearchMetadata,
   SearchStatus,
+  SearchSort,
   ShopperPreferences,
   ProviderId,
   RankedProduct,
@@ -298,6 +299,43 @@ export interface AssembledRanking {
 }
 
 /**
+ * Apply the client-requested ordering to the ranked list and renumber ranks
+ * to match display position. `relevance`/undefined keeps the server ranking.
+ * Applied BEFORE the result cap so the requested order decides which items
+ * survive truncation (otherwise a relevance-ranked, price-heavy top slice can
+ * drop an entire provider before the client ever sees it).
+ */
+function sortRanked(ranked: RankedProduct[], sort: SearchSort | undefined): RankedProduct[] {
+  if (!sort || sort === 'relevance') return ranked;
+
+  const price = (r: RankedProduct) => r.bestOffer?.offer.price?.amount;
+  const reviews = (r: RankedProduct) => r.product.reviewCount ?? -1;
+  const rating = (r: RankedProduct) => r.product.rating ?? -1;
+
+  const sorted = [...ranked].sort((a, b) => {
+    switch (sort) {
+      case 'price-asc':
+        return (price(a) ?? Infinity) - (price(b) ?? Infinity);
+      case 'price-desc':
+        return (price(b) ?? -Infinity) - (price(a) ?? -Infinity);
+      case 'rating-desc': {
+        const byRating = rating(b) - rating(a);
+        return byRating !== 0 ? byRating : reviews(b) - reviews(a);
+      }
+      case 'most-popular':
+      default: {
+        const byReviews = reviews(b) - reviews(a);
+        if (byReviews !== 0) return byReviews;
+        const byRating = rating(b) - rating(a);
+        return byRating !== 0 ? byRating : 0; // stable → keeps relevance order
+      }
+    }
+  });
+
+  return sorted.map((r, index) => ({ ...r, rank: index + 1 }));
+}
+
+/**
  * Steps 7–9: comparability → entity resolution → hard filtering → ranking.
  * Pure over its inputs (does not mutate allOffers), so it serves both the
  * final assembly and streaming partial snapshots.
@@ -306,7 +344,8 @@ export function assembleRanked(
   allOffers: NormalizedOffer[],
   plan: SearchPlan,
   preferences: ShopperPreferences | undefined,
-  maxResults: number
+  maxResults: number,
+  sort?: SearchSort
 ): AssembledRanking {
   const erStart = performance.now();
 
@@ -336,8 +375,9 @@ export function assembleRanked(
   const ranked = rankProducts(filteredProducts, plan, preferences);
   const timingRank = Math.round(performance.now() - rankStart);
 
-  // Limit to requested max results (client paginates locally from here)
-  const topResults = toWireResults(ranked.slice(0, maxResults));
+  // Apply the requested ordering, then limit (client paginates locally).
+  const ordered = sortRanked(ranked, sort);
+  const topResults = toWireResults(ordered.slice(0, maxResults));
 
   return {
     ranked: topResults,
@@ -402,7 +442,8 @@ export async function executeSearch(request: SearchRequest): Promise<SearchApiRe
     allOffers,
     plan,
     request.preferences,
-    request.preferences?.maxResults || 50
+    request.preferences?.maxResults || 50,
+    request.sort
   );
   timing.entityResolution = assembled.timingER;
   timing.ranking = assembled.timingRank;
@@ -513,7 +554,8 @@ export async function executeSearchStream(
       allOffers,
       plan,
       request.preferences,
-      CONFIG.partialSnapshotSize
+      CONFIG.partialSnapshotSize,
+      request.sort
     );
     onEvent({
       type: 'partial',
@@ -563,7 +605,8 @@ export async function executeSearchStream(
     allOffers,
     plan,
     request.preferences,
-    request.preferences?.maxResults || 50
+    request.preferences?.maxResults || 50,
+    request.sort
   );
   timing.entityResolution = assembled.timingER;
   timing.ranking = assembled.timingRank;

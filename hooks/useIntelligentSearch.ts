@@ -11,6 +11,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import type {
   SearchApiResponse,
   SearchStatus as SearchStatusType,
+  SearchSort,
   ShopperPreferences,
   RankedProduct,
   ProviderId,
@@ -249,6 +250,7 @@ export function useIntelligentSearch() {
     preferences?: ShopperPreferences,
     selectedSources?: RetailerSource[],
     destination?: { country: string; postalCode?: string },
+    sort?: SearchSort,
   ) => {
     abortRef.current?.abort();
     const controller = new AbortController();
@@ -274,6 +276,7 @@ export function useIntelligentSearch() {
     const payload = {
       query,
       destination,
+      sort,
       preferences: requestPreferences,
       // No candidatePlan on first search — WebLLM may not be ready yet
       // Server falls back to deterministic planner
@@ -310,6 +313,7 @@ export function useIntelligentSearch() {
             body: JSON.stringify({
               query,
               destination,
+              sort,
               preferences: requestPreferences,
               candidatePlan: planResult.plan,
             }),
