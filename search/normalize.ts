@@ -27,6 +27,8 @@ export function normalizeCandidate(
   if (candidate.description) fieldsProvided.push('description');
   if (candidate.availability && candidate.availability !== 'unknown') fieldsProvided.push('availability');
   if (candidate.condition && candidate.condition !== 'unknown') fieldsProvided.push('condition');
+  if (candidate.rating !== undefined) fieldsProvided.push('rating');
+  if (candidate.reviewCount !== undefined) fieldsProvided.push('reviewCount');
   if (candidate.seller) fieldsProvided.push('seller');
   if (candidate.fulfillment) fieldsProvided.push('fulfillment');
   if (candidate.returnPolicy) fieldsProvided.push('returnPolicy');
@@ -78,6 +80,8 @@ export function normalizeCandidate(
     price: candidate.price,
     listPrice: candidate.listPrice,
     availability: candidate.availability || 'unknown',
+    rating: candidate.rating,
+    reviewCount: candidate.reviewCount,
     fulfillment: candidate.fulfillment,
     seller: candidate.seller,
     returnPolicy: candidate.returnPolicy,

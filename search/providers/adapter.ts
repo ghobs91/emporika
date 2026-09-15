@@ -67,6 +67,8 @@ const walmartAdapter: RetailerSearchProvider = {
         listPrice: item.msrp > item.salePrice ? toMoney(item.msrp) : undefined,
         condition: item.bundle ? 'new' : 'new',
         availability: item.availableOnline !== false ? 'in_stock' : 'out_of_stock',
+        rating: item.customerRating ? parseFloat(item.customerRating) : undefined,
+        reviewCount: item.numReviews,
         fulfillment: {
           shippingSupported: true,
           shippingCost: item.standardShipRate !== undefined ? toMoney(item.standardShipRate) : undefined,
@@ -155,6 +157,8 @@ const bestbuyAdapter: RetailerSearchProvider = {
         listPrice: item.regularPrice > item.salePrice ? toMoney(item.regularPrice) : undefined,
         condition: 'new',
         availability: item.onlineAvailability ? 'in_stock' : 'out_of_stock',
+        rating: item.customerReviewAverage,
+        reviewCount: item.customerReviewCount,
         fulfillment: {
           shippingSupported: true,
           shippingCost: item.shippingLevelsOfService?.length
@@ -245,6 +249,8 @@ const targetAdapter: RetailerSearchProvider = {
           condition: 'new',
           availability: product.fulfillment?.shipping_options?.availability_status === 'IN_STOCK'
             ? 'in_stock' : 'unknown',
+          rating: product.ratings_and_reviews?.statistics?.rating?.average,
+          reviewCount: product.ratings_and_reviews?.statistics?.rating?.count,
           rawFieldAvailability: {
             name: true, price: true, image: true, url: true,
             rating: !!product.ratings_and_reviews?.statistics?.rating?.average,
@@ -441,6 +447,8 @@ const costcoAdapter: RetailerSearchProvider = {
           condition: 'new',
           availability: (item.isItemInStock ?? item.item_buyable ?? item.item_product_buyable)
             ? 'in_stock' : 'unknown',
+          rating: item.item_ratings ?? (item.item_review_ratings ? parseFloat(item.item_review_ratings) : undefined),
+          reviewCount: item.item_product_review_count ?? item.item_review_count,
           rawFieldAvailability: {
             name: true, price: true, image: true, url: true,
             rating: !!(item.item_ratings || item.item_review_ratings),
@@ -560,6 +568,8 @@ const shopifyAdapter: RetailerSearchProvider = {
           condition: 'new',
           availability: product.variants?.some((v: { availability?: { available: boolean } }) => v.availability?.available !== false)
             ? 'in_stock' : 'unknown',
+          rating: product.rating?.value,
+          reviewCount: product.rating?.count,
           variants: product.variants?.map((v) => ({
             providerVariantId: v.id,
             title: v.title,

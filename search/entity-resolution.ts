@@ -266,6 +266,17 @@ function buildCanonicalProduct(
 
   const missingData = offers.flatMap(o => o.uncertaintyFlags);
 
+  // Ratings: trust the most-reviewed offer's rating, and keep the highest
+  // review count seen across retailers.
+  const ratedOffer = [...offers]
+    .sort((a, b) => (b.reviewCount ?? 0) - (a.reviewCount ?? 0))
+    .find(o => o.rating !== undefined);
+  const rating = ratedOffer?.rating;
+  const reviewCount = offers.reduce<number | undefined>(
+    (max, o) => (o.reviewCount !== undefined ? Math.max(max ?? 0, o.reviewCount) : max),
+    undefined
+  );
+
   // Best images from any offer
   const imageUrls = offers
     .flatMap(o => o.imageUrls || [])
@@ -287,6 +298,8 @@ function buildCanonicalProduct(
     title: primaryOffer.title,
     description: undefined,
     brand: firstHint('brand'),
+    rating,
+    reviewCount,
     imageUrls: imageUrls.length > 0 ? imageUrls : undefined,
     offers,
     sourceProviders,

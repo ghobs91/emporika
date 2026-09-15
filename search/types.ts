@@ -90,6 +90,10 @@ export interface ProviderProductCandidate {
   listPrice?: Money;
   condition?: 'new' | 'used' | 'refurbished' | 'open_box' | 'unknown';
   availability?: 'in_stock' | 'out_of_stock' | 'limited' | 'unknown';
+  /** Average product rating as reported by the provider (typically 0–5). */
+  rating?: number;
+  /** Number of product reviews. */
+  reviewCount?: number;
   variants?: ProviderVariantCandidate[];
   fulfillment?: {
     shippingSupported?: boolean;
@@ -255,6 +259,10 @@ export interface NormalizedOffer {
   price?: Money;
   listPrice?: Money;
   availability?: 'in_stock' | 'out_of_stock' | 'limited' | 'unknown';
+  /** Average product rating as reported by the provider (typically 0–5). */
+  rating?: number;
+  /** Number of product reviews. */
+  reviewCount?: number;
   fulfillment?: {
     shippingSupported?: boolean;
     shippingEstimate?: string;
@@ -307,6 +315,10 @@ export interface CanonicalProduct {
   description?: string;
   brand?: string;
   category?: string;
+  /** Best available product rating across offers (from the most-reviewed offer). */
+  rating?: number;
+  /** Highest review count across offers. */
+  reviewCount?: number;
   imageUrls?: string[];
   offers: NormalizedOffer[];
   sourceProviders: ProviderId[];

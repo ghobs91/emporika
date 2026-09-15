@@ -269,22 +269,19 @@ function scoreProduct(
     const reasons: string[] = [];
     const tradeoffs: string[] = [];
 
-    // Generate reasons
-    if (offer.price && score > 0.4) {
-      reasons.push(`Competitively priced at ${offer.price.currency} ${offer.price.amount.toFixed(2)}`);
-    }
-    if (offer.availability === 'in_stock') {
-      reasons.push('Available and in stock');
-    }
-    if (offer.condition === 'new') {
-      reasons.push('Brand new condition');
+    // Only differentiating signals. Generic labels ("competitively priced",
+    // "brand new condition", "in stock") appeared on nearly every card and
+    // were noise, so they are intentionally not emitted.
+    if (offer.fulfillment?.shippingCost?.amount === 0) {
+      reasons.push('Free shipping');
     }
 
-    // Generate tradeoffs
     if (!offer.price) tradeoffs.push('Price not available');
-    if (offer.availability === 'unknown') tradeoffs.push('Availability not verified');
-    if (offer.condition === 'used') tradeoffs.push('Used condition');
-    if (offer.seller?.type === 'marketplace_seller') tradeoffs.push('Sold by marketplace seller');
+    if (offer.availability === 'out_of_stock') tradeoffs.push('Out of stock');
+    if (offer.condition === 'refurbished') tradeoffs.push('Refurbished');
+    else if (offer.condition === 'open_box') tradeoffs.push('Open box');
+    else if (offer.condition === 'used') tradeoffs.push('Used');
+    if (offer.seller?.type === 'marketplace_seller') tradeoffs.push('Marketplace seller');
 
     return {
       offer,
@@ -327,6 +324,12 @@ function scoreProduct(
 
 // ── Main ranking function ──────────────────────────────────────────────
 
+/** Landed cost (price + known shipping), Infinity when price is unknown. */
+function landedAmount(offer: NormalizedOffer): number {
+  if (!offer.price) return Infinity;
+  return offer.price.amount + (offer.fulfillment?.shippingCost?.amount ?? 0);
+}
+
 export function rankProducts(
   products: CanonicalProduct[],
   plan: SearchPlan,
@@ -346,13 +349,11 @@ export function rankProducts(
     }
 
     if (product.offers.length > 1) {
-      reasonsToChoose.push(`${product.offers.length} offers to compare`);
-    }
-
-    if (product.sourceProviders.length > 1) {
-      reasonsToChoose.push(`Available at ${product.sourceProviders.length} retailers`);
-    } else {
-      tradeoffs.push(`Only found at ${product.sourceProviders[0] || 'one retailer'}`);
+      const bestLanded = bestOffer ? landedAmount(bestOffer.offer) : Infinity;
+      const minLanded = Math.min(...product.offers.map(landedAmount));
+      if (Number.isFinite(bestLanded) && bestLanded <= minLanded) {
+        reasonsToChoose.push(`Lowest delivered price of ${product.offers.length} offers`);
+      }
     }
 
     if (product.warnings.length > 0) {

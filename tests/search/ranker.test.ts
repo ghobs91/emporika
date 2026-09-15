@@ -151,6 +151,41 @@ describe('Ranking engine', () => {
     expect(ranked[0].scoreBreakdown?.length ?? 0).toBeGreaterThan(0);
     expect((ranked[0].scoreBreakdown ?? []).every(b => typeof b.weightedContribution === 'number')).toBe(true);
   });
+
+  it('does not emit generic "competitively priced" / "brand new" labels', () => {
+    const product = makeProduct([makeOffer()]);
+    const ranked = rankProducts([product], basePlan);
+    const labels = [...ranked[0].reasonsToChoose, ...ranked[0].tradeoffs];
+
+    expect(labels.some(l => /competitively priced/i.test(l))).toBe(false);
+    expect(labels.some(l => /brand new/i.test(l))).toBe(false);
+  });
+
+  it('emits Free shipping when the best offer ships free', () => {
+    const product = makeProduct([
+      makeOffer({ fulfillment: { shippingSupported: true, shippingCost: { amount: 0, currency: 'USD' } } }),
+    ]);
+    const ranked = rankProducts([product], basePlan);
+    expect(ranked[0].reasonsToChoose).toContain('Free shipping');
+  });
+
+  it('labels the lowest delivered price when a product has multiple offers', () => {
+    const cheap = makeOffer({
+      providerId: 'walmart',
+      providerProductId: 'w',
+      price: { amount: 90, currency: 'USD' },
+      fulfillment: { shippingSupported: true, shippingCost: { amount: 0, currency: 'USD' } },
+    });
+    const pricey = makeOffer({
+      providerId: 'bestbuy',
+      providerProductId: 'b',
+      price: { amount: 120, currency: 'USD' },
+      fulfillment: { shippingSupported: true, shippingCost: { amount: 0, currency: 'USD' } },
+    });
+
+    const ranked = rankProducts([makeProduct([cheap, pricey])], basePlan);
+    expect(ranked[0].reasonsToChoose).toContain('Lowest delivered price of 2 offers');
+  });
 });
 
 describe('toWireResults', () => {

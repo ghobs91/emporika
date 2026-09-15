@@ -284,30 +284,31 @@ export default function Home() {
   };
 
   // ── Pagination ──────────────────────────────────────────────────────
-  // AI results are ranked server-side; preserve that order for "most-popular"
-  // but honor the user's sort choice for the other options.
+  // The selected sort is applied to the displayed list in both modes.
+  // "Most Popular" uses review volume (then rating), falling back to the
+  // server relevance rank as a stable tiebreaker.
   const aiResults = aiState.response?.results ?? [];
-  const sortedAiResults =
-    sortBy === 'most-popular'
-      ? aiResults
-      : [...aiResults].sort((a, b) => {
-          const priceA = a.bestOffer?.offer.price?.amount;
-          const priceB = b.bestOffer?.offer.price?.amount;
-          switch (sortBy) {
-            case 'price-asc':
-              return (priceA ?? Infinity) - (priceB ?? Infinity);
-            case 'price-desc':
-              return (priceB ?? -Infinity) - (priceA ?? -Infinity);
-            case 'rating-desc': {
-              // Offers without a seller rating go to the end
-              const ratingA = a.bestOffer?.offer.seller?.rating ?? -1;
-              const ratingB = b.bestOffer?.offer.seller?.rating ?? -1;
-              return ratingB - ratingA;
-            }
-            default:
-              return 0;
-          }
-        });
+  const sortedAiResults = [...aiResults].sort((a, b) => {
+    switch (sortBy) {
+      case 'price-asc':
+        return (a.bestOffer?.offer.price?.amount ?? Infinity) - (b.bestOffer?.offer.price?.amount ?? Infinity);
+      case 'price-desc':
+        return (b.bestOffer?.offer.price?.amount ?? -Infinity) - (a.bestOffer?.offer.price?.amount ?? -Infinity);
+      case 'rating-desc': {
+        const rating = (b.product.rating ?? -1) - (a.product.rating ?? -1);
+        if (rating !== 0) return rating;
+        return (b.product.reviewCount ?? -1) - (a.product.reviewCount ?? -1);
+      }
+      case 'most-popular':
+      default: {
+        const reviews = (b.product.reviewCount ?? -1) - (a.product.reviewCount ?? -1);
+        if (reviews !== 0) return reviews;
+        const rating = (b.product.rating ?? -1) - (a.product.rating ?? -1);
+        if (rating !== 0) return rating;
+        return a.rank - b.rank;
+      }
+    }
+  });
 
   const aiTotalPages = Math.max(1, Math.ceil(sortedAiResults.length / RESULTS_PER_PAGE));
   const aiPage = Math.min(currentPage, aiTotalPages);
@@ -621,6 +622,8 @@ export default function Home() {
                         brand: ranked.product.brand,
                         sellerName: best?.seller?.name,
                         sellerDomain: best?.seller?.domain,
+                        customerRating: ranked.product.rating,
+                        reviewCount: ranked.product.reviewCount,
                         shortDescription: ranked.reasonsToChoose.slice(0, 2).join(' · '),
                       };
                       return (

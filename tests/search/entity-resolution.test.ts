@@ -167,4 +167,26 @@ describe('Entity resolution', () => {
     const products = resolveEntities([offerA, offerB]);
     expect(products).toHaveLength(2);
   });
+
+  it('aggregates rating from the most-reviewed offer and max review count', () => {
+    const offerA = makeOffer({
+      providerId: 'walmart',
+      providerProductId: 'w1',
+      identityHints: { gtin: '111' },
+      rating: 4.2,
+      reviewCount: 10,
+    });
+    const offerB = makeOffer({
+      providerId: 'bestbuy',
+      providerProductId: 'b1',
+      identityHints: { gtin: '111' },
+      rating: 4.8,
+      reviewCount: 500,
+    });
+
+    const products = resolveEntities([offerA, offerB]);
+    expect(products).toHaveLength(1);
+    expect(products[0].rating).toBe(4.8);
+    expect(products[0].reviewCount).toBe(500);
+  });
 });
