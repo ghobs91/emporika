@@ -17,6 +17,7 @@ import type {
   SearchMetadata,
 } from '@/search/types';
 import { getWebLLMClient } from '@/lib/webllm/client';
+import { derivePreferences, loadLearnedProfile, mergePreferences } from '@/lib/learning';
 import type { RetailerSource } from '@/types/unified';
 
 export type { SearchStatusType, SearchApiResponse };
@@ -247,6 +248,7 @@ export function useIntelligentSearch() {
     query: string,
     preferences?: ShopperPreferences,
     selectedSources?: RetailerSource[],
+    destination?: { country: string; postalCode?: string },
   ) => {
     abortRef.current?.abort();
     const controller = new AbortController();
@@ -260,13 +262,19 @@ export function useIntelligentSearch() {
       response: null,
     }));
 
+    // Fold deterministic learned signals (e.g. repeatedly chosen brands) under
+    // explicit preferences. Explicit choices always win.
+    const learned = derivePreferences(loadLearnedProfile());
+    const requestPreferences = {
+      ...mergePreferences(preferences, learned),
+      ...(selectedSources ? { includedProviders: selectedSources } : {}),
+      maxResults: MAX_RESULTS,
+    };
+
     const payload = {
       query,
-      preferences: {
-        ...preferences,
-        ...(selectedSources ? { includedProviders: selectedSources } : {}),
-        maxResults: MAX_RESULTS,
-      },
+      destination,
+      preferences: requestPreferences,
       // No candidatePlan on first search — WebLLM may not be ready yet
       // Server falls back to deterministic planner
     };
@@ -301,11 +309,8 @@ export function useIntelligentSearch() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               query,
-              preferences: {
-                ...preferences,
-                ...(selectedSources ? { includedProviders: selectedSources } : {}),
-                maxResults: MAX_RESULTS,
-              },
+              destination,
+              preferences: requestPreferences,
               candidatePlan: planResult.plan,
             }),
             signal: AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined,

@@ -496,9 +496,21 @@ const shopifyAdapter: RetailerSearchProvider = {
     const unsupported: string[] = [];
     const applied: string[] = ['keyword'];
 
+    // Shopify's Global Catalog is keyword-based; it has no structured
+    // category filter we can populate from a free-text hint. Apply the
+    // intended sub-category as a keyword so "king bed" favours bed frames
+    // over the adjacent category (bedding).
+    const categoryHint = request.categoryHints?.find(
+      (hint) => !request.query.toLowerCase().includes(hint.toLowerCase())
+    );
+    const effectiveQuery = categoryHint
+      ? `${request.query} ${categoryHint}`
+      : request.query;
+    if (categoryHint) applied.push('categoryHints');
+
     try {
       const response = await searchShopifyProducts({
-        query: request.query,
+        query: effectiveQuery,
         pagination: { limit: Math.min(request.resultLimit, 50) },
         filters: {
           available: request.availabilityRequired || undefined,
@@ -529,11 +541,15 @@ const shopifyAdapter: RetailerSearchProvider = {
           providerOfferId: firstVariant?.id,
           canonicalProductHints: {
             shopifyUpid: extractUPID(product.id),
-            brand: firstVariant?.seller?.name,
+            // Shopify exposes a merchant SKU, not a product-level brand. Passing
+            // the seller name as `brand` caused false brand-vetoes between two
+            // merchants listing the same product, blocking cross-merchant
+            // dedup. Use the SKU as an MPN hint instead and leave brand unset.
+            ...(firstVariant?.sku ? { mpn: [firstVariant.sku] } : {}),
           },
           title: product.title,
           description: product.description?.plain || product.description?.html,
-          brand: firstVariant?.seller?.name,
+          brand: undefined,
           categoryPath: product.categories?.map((c: { value: string }) => c.value),
           imageUrls: product.media?.filter((m: { type: string }) => m.type === 'image').map((m: { url: string }) => m.url),
           productUrl: firstVariant?.url ?? product.url,
@@ -558,10 +574,11 @@ const shopifyAdapter: RetailerSearchProvider = {
             id: firstVariant.seller.id,
             name: firstVariant.seller.name,
             type: 'retailer',
+            domain: firstVariant.seller.domain,
           } : undefined,
           rawFieldAvailability: {
             name: true, price: true, image: true, url: true,
-            brand: !!firstVariant?.seller?.name,
+            brand: false,
             rating: !!product.rating, reviews: !!product.rating?.count,
             description: !!product.description,
             variants: !!product.variants?.length,

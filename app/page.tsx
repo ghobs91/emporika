@@ -5,6 +5,8 @@ import Link from 'next/link';
 import SearchBar from '@/components/SearchBar';
 import ProductGrid from '@/components/ProductGrid';
 import ProductCard from '@/components/ProductCard';
+import ProductModal from '@/components/ProductModal';
+import ProviderStatusBar from '@/components/ProviderStatusBar';
 import TrendingFeed from '@/components/TrendingFeed';
 import ThemeToggle from '@/components/ThemeToggle';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
@@ -16,7 +18,7 @@ import CategoryPillRail from '@/components/CategoryPillRail';
 import DealsCarousel from '@/components/DealsCarousel';
 import CartSummarySection from '@/components/CartSummarySection';
 import { CartProvider } from '@/context/CartContext';
-import { UnifiedProduct, RetailerSource } from '@/types/unified';
+import { UnifiedProduct, RetailerSource, ProviderStatus } from '@/types/unified';
 import { ShoppingBag, SlidersHorizontal, X } from 'lucide-react';
 import { useTargetStore } from '@/hooks/useTargetStore';
 import SearchFilters, { ActiveFilters } from '@/components/SearchFilters';
@@ -24,7 +26,6 @@ import { ProductFilters, applyProductFilters } from '@/lib/filters';
 import { useIntelligentSearch } from '@/hooks/useIntelligentSearch';
 import { SearchModeToggle } from '@/components/WebLLMStatus';
 import SortSelect, { SortOption } from '@/components/SortSelect';
-import ProductResultCard from '@/components/ProductResultCard';
 import Pagination from '@/components/Pagination';
 import ClarificationPrompt from '@/components/ClarificationPrompt';
 import SearchPromptPills from '@/components/SearchPromptPills';
@@ -48,6 +49,8 @@ export default function Home() {
   const [filters, setFilters] = useState<ProductFilters>({});
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [providerStatus, setProviderStatus] = useState<ProviderStatus[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<UnifiedProduct | null>(null);
   const { storeInfo } = useTargetStore();
   const { state: aiState, search: aiSearch, toggleAiMode } = useIntelligentSearch();
 
@@ -106,6 +109,33 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSources]);
 
+  // Derive per-retailer status from the intelligent-search metadata/results
+  // so the UI can show who actually returned results (vs. errored/empty).
+  useEffect(() => {
+    const response = aiState.response;
+    if (!response?.metadata) return;
+    const counts: Record<string, number> = {};
+    for (const ranked of response.results ?? []) {
+      for (const providerId of ranked.product.sourceProviders) {
+        counts[providerId] = (counts[providerId] ?? 0) + 1;
+      }
+    }
+    const failed = new Map(response.metadata.providersFailed.map((f) => [f.providerId, f.errorType]));
+    const ids = Array.from(
+      new Set<string>([
+        ...response.metadata.providersSearched,
+        ...response.metadata.providersFailed.map((f) => f.providerId),
+      ])
+    );
+    setProviderStatus(
+      ids.map((id) => ({
+        providerId: id as RetailerSource,
+        count: counts[id] ?? 0,
+        error: failed.get(id as RetailerSource),
+      }))
+    );
+  }, [aiState.response]);
+
   const handleSearch = async (query: string) => {
     setIsLoading(true);
     setSearchQuery(query);
@@ -114,11 +144,16 @@ export default function Home() {
     setSelectedClothingSize(null); // Reset clothing size filter when searching
     setFilters({}); // Reset property filters when searching
     setCurrentPage(1); // Reset pagination when searching
+    setProviderStatus([]); // Reset retailer status when searching
 
     // ── Intelligent search (POST /api/search) ──
     if (aiState.aiEnabled) {
       console.log('[AI Search] Firing POST /api/search for:', query);
-      aiSearch(query, undefined, selectedSources).catch((err) => {
+      const destination = {
+        country: 'US',
+        ...(storeInfo?.zip ? { postalCode: storeInfo.zip } : {}),
+      };
+      aiSearch(query, undefined, selectedSources, destination).catch((err) => {
         console.error('AI search failed:', err);
       });
     }
@@ -143,6 +178,18 @@ export default function Home() {
       if (response.ok) {
         setProducts(data.items || []);
         setTotalResults(data.totalResults || 0);
+        // Classic mode has no AI metadata; map the per-source summary.
+        if (!aiState.aiEnabled && data.sources) {
+          setProviderStatus(
+            (Object.entries(data.sources) as Array<[RetailerSource, { count: number; error?: string }]>).map(
+              ([providerId, summary]) => ({
+                providerId,
+                count: summary.count,
+                error: summary.error,
+              })
+            )
+          );
+        }
       } else {
         console.error('Search error:', data.error);
         setProducts([]);
@@ -520,6 +567,9 @@ export default function Home() {
                 </div>
               )}
 
+              {/* Per-retailer status — makes silent degradation visible */}
+              <ProviderStatusBar statuses={providerStatus} streaming={aiState.streaming} />
+
               {/* AI mode: show ranked intelligent results; otherwise classic grid */}
               {aiState.aiEnabled && aiState.response?.results && aiState.response.results.length > 0 ? (
                 <div className="space-y-3">
@@ -560,23 +610,27 @@ export default function Home() {
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {aiPageItems.map((ranked) => {
                       const best = ranked.bestOffer?.offer;
-                      const product: import('@/types/unified').UnifiedProduct = {
+                      const product: UnifiedProduct = {
                         id: ranked.product.canonicalId,
                         name: ranked.product.title,
                         price: best?.price?.amount ?? 0,
                         originalPrice: best?.listPrice && best.listPrice.amount > (best.price?.amount ?? 0) ? best.listPrice.amount : undefined,
                         image: ranked.product.imageUrls?.[0] ?? best?.imageUrls?.[0] ?? '',
                         productUrl: best?.productUrl ?? '#',
-                        source: (best?.providerId ?? 'shopify') as import('@/types/unified').RetailerSource,
+                        source: (best?.providerId ?? 'shopify') as RetailerSource,
+                        brand: ranked.product.brand,
+                        sellerName: best?.seller?.name,
+                        sellerDomain: best?.seller?.domain,
                         shortDescription: ranked.reasonsToChoose.slice(0, 2).join(' · '),
                       };
                       return (
-                        <div key={ranked.product.canonicalId} className="relative">
-                          <div className="absolute -top-2 -left-2 z-10 w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/50 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 text-xs font-bold flex items-center justify-center shadow-sm">
-                            {ranked.rank}
-                          </div>
-                          <ProductCard product={product} />
-                        </div>
+                        <ProductCard
+                          key={ranked.product.canonicalId}
+                          product={product}
+                          rank={ranked.rank}
+                          ranked={ranked}
+                          onClick={() => setSelectedProduct(product)}
+                        />
                       );
                     })}
                   </div>
@@ -618,6 +672,16 @@ export default function Home() {
 
       {/* PWA Install Prompt */}
       <PWAInstallPrompt />
+
+      {/* Product detail modal (AI cards) */}
+      {selectedProduct && (
+        <ProductModal
+          key={selectedProduct.id}
+          product={selectedProduct}
+          isOpen={true}
+          onClose={() => setSelectedProduct(null)}
+        />
+      )}
 
       {/* Cart Drawer */}
       <CartDrawer />

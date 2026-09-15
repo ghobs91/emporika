@@ -30,16 +30,22 @@ export interface UnifiedProduct {
   image: string;
   productUrl: string;
   source: RetailerSource;
+  /** Product brand, when known (used for deterministic preference learning). */
+  brand?: string;
   customerRating?: number;
   reviewCount?: number;
   shortDescription?: string;
   freeShipping?: boolean;
   availableOnline?: boolean;
   shipping?: ShippingInfo;
+  /** Cheapest known shipping cost in dollars (0 = free). Absent when unknown. */
+  shippingCost?: number;
   /** Shopify only: direct checkout URL that adds the variant to cart */
   checkoutUrl?: string;
   /** Shopify only: seller's myshopify.com domain for Cart MCP calls */
   sellerDomain?: string;
+  /** Shopify only: merchant/storefront display name */
+  sellerName?: string;
   /** Shopify only: variant GID for Cart MCP calls */
   variantId?: string;
 }
@@ -74,7 +80,13 @@ export function normalizeWalmartProduct(product: WalmartProduct): UnifiedProduct
   if (product.twoThreeDayShippingRate !== undefined) {
     shipping.twoThreeDay = true;
   }
-  
+
+  // Cheapest known shipping rate (0 when the retailer advertises free shipping).
+  const shippingCost =
+    product.freeShippingOver35Dollars === true
+      ? 0
+      : product.standardShipRate ?? product.twoThreeDayShippingRate;
+
   return {
     id: `walmart-${product.itemId}`,
     name: product.name,
@@ -89,6 +101,7 @@ export function normalizeWalmartProduct(product: WalmartProduct): UnifiedProduct
     freeShipping: product.freeShippingOver35Dollars,
     availableOnline: product.availableOnline,
     shipping: Object.keys(shipping).length > 0 ? shipping : undefined,
+    shippingCost,
   };
 }
 
@@ -128,6 +141,12 @@ export function normalizeBestBuyProduct(product: BestBuyProduct): UnifiedProduct
     freeShipping: product.freeShipping,
     availableOnline: product.onlineAvailability,
     shipping: Object.keys(shipping).length > 0 ? shipping : undefined,
+    shippingCost:
+      product.freeShipping === true
+        ? 0
+        : product.shippingLevelsOfService?.length
+          ? Math.min(...product.shippingLevelsOfService.map(level => level.unitShippingPrice))
+          : undefined,
   };
 }
 
@@ -232,6 +251,15 @@ export function normalizeEbayProduct(product: EbayItemSummary): UnifiedProduct {
     };
   }
 
+  const shippingCosts = (product.shippingOptions || [])
+    .map(option => (option.shippingCost?.value !== undefined ? parseFloat(option.shippingCost.value) : NaN))
+    .filter(n => !Number.isNaN(n));
+  const shippingCost = hasFreeShipping
+    ? 0
+    : shippingCosts.length > 0
+      ? Math.min(...shippingCosts)
+      : undefined;
+
   return {
     id: `ebay-${product.itemId}`,
     name: product.title,
@@ -246,6 +274,7 @@ export function normalizeEbayProduct(product: EbayItemSummary): UnifiedProduct {
     freeShipping: hasFreeShipping,
     availableOnline: true, // eBay items are always available online
     shipping: Object.keys(shipping).length > 0 ? shipping : undefined,
+    shippingCost,
   };
 }
 
@@ -344,4 +373,11 @@ export interface UnifiedSearchResponse {
       error?: string;
     };
   };
+}
+
+/** Per-retailer search outcome, surfaced in the UI so silent degradation is visible. */
+export interface ProviderStatus {
+  providerId: RetailerSource;
+  count: number;
+  error?: string;
 }

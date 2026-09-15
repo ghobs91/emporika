@@ -272,6 +272,41 @@ export interface ShopifyLookupParams {
   view?: string;
 }
 
+// ── Shared UCP cart/checkout context ───────────────────────────────────
+// Localization/identity hints accepted by cart and checkout tools. `context`
+// is a hint for pricing, availability, and currency — never authoritative
+// for shipping (collect a shipping address through Checkout fulfillment).
+
+export interface ShopifyContext {
+  address_country?: string;
+  address_region?: string;
+  postal_code?: string;
+  language?: string;
+  currency?: string;
+  intent?: string;
+  eligibility?: string[];
+}
+
+/** Optional attribution metadata forwarded to the merchant with cart/checkout. */
+export interface ShopifyAttribution {
+  referring_domain?: string;
+  click_id_tag?: string;
+  click_id_value?: string;
+  activity_id_tag?: string;
+  activity_id_value?: string;
+  utm_campaign?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_content?: string;
+  utm_term?: string;
+}
+
+/** Optional buyer information for personalized estimates. */
+export interface ShopifyBuyer {
+  email?: string;
+  phone_number?: string;
+}
+
 // ── Cart MCP ───────────────────────────────────────────────────────────
 // Based on: https://shopify.dev/docs/agents/carts-and-checkout/cart-mcp
 
@@ -301,6 +336,8 @@ export interface ShopifyCart {
   totals: ShopifyCartTotal[];
   discounts?: { codes: string[]; applied: unknown[] };
   fulfillment?: { methods: unknown[] };
+  attribution?: ShopifyAttribution;
+  buyer?: ShopifyBuyer;
   messages: ShopifyMessage[];
   continue_url: string;
   expires_at?: string;
@@ -324,10 +361,11 @@ export interface ShopifyCreateCartParams {
   /** Multi-item cart: array of variant/quantity pairs */
   lineItems?: ShopifyCreateCartLineItem[];
   shopDomain: string; // e.g. "lulu-and-georgia.myshopify.com"
-  context?: {
-    address_country?: string;
-    postal_code?: string;
-  };
+  context?: ShopifyContext;
+  /** Optional attribution metadata (UTMs, click IDs) forwarded to the merchant. */
+  attribution?: ShopifyAttribution;
+  /** Optional buyer information for personalized estimates. */
+  buyer?: ShopifyBuyer;
   /** Caller-provided idempotency key for safe retries (generated server-side if omitted). Sent as meta `idempotency-key`. */
   idempotencyKey?: string;
 }
@@ -343,15 +381,113 @@ export interface ShopifyUpdateCartParams {
   cartId: string; // gid://shopify/Cart/{id}
   /** Full replacement line items (PUT semantics — send the complete desired state, not a diff). */
   lineItems: ShopifyCreateCartLineItem[];
-  context?: {
-    address_country?: string;
-    postal_code?: string;
-  };
+  context?: ShopifyContext;
+  /** Resend attribution to preserve it — update_cart replaces the full cart state. */
+  attribution?: ShopifyAttribution;
+  buyer?: ShopifyBuyer;
   idempotencyKey?: string;
 }
 
 export interface ShopifyCancelCartParams {
   shopDomain: string;
   cartId: string; // gid://shopify/Cart/{id}
+  idempotencyKey?: string;
+}
+
+// ── Checkout MCP ───────────────────────────────────────────────────────
+// Based on: https://shopify.dev/docs/agents/carts-and-checkout/checkout-mcp
+//
+// Emporika uses Checkout MCP for the build + handoff flow: convert a Cart
+// MCP cart into a checkout session (create_checkout with cart_id), optionally
+// update it, and hand the buyer off via `continue_url`. `complete_checkout`
+// requires a token permitted to complete purchases and is intentionally not
+// part of this client.
+
+export type ShopifyCheckoutStatus =
+  | 'incomplete'
+  | 'requires_escalation'
+  | 'ready_for_complete'
+  | 'complete_in_progress'
+  | 'completed'
+  | 'canceled'
+  | string;
+
+export interface ShopifyCheckoutLineItem extends ShopifyCartLineItem {
+  available_quantity?: number;
+}
+
+export interface ShopifyCheckoutFulfillment {
+  methods?: Array<{
+    id?: string;
+    type: string;
+    line_item_ids?: string[];
+    destinations?: ShopifyDestination[];
+  }>;
+}
+
+export interface ShopifyDestination {
+  first_name?: string;
+  last_name?: string;
+  street_address?: string;
+  address_locality?: string;
+  address_region?: string;
+  postal_code?: string;
+  address_country?: string;
+}
+
+/** Input checkout payload shared by create_checkout and update_checkout (PUT semantics). */
+export interface ShopifyCheckoutInput {
+  currency?: string;
+  line_items?: ShopifyCreateCartLineItem[];
+  buyer?: ShopifyBuyer;
+  context?: ShopifyContext;
+  attribution?: ShopifyAttribution;
+  fulfillment?: ShopifyCheckoutFulfillment;
+}
+
+export interface ShopifyCheckout {
+  ucp: ShopifyUCPMetadata;
+  id: string; // gid://shopify/Checkout/{id}
+  status: ShopifyCheckoutStatus;
+  currency?: string;
+  buyer?: ShopifyBuyer;
+  line_items?: ShopifyCheckoutLineItem[];
+  totals?: ShopifyCartTotal[];
+  fulfillment?: ShopifyCheckoutFulfillment;
+  links?: Array<{ type: string; title?: string; url: string }>;
+  payment?: { instruments?: unknown[]; selected_instrument_id?: string };
+  attribution?: ShopifyAttribution;
+  messages?: ShopifyMessage[];
+  continue_url?: string;
+  expires_at?: string;
+  order?: { id: string; permalink_url?: string };
+}
+
+export interface ShopifyCreateCheckoutParams {
+  shopDomain: string;
+  /** Optional Cart MCP cart id to convert into this checkout. When set, `checkout` is optional. */
+  cartId?: string;
+  /** Checkout payload. Required only when `cartId` is omitted. */
+  checkout?: ShopifyCheckoutInput;
+  idempotencyKey?: string;
+}
+
+export interface ShopifyGetCheckoutParams {
+  shopDomain: string;
+  checkoutId: string; // gid://shopify/Checkout/{id}
+  idempotencyKey?: string;
+}
+
+export interface ShopifyUpdateCheckoutParams {
+  shopDomain: string;
+  checkoutId: string;
+  /** Full replacement checkout state (PUT semantics — send the complete desired state). */
+  checkout: ShopifyCheckoutInput;
+  idempotencyKey?: string;
+}
+
+export interface ShopifyCancelCheckoutParams {
+  shopDomain: string;
+  checkoutId: string;
   idempotencyKey?: string;
 }

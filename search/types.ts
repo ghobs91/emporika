@@ -105,6 +105,8 @@ export interface ProviderProductCandidate {
     type?: 'retailer' | 'marketplace_seller' | 'unknown';
     rating?: number;
     ratingCount?: number;
+    /** Merchant storefront domain (e.g. "shop.myshopify.com"), when known. */
+    domain?: string;
   };
   returnPolicy?: {
     summary?: string;
@@ -267,6 +269,8 @@ export interface NormalizedOffer {
     type?: 'retailer' | 'marketplace_seller' | 'unknown';
     rating?: number;
     ratingCount?: number;
+    /** Merchant storefront domain (e.g. "shop.myshopify.com"), when known. */
+    domain?: string;
   };
   returnPolicy?: {
     summary?: string;

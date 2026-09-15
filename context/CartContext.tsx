@@ -13,9 +13,11 @@ function loadCart(): CartItem[] {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const items = JSON.parse(raw) as CartItem[];
-    // Remove items older than 7 days
+    // Remove items older than 7 days; backfill `source` for legacy entries.
     const now = Date.now();
-    const fresh = items.filter((item) => now - item.addedAt < 7 * 24 * 60 * 60 * 1000);
+    const fresh = items
+      .filter((item) => now - item.addedAt < 7 * 24 * 60 * 60 * 1000)
+      .map((item) => ({ ...item, source: item.source ?? 'shopify' }));
     if (fresh.length !== items.length) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh));
     }
@@ -54,7 +56,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addItem = useCallback((item: Omit<CartItem, 'id' | 'addedAt'>) => {
     setItems((prev) => {
       const existing = prev.find(
-        (i) => i.variantId === item.variantId && i.shopDomain === item.shopDomain
+        (i) =>
+          i.shopDomain === item.shopDomain &&
+          (i.variantId && item.variantId
+            ? i.variantId === item.variantId
+            : i.productId === item.productId)
       );
       if (existing) {
         return prev.map((i) =>

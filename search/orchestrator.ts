@@ -22,7 +22,7 @@ import type {
   ProviderSearchResult,
 } from './types';
 import { validatePlan } from './schemas';
-import { createFallbackPlan, resolveEligibleProviders } from './planner';
+import { createFallbackPlan, resolveEligibleProviders, withCategoryIntent } from './planner';
 import { getProvider, getAvailableProviders } from './providers/adapter';
 import { getCapabilities } from './providers/capabilities';
 import { normalizeProviderResults } from './normalize';
@@ -88,7 +88,9 @@ function prepareSearch(
   if (request.candidatePlan) {
     const validation = validatePlan(request.candidatePlan);
     if (validation.valid) {
-      plan = validation.plan;
+      // A model-generated plan has no knowledge of the deterministic category
+      // disambiguation rules; merge them in (existing values win).
+      plan = withCategoryIntent(validation.plan, request.query);
       plannerSource = 'webllm';
     } else {
       // Candidate plan failed validation — use fallback

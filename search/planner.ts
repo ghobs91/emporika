@@ -162,7 +162,83 @@ function extractSizes(query: string): SizeExtraction {
     return `pack of ${n}`;
   });
 
+  // Bed/mattress sizes: "king", "california king", "queen", "twin xl".
+  // These stay in the search query (not stripped) — retailers match them well.
+  const bedSize = lower.match(/\b(california king|cal ?king|king|queen|full xl|twin xl|full|twin)\b/);
+  if (
+    bedSize?.[0] &&
+    /\b(beds?|mattresses?|bed ?frames?|headboards?|sheets?)\b/.test(lower)
+  ) {
+    const size = bedSize[0].toLowerCase().replace(/\s+/g, ' ');
+    if (!features.includes(size)) features.push(size);
+  }
+
   return { features, strip };
+}
+
+interface CategoryIntent {
+  categoryHints?: string[];
+  exclusions?: string[];
+}
+
+/**
+ * Category disambiguation rules. When the query targets a category but not
+ * its common cross-category homonyms, we (a) hint the intended sub-category
+ * for provider keyword matching and (b) exclude adjacent product categories
+ * that otherwise dominate results (e.g. "king bed" → bed sheets).
+ *
+ * `unless` lists terms that indicate the shopper means the adjacent category
+ * on purpose, in which case no rule fires.
+ */
+const CATEGORY_RULES: Array<{
+  match: RegExp;
+  unless: RegExp;
+  hints: string[];
+  exclusions: string[];
+}> = [
+  {
+    match: /\b(beds?|bed ?frames?|platform bed|headboards?)\b/i,
+    unless: /\b(sheets?|bedding|comforter|duvet|quilt|pillows?|pillowcases?|mattresses?|toppers?|protectors?|bedspreads?|coverlets?)\b/i,
+    hints: ['bed frame', 'platform bed', 'headboard'],
+    exclusions: [
+      'bed sheet', 'bed sheets', 'sheet set', 'sheets', 'bedding',
+      'comforter', 'duvet', 'quilt', 'pillowcase', 'mattress protector',
+      'mattress topper', 'bedspread',
+    ],
+  },
+];
+
+/** Detect the intended sub-category and adjacent-category exclusions. */
+function detectCategoryIntent(query: string): CategoryIntent {
+  for (const rule of CATEGORY_RULES) {
+    if (rule.match.test(query) && !rule.unless.test(query)) {
+      return { categoryHints: rule.hints, exclusions: rule.exclusions };
+    }
+  }
+  return {};
+}
+
+/**
+ * Merge deterministic category disambiguation into a plan (e.g. a
+ * WebLLM-generated candidate plan, which has no knowledge of these rules).
+ * Existing plan values always win — this only fills gaps.
+ */
+export function withCategoryIntent(plan: SearchPlan, query: string): SearchPlan {
+  const intent = detectCategoryIntent(query);
+  if (!intent.categoryHints && !intent.exclusions) return plan;
+
+  return {
+    ...plan,
+    hardFilters: {
+      ...plan.hardFilters,
+      categoryHints: plan.hardFilters.categoryHints?.length
+        ? plan.hardFilters.categoryHints
+        : intent.categoryHints,
+      exclusions: plan.hardFilters.exclusions?.length
+        ? plan.hardFilters.exclusions
+        : intent.exclusions,
+    },
+  };
 }
 
 interface CompatExtraction {
@@ -297,6 +373,10 @@ export function createFallbackPlan(
     }
   }
 
+  // Category disambiguation: intended sub-category + adjacent-category
+  // exclusions ("king bed" should not surface bed sheets).
+  const categoryIntent = detectCategoryIntent(correctedQuery);
+
   // ── Generate search queries ──────────────────────────────────────────
 
   // Clean up the query for search. Extracted size/compatibility phrases
@@ -382,7 +462,9 @@ export function createFallbackPlan(
       maxPrice: maxPrice ?? preferences?.budget?.max,
       minPrice: minPrice ?? preferences?.budget?.min,
       currency: preferences?.budget?.currency || 'USD',
+      categoryHints: categoryIntent.categoryHints,
       requiredFeatures: requiredFeatures.length > 0 ? requiredFeatures : undefined,
+      exclusions: categoryIntent.exclusions,
       excludedBrands: preferences?.excludedBrands,
       preferredBrands: preferredBrands.length > 0 ? preferredBrands : undefined,
       allowedConditions: allowedConditions.length > 0 ? allowedConditions : undefined,

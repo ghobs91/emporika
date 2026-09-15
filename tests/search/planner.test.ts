@@ -1,7 +1,7 @@
 // ── Deterministic fallback planner tests ──────────────────────────────────
 
 import { describe, it, expect } from 'vitest';
-import { createFallbackPlan } from '@/search/planner';
+import { createFallbackPlan, withCategoryIntent } from '@/search/planner';
 import { validatePlan } from '@/search/schemas';
 import type { ProviderId } from '@/search/types';
 
@@ -62,5 +62,40 @@ describe('createFallbackPlan query understanding', () => {
   it('keeps ranking weights summing to 1.0 with and without brands', () => {
     expect(validatePlan(createFallbackPlan('running shoes', ALL)).valid).toBe(true);
     expect(validatePlan(createFallbackPlan('nike running shoes', ALL)).valid).toBe(true);
+  });
+});
+
+describe('createFallbackPlan category disambiguation', () => {
+  it('extracts bed sizes into feature tokens', () => {
+    const plan = createFallbackPlan('king bed', ALL);
+    expect(plan.hardFilters.requiredFeatures).toContain('king');
+  });
+
+  it('excludes the adjacent category for "bed" without bedding terms', () => {
+    const plan = createFallbackPlan('king bed', ALL);
+    expect(plan.hardFilters.categoryHints).toContain('bed frame');
+    expect(plan.hardFilters.exclusions).toContain('bed sheets');
+    expect(validatePlan(plan).valid).toBe(true);
+  });
+
+  it('does NOT exclude bedding when the shopper asks for bedding', () => {
+    const plan = createFallbackPlan('king bed sheets', ALL);
+    expect(plan.hardFilters.exclusions).toBeUndefined();
+    expect(plan.hardFilters.requiredFeatures).toContain('king');
+  });
+
+  it('does not fire the bed rule for mattresses', () => {
+    const plan = createFallbackPlan('king mattress', ALL);
+    expect(plan.hardFilters.categoryHints).toBeUndefined();
+  });
+
+  it('merges category intent into a candidate plan (existing values win)', () => {
+    const base = createFallbackPlan('neutral query', ALL);
+    const merged = withCategoryIntent(base, 'king bed');
+    expect(merged.hardFilters.categoryHints).toContain('bed frame');
+    expect(merged.hardFilters.exclusions).toContain('bed sheets');
+
+    const existing = { ...base, hardFilters: { ...base.hardFilters, categoryHints: ['sofa'] } };
+    expect(withCategoryIntent(existing, 'king bed').hardFilters.categoryHints).toEqual(['sofa']);
   });
 });

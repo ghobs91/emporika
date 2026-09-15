@@ -6,22 +6,27 @@
 //
 // Truthful scope: Emporika only uses
 //   - catalog.search / catalog.lookup (+ Shopify extensions) for discovery
-//   - cart (create_cart) for Cart MCP handoff via `continue_url`
-// It does NOT implement native checkout (create/update/complete_checkout),
-// fulfillment selection, discount codes, buyer consent, or order webhooks —
-// so those capabilities are deliberately NOT declared. Declaring them would
-// negotiate sessions we cannot fulfill.
+//   - cart (create/get/update/cancel) for Cart MCP sessions, handed off via
+//     `continue_url`
+//   - checkout (create/get/update/cancel) for Checkout MCP sessions built
+//     from a cart and handed off via `continue_url`
+// It does NOT complete payment (`complete_checkout`), select fulfillment,
+// apply discount codes, obtain buyer consent, or read orders/webhooks — so
+// `dev.ucp.shopping.fulfillment` and Order tools are deliberately NOT
+// declared, and checkout is used for build + handoff only. Declaring
+// capabilities we cannot fulfill would negotiate sessions we can't complete.
 //
-// Version note: pinned to `2026-04-08` because that is what
-// `catalog.shopify.com/api/ucp/mcp` negotiates. `2026-08-25` exists upstream;
-// bump only after verifying Shopify accepts it.
+// Version note: pinned to `2026-08-25`, the version Shopify's live UCP
+// endpoints negotiate (verified against `catalog.shopify.com/api/ucp/mcp`
+// and the Cart/Checkout MCP bindings). Bump only after re-verifying against
+// the live endpoints.
 //
 // Served at two URLs (same content):
 //   - /ucp-agent-profile.json (static copy in `public/`)
 //   - /.well-known/ucp (dynamic route in `app/.well-known/ucp/route.ts`)
 // Keep all three in sync when editing.
 
-export const UCP_VERSION = '2026-04-08' as const;
+export const UCP_VERSION = '2026-08-25' as const;
 
 export const UCP_AGENT_PROFILE = {
   ucp: {
@@ -37,25 +42,32 @@ export const UCP_AGENT_PROFILE = {
       ],
     },
     capabilities: {
-      'dev.ucp.shopping.cart': [
-        {
-          version: UCP_VERSION,
-          spec: `https://ucp.dev/${UCP_VERSION}/specification/cart`,
-          schema: `https://ucp.dev/${UCP_VERSION}/schemas/shopping/cart.json`,
-        },
-      ],
       'dev.ucp.shopping.catalog.search': [
         {
           version: UCP_VERSION,
-          spec: `https://ucp.dev/${UCP_VERSION}/specification/catalog/search`,
+          spec: `https://ucp.dev/${UCP_VERSION}/specification/shopping/catalog/`,
           schema: `https://ucp.dev/${UCP_VERSION}/schemas/shopping/catalog_search.json`,
         },
       ],
       'dev.ucp.shopping.catalog.lookup': [
         {
           version: UCP_VERSION,
-          spec: `https://ucp.dev/${UCP_VERSION}/specification/catalog/lookup`,
+          spec: `https://ucp.dev/${UCP_VERSION}/specification/shopping/catalog/`,
           schema: `https://ucp.dev/${UCP_VERSION}/schemas/shopping/catalog_lookup.json`,
+        },
+      ],
+      'dev.ucp.shopping.cart': [
+        {
+          version: UCP_VERSION,
+          spec: `https://ucp.dev/${UCP_VERSION}/specification/shopping/cart/`,
+          schema: `https://ucp.dev/${UCP_VERSION}/schemas/shopping/cart.json`,
+        },
+      ],
+      'dev.ucp.shopping.checkout': [
+        {
+          version: UCP_VERSION,
+          spec: `https://ucp.dev/${UCP_VERSION}/specification/shopping/checkout/`,
+          schema: `https://ucp.dev/${UCP_VERSION}/schemas/shopping/checkout.json`,
         },
       ],
       'dev.shopify.catalog': [

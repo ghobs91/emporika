@@ -141,6 +141,8 @@ CRON_SECRET=
 SHOPIFY_CLIENT_ID=
 SHOPIFY_CLIENT_SECRET=
 SHOPIFY_AGENT_PROFILE=
+# Optional buyer-linked token (JWT) for personalized catalog + checkout auto-discounts
+SHOPIFY_BUYER_TOKEN=
 
 # WebLLM (optional, progressive enhancement)
 NEXT_PUBLIC_WEBLLM_ENABLED=true
@@ -170,7 +172,7 @@ npm run test:watch # Watch mode
 
 ## Testing
 
-Vitest with 33 tests across 4 test files:
+Vitest with 99 tests across 12 test files:
 
 ```bash
 npm test
@@ -181,6 +183,9 @@ Test categories:
 - **Ranking engine**: Price/availability/condition scoring, determinism, breakdown generation
 - **Entity resolution**: Title matching, dissimilarity detection, empty input handling
 - **Provider selection**: Capability-based provider eligibility and query fan-out
+- **Planning & filtering**: Size/category extraction, adjacent-category exclusions
+- **Interaction learning**: Deterministic preference derivation from local signals
+- **Shopify UCP**: Cart and Checkout MCP lifecycle (mocked fetch)
 
 Tests do not require WebGPU, browser model download, live retailer APIs, or Shopify MCP access.
 

@@ -5,6 +5,10 @@ import { X, Star, Truck, Zap, Package, ExternalLink, ShoppingCart, Loader2, Chec
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useCart } from '@/context/CartContext';
+import { useMerchantCheckout } from '@/hooks/useMerchantCheckout';
+import { recordInteraction } from '@/lib/learning';
+import { getRetailerInfo } from '@/lib/retailer';
+import MerchantLogo from '@/components/MerchantLogo';
 
 interface CartResult {
   success: boolean;
@@ -39,6 +43,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
   const [cartState, setCartState] = useState<'idle' | 'creating' | 'created' | 'error'>('idle');
   const [cartResult, setCartResult] = useState<CartResult | null>(null);
   const { addItem, setIsOpen: setCartOpen } = useCart();
+  const { startCheckout } = useMerchantCheckout();
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -66,6 +71,13 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
       document.removeEventListener('keydown', handleEscape);
     };
   }, [isOpen, onClose]);
+
+  // Deterministic learning: opening a product is a weak "click" signal.
+  useEffect(() => {
+    if (isOpen) {
+      recordInteraction({ kind: 'click', providerId: product.source, brand: product.brand });
+    }
+  }, [isOpen, product.id, product.source, product.brand]);
 
   if (!isOpen) return null;
 
@@ -186,10 +198,12 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
         setCartResult(data);
         setCartState('created');
 
-        // Also add to Emporika's persistent cart
-        const merchantName = product.name.includes(' — ')
-          ? product.name.split(' — ').pop() || 'Shopify Merchant'
-          : 'Shopify Merchant';
+        // Persist the real merchant name (falling back to the title suffix).
+        const merchantName =
+          product.sellerName ||
+          (product.name.includes(' — ')
+            ? product.name.split(' — ').pop() || 'Shopify Merchant'
+            : 'Shopify Merchant');
         addItem({
           productId: product.id,
           variantId: product.variantId!,
@@ -202,7 +216,9 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
           currency: data.cart?.currency || 'USD',
           continueUrl: data.cart!.continueUrl,
           cartId: data.cart!.id,
+          source: 'shopify',
         });
+        recordInteraction({ kind: 'add_to_cart', providerId: 'shopify', brand: product.brand });
       } else {
         // Cart MCP failed — fall back to cart permalink
         console.warn('Cart MCP failed, falling back to permalink:', data.error);
@@ -218,9 +234,41 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
   };
 
   const handleProceedToCheckout = () => {
-    if (cartResult?.cart?.continueUrl) {
-      window.open(cartResult.cart.continueUrl, '_blank', 'noopener,noreferrer');
+    const checkoutUrl = cartResult?.cart?.continueUrl;
+    if (!checkoutUrl) return;
+    recordInteraction({ kind: 'purchase', providerId: 'shopify', brand: product.brand });
+    const cartId = cartResult?.cart?.id;
+    const shopDomain = product.sellerDomain;
+    // Convert the Cart MCP cart into a Checkout MCP session and hand off;
+    // falls back to the cart continue_url if Checkout MCP is unavailable.
+    if (cartId && shopDomain) {
+      void startCheckout(shopDomain, cartId, checkoutUrl);
+    } else {
+      window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
     }
+  };
+
+  /**
+   * Universal cart: non-Shopify retailers have no Cart/Checkout MCP, so we add
+   * the product to Emporika's local cart and hand off to the product page at
+   * checkout time.
+   */
+  const handleAddLocalToCart = () => {
+    const retailer = getRetailerInfo(product.source);
+    addItem({
+      productId: product.id,
+      shopDomain: product.source,
+      merchantName: retailer.label,
+      title: product.name,
+      price: product.price,
+      image: product.image,
+      quantity: 1,
+      currency: 'USD',
+      continueUrl: product.productUrl,
+      source: product.source,
+    });
+    recordInteraction({ kind: 'add_to_cart', providerId: product.source, brand: product.brand });
+    setCartOpen(true);
   };
 
   return (
@@ -234,19 +282,40 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
       >
         {/* Header */}
         <div className="sticky top-0 bg-white dark:bg-[#242424] border-b border-gray-200 dark:border-gray-800 p-4 flex items-center justify-between z-10">
-          <div className={`${sourceColor} text-white px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2`}>
-            {sourceFavicon && (
-              <Image
-                src={sourceFavicon}
-                alt={`${sourceLabel} favicon`}
-                width={16}
-                height={16}
-                className="rounded-sm"
-                unoptimized
-              />
-            )}
-            {sourceLabel}
-          </div>
+          {isShopify && product.sellerName ? (
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="flex items-center gap-2 bg-gray-100 dark:bg-[#1a1a1a] text-gray-900 dark:text-gray-100 px-3 py-1 rounded-full text-sm font-semibold min-w-0">
+                <MerchantLogo
+                  domain={product.sellerDomain}
+                  alt={product.sellerName}
+                  size={18}
+                  className="rounded-sm shrink-0"
+                />
+                <span className="truncate">{product.sellerName}</span>
+              </div>
+              <span
+                className="inline-flex items-center gap-1 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 px-2 py-1 rounded-full text-xs font-medium shrink-0"
+                title="Fulfilled via Shopify"
+              >
+                <Image src="/shopify-logo.svg" alt="" width={12} height={12} className="rounded-sm" unoptimized />
+                Shopify
+              </span>
+            </div>
+          ) : (
+            <div className={`${sourceColor} text-white px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2`}>
+              {sourceFavicon && (
+                <Image
+                  src={sourceFavicon}
+                  alt={`${sourceLabel} favicon`}
+                  width={16}
+                  height={16}
+                  className="rounded-sm"
+                  unoptimized
+                />
+              )}
+              {sourceLabel}
+            </div>
+          )}
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
@@ -495,16 +564,25 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
                   </a>
                 </>
               ) : (
-                /* Non-Shopify: single "View on Retailer" button */
-                <a
-                  href={product.productUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
-                >
-                  View on {sourceLabel}
-                  <ExternalLink size={18} />
-                </a>
+                /* Non-Shopify: local cart (no Cart MCP) + direct product page */
+                <>
+                  <button
+                    onClick={handleAddLocalToCart}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  >
+                    <ShoppingCart size={18} />
+                    Add to Cart
+                  </button>
+                  <a
+                    href={product.productUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full bg-white dark:bg-[#1a1a1a] hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium py-3 px-6 rounded-lg border border-gray-300 dark:border-gray-600 transition-colors flex items-center justify-center gap-2"
+                  >
+                    View on {sourceLabel}
+                    <ExternalLink size={18} />
+                  </a>
+                </>
               )}
             </div>
           </div>

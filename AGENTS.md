@@ -42,7 +42,7 @@ Verified this session unless marked otherwise. All are npm scripts from `package
 | `npm run dev` | Dev server at `http://localhost:3000` | [inferred, not verified] |
 | `npm run build` | Production build | [inferred, not verified] |
 | `npm run start` | Serve production build | [inferred, not verified] |
-| `npm test` | Run Vitest once (33 tests, 4 files) | ✅ passed 2026-08-20 |
+| `npm test` | Run Vitest once (99 tests, 12 files) | ✅ passed 2026-09-15 |
 | `npm run test:watch` | Vitest watch mode | [inferred, not verified] |
 | `npm run test:ui` | Vitest UI (`@vitest/ui`) | [inferred, not verified] |
 | `npm run lint` | ESLint (flat config) | ❌ exits 1: 231 errors / 3,822 warnings (pre-existing; e.g. `no-explicit-any` in `types/unified.ts`) |
@@ -95,6 +95,7 @@ There is no Makefile/justfile and no CI workflow in this repo.
 | `COSTCO_REFRESH_SECRET` | Costco cookie refresh auth | read by cookie routes |
 | `CRON_SECRET` | Cron route auth | `/api/cron/refresh-costco` requires `Authorization: Bearer <CRON_SECRET>` when set |
 | `SHOPIFY_CLIENT_ID` / `SHOPIFY_CLIENT_SECRET` | Shopify MCP auth | server-side only |
+| `SHOPIFY_BUYER_TOKEN` | Buyer-linked JWT for personalized Shopify catalog + checkout auto-discounts | optional; server-side only; preferred over client credentials when set |
 | `SHOPIFY_AGENT_PROFILE` | Shopify agent profile | fetched during MCP negotiation |
 | `NEXT_PUBLIC_WEBLLM_ENABLED` | Toggle WebLLM | optional; default enabled unless `"false"` |
 | `NEXT_PUBLIC_WEBLLM_DEFAULT_MODEL` | WebLLM model | default `Qwen3-1.7B-q4f16_1-MLC` |

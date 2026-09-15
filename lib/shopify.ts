@@ -12,6 +12,15 @@ import type {
   ShopifyUpdateCartParams,
   ShopifyCancelCartParams,
   ShopifyCart,
+  ShopifyAttribution,
+  ShopifyCreateCheckoutParams,
+  ShopifyGetCheckoutParams,
+  ShopifyUpdateCheckoutParams,
+  ShopifyCancelCheckoutParams,
+  ShopifyCheckout,
+  ShopifyCheckoutStatus,
+  ShopifyCheckoutInput,
+  ShopifyMessage,
 } from '@/types/shopify';
 
 // ── Configuration ─────────────────────────────────────────────────────
@@ -20,12 +29,19 @@ const SHOPIFY_MCP_ENDPOINT = 'https://catalog.shopify.com/api/ucp/mcp';
 const TOKEN_ENDPOINT = 'https://api.shopify.com/auth/access_token';
 const SHOPIFY_CLIENT_ID = process.env.SHOPIFY_CLIENT_ID;
 const SHOPIFY_CLIENT_SECRET = process.env.SHOPIFY_CLIENT_SECRET;
+/**
+ * Optional buyer-linked token (JWT) obtained via the UCP delegated identity
+ * flow with Shop as the IdP. When present it is preferred over client
+ * credentials: it makes Catalog search buyer-aware and lets Checkout MCP apply
+ * automatic discounts. Server-side only — never expose it to the browser.
+ */
+const SHOPIFY_BUYER_TOKEN = process.env.SHOPIFY_BUYER_TOKEN;
 // In development / when not explicitly configured, use Shopify's own test fixture.
 // This always works and doesn't require a deployment.
 // Set SHOPIFY_AGENT_PROFILE in .env.local to use the self-hosted profile in production.
 const SHOPIFY_AGENT_PROFILE =
   process.env.SHOPIFY_AGENT_PROFILE ||
-  'https://shopify.dev/ucp/agent-profiles/2026-04-08/valid-with-capabilities.json';
+  'https://shopify.dev/ucp/agent-profiles/2026-08-25/valid-with-capabilities.json';
 
 // ── Token cache ───────────────────────────────────────────────────────
 
@@ -36,6 +52,9 @@ let tokenExpiry: number | null = null;
  * Get or refresh the bearer token for Shopify API.
  */
 async function getBearerToken(): Promise<string | null> {
+  // A buyer-linked token always wins: it is higher trust and buyer-aware.
+  if (SHOPIFY_BUYER_TOKEN) return SHOPIFY_BUYER_TOKEN;
+
   // Return cached token if still valid (with 5 minute buffer)
   if (cachedToken && tokenExpiry && Date.now() < tokenExpiry - 5 * 60 * 1000) {
     return cachedToken;
@@ -99,6 +118,24 @@ interface JsonRpcResponse<T = unknown> {
 
 let jsonRpcId = 0;
 
+type UcpAuth = 'none' | 'token' | 'buyer';
+
+/**
+ * Resolve an Authorization header for a UCP call:
+ * - 'none'  → anonymous (Cart MCP accepts unauthenticated requests)
+ * - 'token' → buyer-linked token if configured, else client-credentials token
+ *             (elevated Catalog rate limits; buyer-aware when personalized)
+ * - 'buyer' → only a buyer-linked token, else anonymous (Checkout auto-discount)
+ */
+async function resolveAuthorization(auth: UcpAuth): Promise<string | undefined> {
+  if (auth === 'none') return undefined;
+  if (auth === 'buyer') {
+    return SHOPIFY_BUYER_TOKEN ? `Bearer ${SHOPIFY_BUYER_TOKEN}` : undefined;
+  }
+  const token = await getBearerToken();
+  return token ? `Bearer ${token}` : undefined;
+}
+
 /**
  * Generic JSON-RPC call to any UCP endpoint.
  * Used by both the Global Catalog (catalog.shopify.com) and
@@ -113,16 +150,16 @@ async function ucpRpcCall<T>(
   endpoint: string,
   method: string,
   params: { name: string; arguments: Record<string, unknown> },
-  requiresAuth = false,
+  auth: UcpAuth = 'none',
   retries = 2
 ): Promise<T | null> {
-  const bearerToken = requiresAuth ? await getBearerToken() : null;
+  const authorization = await resolveAuthorization(auth);
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
-  if (bearerToken) {
-    headers['Authorization'] = `Bearer ${bearerToken}`;
+  if (authorization) {
+    headers['Authorization'] = authorization;
   }
 
   const requestId = ++jsonRpcId;
@@ -145,7 +182,7 @@ async function ucpRpcCall<T>(
     const delayMs = retryAfter * 1000 + Math.floor(Math.random() * 250);
     console.warn(`Shopify UCP rate-limited (${endpoint}), retrying in ${delayMs}ms (${retries} left)`);
     await new Promise((resolve) => setTimeout(resolve, delayMs));
-    return ucpRpcCall<T>(endpoint, method, params, requiresAuth, retries - 1);
+    return ucpRpcCall<T>(endpoint, method, params, auth, retries - 1);
   }
 
   if (!response.ok) {
@@ -173,6 +210,17 @@ async function ucpRpcCall<T>(
 }
 
 // ── UCP request metadata ────────────────────────────────────────────────
+
+// Emporika's default attribution so Shopify merchants can see agentic traffic
+// (overridable per call). Flows from cart into checkout on conversion.
+const DEFAULT_ATTRIBUTION: ShopifyAttribution = {
+  utm_source: 'emporika',
+  utm_medium: 'agentic_commerce',
+};
+
+function buildAttribution(attribution?: ShopifyAttribution): ShopifyAttribution {
+  return { ...DEFAULT_ATTRIBUTION, ...(attribution ?? {}) };
+}
 
 /**
  * Build the `meta` object required on every UCP tools/call.
@@ -216,7 +264,7 @@ export async function searchShopifyProducts(
         saved_catalog_slug: params.saved_catalog_slug,
       },
     },
-  });
+  }, 'token');
 
   return result?.structuredContent ?? null;
 }
@@ -240,7 +288,7 @@ export async function lookupShopifyProducts(
         view: params.view,
       },
     },
-  });
+  }, 'token');
 
   return result?.structuredContent ?? null;
 }
@@ -266,7 +314,7 @@ export async function getShopifyProductDetails(
         view: params.view,
       },
     },
-  });
+  }, 'token');
 
   return result?.structuredContent ?? null;
 }
@@ -328,10 +376,12 @@ export async function createShopifyCart(
         cart: {
           line_items,
           context: params.context ?? { address_country: 'US' },
+          attribution: buildAttribution(params.attribution),
+          ...(params.buyer ? { buyer: params.buyer } : {}),
         },
       },
     },
-    false // Cart MCP is unauthenticated
+    'none' // Cart MCP is unauthenticated
   );
 
   return result?.structuredContent ?? null;
@@ -357,7 +407,7 @@ export async function getShopifyCart(
         id: params.cartId,
       },
     },
-    false // Cart MCP is unauthenticated
+    'none' // Cart MCP is unauthenticated
   );
 
   return result?.structuredContent ?? null;
@@ -394,10 +444,12 @@ export async function updateShopifyCart(
             item: { id: li.variantId },
           })),
           context: params.context ?? { address_country: 'US' },
+          attribution: buildAttribution(params.attribution),
+          ...(params.buyer ? { buyer: params.buyer } : {}),
         },
       },
     },
-    false // Cart MCP is unauthenticated
+    'none' // Cart MCP is unauthenticated
   );
 
   return result?.structuredContent ?? null;
@@ -422,10 +474,184 @@ export async function cancelShopifyCart(
         id: params.cartId,
       },
     },
-    false // Cart MCP is unauthenticated
+    'none' // Cart MCP is unauthenticated
   );
 
   return result?.structuredContent ?? null;
+}
+
+// ── Checkout MCP ───────────────────────────────────────────────────────
+//
+// Checkout MCP implements `dev.ucp.shopping.checkout`. Emporika uses it for
+// the build + handoff flow: convert a Cart MCP cart into a checkout session,
+// optionally read/update it, and hand the buyer off via `continue_url`.
+// `complete_checkout` (payment finalization) requires a token permitted to
+// complete purchases and is intentionally not implemented here.
+
+/** Checkout resources are returned directly in `structuredContent` (unlike carts, which are wrapped in `cart`). */
+type CheckoutStructuredContent = ShopifyCheckout & { checkout?: ShopifyCheckout };
+
+function extractCheckout(
+  result: { structuredContent: CheckoutStructuredContent } | null
+): ShopifyCheckout | null {
+  const sc = result?.structuredContent;
+  if (!sc) return null;
+  return sc.checkout ?? sc;
+}
+
+function normalizeCheckoutInput(input: ShopifyCheckoutInput): Record<string, unknown> {
+  return {
+    ...(input.currency ? { currency: input.currency } : {}),
+    ...(input.line_items
+      ? {
+          line_items: input.line_items.map((li) => ({
+            quantity: li.quantity ?? 1,
+            item: { id: li.variantId },
+          })),
+        }
+      : {}),
+    ...(input.buyer ? { buyer: input.buyer } : {}),
+    ...(input.context ? { context: input.context } : {}),
+    attribution: buildAttribution(input.attribution),
+    ...(input.fulfillment ? { fulfillment: input.fulfillment } : {}),
+  };
+}
+
+/**
+ * Create a Checkout MCP session, optionally converting an existing Cart MCP
+ * cart by passing its id as `cart_id`. When a cart id is supplied the merchant
+ * inherits the cart's line items, context, buyer, and attribution and the
+ * `checkout` payload becomes optional.
+ */
+export async function createShopifyCheckout(
+  params: ShopifyCreateCheckoutParams
+): Promise<ShopifyCheckout | null> {
+  if (!params.cartId && !params.checkout) {
+    throw new Error('createShopifyCheckout: provide cartId or a checkout payload');
+  }
+
+  const args: Record<string, unknown> = { meta: buildMeta(params.idempotencyKey) };
+  if (params.cartId) args.cart_id = params.cartId;
+  if (params.checkout) args.checkout = normalizeCheckoutInput(params.checkout);
+
+  const result = await ucpRpcCall<{ structuredContent: CheckoutStructuredContent }>(
+    merchantEndpoint(params.shopDomain),
+    'tools/call',
+    { name: 'create_checkout', arguments: args },
+    'buyer' // Attach a buyer-linked token for auto-discounts when configured; else anonymous
+  );
+
+  return extractCheckout(result);
+}
+
+/** Retrieve the current state of a Checkout MCP session. */
+export async function getShopifyCheckout(
+  params: ShopifyGetCheckoutParams
+): Promise<ShopifyCheckout | null> {
+  const result = await ucpRpcCall<{ structuredContent: CheckoutStructuredContent }>(
+    merchantEndpoint(params.shopDomain),
+    'tools/call',
+    {
+      name: 'get_checkout',
+      arguments: {
+        meta: buildMeta(params.idempotencyKey),
+        id: params.checkoutId,
+      },
+    },
+    'buyer'
+  );
+
+  return extractCheckout(result);
+}
+
+/**
+ * Update a Checkout MCP session.
+ *
+ * PUT semantics: the payload replaces the FULL checkout state, so callers must
+ * send the complete desired `checkout` object — never a diff.
+ */
+export async function updateShopifyCheckout(
+  params: ShopifyUpdateCheckoutParams
+): Promise<ShopifyCheckout | null> {
+  const result = await ucpRpcCall<{ structuredContent: CheckoutStructuredContent }>(
+    merchantEndpoint(params.shopDomain),
+    'tools/call',
+    {
+      name: 'update_checkout',
+      arguments: {
+        meta: buildMeta(params.idempotencyKey),
+        id: params.checkoutId,
+        checkout: normalizeCheckoutInput(params.checkout),
+      },
+    },
+    'buyer'
+  );
+
+  return extractCheckout(result);
+}
+
+/** Cancel a Checkout MCP session. Best-effort cleanup — canceled sessions can't be resumed. */
+export async function cancelShopifyCheckout(
+  params: ShopifyCancelCheckoutParams
+): Promise<ShopifyCheckout | null> {
+  const result = await ucpRpcCall<{ structuredContent: CheckoutStructuredContent }>(
+    merchantEndpoint(params.shopDomain),
+    'tools/call',
+    {
+      name: 'cancel_checkout',
+      arguments: {
+        meta: buildMeta(params.idempotencyKey),
+        id: params.checkoutId,
+      },
+    },
+    'buyer'
+  );
+
+  return extractCheckout(result);
+}
+
+export type ShopifyCheckoutAction =
+  | 'completed'
+  | 'canceled'
+  | 'handoff'
+  | 'retry_or_fallback';
+
+export interface ShopifyCheckoutClassification {
+  status: ShopifyCheckoutStatus;
+  action: ShopifyCheckoutAction;
+  errors: ShopifyMessage[];
+  warnings: ShopifyMessage[];
+  needsBuyer: boolean;
+}
+
+/**
+ * Classify a checkout resource following the UCP checkout lifecycle. Because
+ * Emporika uses the build + handoff flow, every non-terminal state
+ * (`incomplete`, `requires_escalation`, `ready_for_complete`,
+ * `complete_in_progress`) resolves to `handoff` when a `continue_url` exists.
+ */
+export function classifyShopifyCheckout(
+  checkout: ShopifyCheckout
+): ShopifyCheckoutClassification {
+  const messages = checkout.messages ?? [];
+  const errors = messages.filter((m) => m.type === 'error');
+  const warnings = messages.filter((m) => m.type === 'warning');
+  const needsBuyer = errors.some(
+    (m) => m.severity === 'requires_buyer_input' || m.severity === 'requires_buyer_review'
+  );
+
+  let action: ShopifyCheckoutAction;
+  if (checkout.status === 'completed') {
+    action = 'completed';
+  } else if (checkout.status === 'canceled') {
+    action = 'canceled';
+  } else if (checkout.continue_url) {
+    action = 'handoff';
+  } else {
+    action = 'retry_or_fallback';
+  }
+
+  return { status: checkout.status, action, errors, warnings, needsBuyer };
 }
 
 // ── Conversion ────────────────────────────────────────────────────────
@@ -487,6 +713,7 @@ export function convertShopifyToUnified(
       productUrl,
       checkoutUrl,
       sellerDomain,
+      sellerName,
       variantId,
       source: 'shopify' as const,
       availableOnline,
