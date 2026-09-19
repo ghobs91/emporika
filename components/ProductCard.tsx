@@ -108,10 +108,10 @@ export default function ProductCard({ product, rank, ranked, onClick }: ProductC
       {/* Content */}
       <div className="p-4 flex flex-col grow gap-2">
         {/* Retailer + rating — emphasized */}
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 min-w-0">
-            {hasMerchant ? (
-              <>
+        <div className="flex flex-col gap-1 min-w-0">
+          {hasMerchant ? (
+            <>
+              <div className="flex items-center gap-1.5 min-w-0">
                 <MerchantLogo
                   domain={product.sellerDomain}
                   alt={product.sellerName!}
@@ -124,16 +124,33 @@ export default function ProductCard({ product, rank, ranked, onClick }: ProductC
                 >
                   {product.sellerName}
                 </span>
+              </div>
+              <div className="flex items-center justify-between gap-2">
                 <span
-                  className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-[10px] font-medium shrink-0"
+                  className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-[10px] font-medium shrink-0 self-start"
                   title="Fulfilled via Shopify"
                 >
                   <Image src="/shopify-logo.svg" alt="" width={10} height={10} className="rounded-sm" unoptimized />
                   Shopify
                 </span>
-              </>
-            ) : (
-              <>
+                {product.customerRating !== undefined && (
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Star className="fill-yellow-400 text-yellow-400" size={13} />
+                    <span className="text-xs font-semibold text-gray-800 dark:text-gray-200">
+                      {product.customerRating.toFixed(1)}
+                    </span>
+                    {product.reviewCount !== undefined && (
+                      <span className="text-xs text-gray-400 dark:text-gray-500">
+                        ({product.reviewCount.toLocaleString()})
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 min-w-0">
                 {sourceFavicon && (
                   <Image
                     src={sourceFavicon}
@@ -147,19 +164,19 @@ export default function ProductCard({ product, rank, ranked, onClick }: ProductC
                 <span className="text-xs font-medium text-gray-600 dark:text-gray-300 truncate">
                   {multipleStores ? `${storeCount} stores` : sourceLabel}
                 </span>
-              </>
-            )}
-          </div>
-          {product.customerRating !== undefined && (
-            <div className="flex items-center gap-1 shrink-0">
-              <Star className="fill-yellow-400 text-yellow-400" size={13} />
-              <span className="text-xs font-semibold text-gray-800 dark:text-gray-200">
-                {product.customerRating.toFixed(1)}
-              </span>
-              {product.reviewCount !== undefined && (
-                <span className="text-xs text-gray-400 dark:text-gray-500">
-                  ({product.reviewCount.toLocaleString()})
-                </span>
+              </div>
+              {product.customerRating !== undefined && (
+                <div className="flex items-center gap-1 shrink-0">
+                  <Star className="fill-yellow-400 text-yellow-400" size={13} />
+                  <span className="text-xs font-semibold text-gray-800 dark:text-gray-200">
+                    {product.customerRating.toFixed(1)}
+                  </span>
+                  {product.reviewCount !== undefined && (
+                    <span className="text-xs text-gray-400 dark:text-gray-500">
+                      ({product.reviewCount.toLocaleString()})
+                    </span>
+                  )}
+                </div>
               )}
             </div>
           )}
