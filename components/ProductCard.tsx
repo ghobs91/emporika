@@ -107,7 +107,7 @@ export default function ProductCard({ product, rank, ranked, onClick }: ProductC
 
       {/* Content */}
       <div className="p-4 flex flex-col grow gap-2">
-        {/* Retailer + rating — emphasized */}
+        {/* Retailer (merchant name + Shopify pill, or source favicon/label) */}
         <div className="flex flex-col gap-1 min-w-0">
           {hasMerchant ? (
             <>
@@ -125,59 +125,29 @@ export default function ProductCard({ product, rank, ranked, onClick }: ProductC
                   {product.sellerName}
                 </span>
               </div>
-              <div className="flex items-center justify-between gap-2">
-                <span
-                  className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-[10px] font-medium shrink-0 self-start"
-                  title="Fulfilled via Shopify"
-                >
-                  <Image src="/shopify-logo.svg" alt="" width={10} height={10} className="rounded-sm" unoptimized />
-                  Shopify
-                </span>
-                {product.customerRating !== undefined && (
-                  <div className="flex items-center gap-1 shrink-0">
-                    <Star className="fill-yellow-400 text-yellow-400" size={13} />
-                    <span className="text-xs font-semibold text-gray-800 dark:text-gray-200">
-                      {product.customerRating.toFixed(1)}
-                    </span>
-                    {product.reviewCount !== undefined && (
-                      <span className="text-xs text-gray-400 dark:text-gray-500">
-                        ({product.reviewCount.toLocaleString()})
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
+              <span
+                className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-[10px] font-medium shrink-0 self-start"
+                title="Fulfilled via Shopify"
+              >
+                <Image src="/shopify-logo.svg" alt="" width={10} height={10} className="rounded-sm" unoptimized />
+                Shopify
+              </span>
             </>
           ) : (
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5 min-w-0">
-                {sourceFavicon && (
-                  <Image
-                    src={sourceFavicon}
-                    alt={sourceLabel}
-                    width={18}
-                    height={18}
-                    className="rounded-sm shrink-0"
-                    unoptimized
-                  />
-                )}
-                <span className="text-xs font-medium text-gray-600 dark:text-gray-300 truncate">
-                  {multipleStores ? `${storeCount} stores` : sourceLabel}
-                </span>
-              </div>
-              {product.customerRating !== undefined && (
-                <div className="flex items-center gap-1 shrink-0">
-                  <Star className="fill-yellow-400 text-yellow-400" size={13} />
-                  <span className="text-xs font-semibold text-gray-800 dark:text-gray-200">
-                    {product.customerRating.toFixed(1)}
-                  </span>
-                  {product.reviewCount !== undefined && (
-                    <span className="text-xs text-gray-400 dark:text-gray-500">
-                      ({product.reviewCount.toLocaleString()})
-                    </span>
-                  )}
-                </div>
+            <div className="flex items-center gap-1.5 min-w-0">
+              {sourceFavicon && (
+                <Image
+                  src={sourceFavicon}
+                  alt={sourceLabel}
+                  width={18}
+                  height={18}
+                  className="rounded-sm shrink-0"
+                  unoptimized
+                />
               )}
+              <span className="text-xs font-medium text-gray-600 dark:text-gray-300 truncate">
+                {multipleStores ? `${storeCount} stores` : sourceLabel}
+              </span>
             </div>
           )}
         </div>
@@ -185,6 +155,21 @@ export default function ProductCard({ product, rank, ranked, onClick }: ProductC
         <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-2 leading-snug">
           {decodeHtmlEntities(displayTitle)}
         </h3>
+
+        {/* Rating — always between name and price */}
+        {product.customerRating !== undefined && (
+          <div className="flex items-center gap-1">
+            <Star className="fill-yellow-400 text-yellow-400" size={13} />
+            <span className="text-xs font-semibold text-gray-800 dark:text-gray-200">
+              {product.customerRating.toFixed(1)}
+            </span>
+            {product.reviewCount !== undefined && (
+              <span className="text-xs text-gray-400 dark:text-gray-500">
+                ({product.reviewCount.toLocaleString()})
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Price — show "from" when the same product is available cheaper elsewhere */}
         <div className="mt-auto pt-1 flex items-baseline gap-2">
