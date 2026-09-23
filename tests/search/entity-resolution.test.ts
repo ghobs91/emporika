@@ -189,4 +189,36 @@ describe('Entity resolution', () => {
     expect(products[0].rating).toBe(4.8);
     expect(products[0].reviewCount).toBe(500);
   });
+
+  it('populates canonical category from the leaf of the offer category path', () => {
+    const offer = makeOffer({ categoryPath: ['Electronics', 'Headphones'] });
+    const products = resolveEntities([offer]);
+    expect(products[0].category).toBe('Headphones');
+  });
+
+  it('takes the leaf segment of a slash-delimited category path', () => {
+    const offer = makeOffer({ categoryPath: ['Electronics/Computers/Laptops'] });
+    const products = resolveEntities([offer]);
+    expect(products[0].category).toBe('Laptops');
+  });
+
+  it('falls back to another offer when the primary has no category', () => {
+    const offerA = makeOffer({
+      providerId: 'walmart',
+      providerProductId: 'w1',
+      title: 'Sony WH-1000XM5 Wireless Headphones',
+      identityHints: { gtin: '222' },
+    });
+    const offerB = makeOffer({
+      providerId: 'bestbuy',
+      providerProductId: 'b1',
+      title: 'Sony WH1000XM5 Wireless Headphones',
+      identityHints: { gtin: '222' },
+      categoryPath: ['Audio', 'Headphones'],
+    });
+
+    const products = resolveEntities([offerA, offerB]);
+    expect(products).toHaveLength(1);
+    expect(products[0].category).toBe('Headphones');
+  });
 });

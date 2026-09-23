@@ -70,6 +70,7 @@ export function normalizeCandidate(
     productUrl: candidate.productUrl,
     title: candidate.title,
     condition: candidate.condition || 'unknown',
+    categoryPath: candidate.categoryPath,
     identityHints,
     comparableVariant: candidate.variants?.[0] ? {
       id: candidate.variants[0].providerVariantId,

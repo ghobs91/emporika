@@ -28,6 +28,17 @@ function normalizeMpn(mpn: string): string {
 }
 
 /**
+ * Leaf segment of a category path ("A/B/C" → "C"). Tolerates both a
+ * pre-segmented array and a single slash-delimited element.
+ */
+function leafCategory(path?: string[]): string | undefined {
+  if (!path?.length) return undefined;
+  const last = path[path.length - 1];
+  const parts = last.split('/').map(s => s.trim()).filter(Boolean);
+  return parts.length > 0 ? parts[parts.length - 1] : undefined;
+}
+
+/**
  * Token-based title similarity (Jaccard-like, simplified).
  * Returns a score between 0 and 1.
  */
@@ -282,6 +293,11 @@ function buildCanonicalProduct(
     .flatMap(o => o.imageUrls || [])
     .filter(Boolean) as string[];
 
+  // Category: first offer that reports a usable path wins.
+  const category = offers
+    .map(o => leafCategory(o.categoryPath))
+    .find(c => c !== undefined);
+
   return {
     canonicalId: `cp-${index}`,
     identity: {
@@ -298,6 +314,7 @@ function buildCanonicalProduct(
     title: primaryOffer.title,
     description: undefined,
     brand: firstHint('brand'),
+    category,
     rating,
     reviewCount,
     imageUrls: imageUrls.length > 0 ? imageUrls : undefined,

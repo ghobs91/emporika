@@ -238,6 +238,8 @@ export interface NormalizedOffer {
   productUrl?: string;
   title: string;
   condition: 'new' | 'used' | 'refurbished' | 'open_box' | 'unknown';
+  /** Category path as reported by the provider (leaf last). Drives the category facet. */
+  categoryPath?: string[];
   /** Normalized identity hints carried over from the provider candidate (first values only). Drives entity resolution. */
   identityHints?: {
     shopifyUpid?: string;

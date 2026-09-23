@@ -61,6 +61,7 @@ const walmartAdapter: RetailerSearchProvider = {
         title: item.name,
         description: item.shortDescription,
         brand: undefined, // Walmart API exposes no brand field — never fake it
+        categoryPath: item.categoryPath ? [item.categoryPath] : undefined,
         imageUrls: [item.largeImage, item.mediumImage, item.thumbnailImage].filter(Boolean) as string[],
         productUrl: item.productUrl,
         price: toMoney(item.salePrice),
@@ -242,6 +243,9 @@ const targetAdapter: RetailerSearchProvider = {
           },
           title: product.item?.product_description?.title || 'Untitled',
           description: (product.item?.product_description as { bullet_descriptions?: string[] })?.bullet_descriptions?.join(' ') || undefined,
+          categoryPath: product.item?.product_classification?.product_type_name
+            ? [product.item.product_classification.product_type_name]
+            : undefined,
           imageUrls: [product.item?.enrichment?.images?.primary_image_url].filter(Boolean) as string[],
           productUrl: `https://www.target.com/p/-/A-${product.tcin}`,
           price: toMoney(product.price?.current_retail ?? 0),
@@ -339,6 +343,7 @@ const ebayAdapter: RetailerSearchProvider = {
           providerProductId: item.itemId,
           title: item.title,
           description: item.shortDescription,
+          categoryPath: item.categories?.map(c => c.categoryName),
           imageUrls: [
             item.image?.imageUrl,
             ...(item.thumbnailImages || []).map(i => i.imageUrl),
