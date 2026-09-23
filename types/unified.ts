@@ -6,6 +6,9 @@ import { CostcoProduct } from './costco';
 
 export type RetailerSource = 'walmart' | 'bestbuy' | 'target' | 'ebay' | 'costco' | 'shopify';
 
+/** Normalized product condition, used for the condition facet. */
+export type ProductCondition = 'new' | 'used' | 'refurbished' | 'open_box';
+
 // Unified product interface that works across all retailers
 export interface ShippingInfo {
   freeShipping?: boolean;
@@ -32,6 +35,10 @@ export interface UnifiedProduct {
   source: RetailerSource;
   /** Product brand, when known (used for deterministic preference learning). */
   brand?: string;
+  /** Leaf product category, when known (used for the category facet). */
+  category?: string;
+  /** Normalized condition. Retailers that only expose new goods report 'new'. */
+  condition?: ProductCondition;
   customerRating?: number;
   reviewCount?: number;
   shortDescription?: string;
@@ -48,6 +55,26 @@ export interface UnifiedProduct {
   sellerName?: string;
   /** Shopify only: variant GID for Cart MCP calls */
   variantId?: string;
+}
+
+// ── Shared attribute helpers ───────────────────────────────────────────
+
+/** Map a retailer's condition string to the normalized condition facet value. */
+export function normalizeCondition(condition?: string): ProductCondition | undefined {
+  if (!condition) return undefined;
+  const c = condition.toLowerCase();
+  if (c.includes('new')) return 'new';
+  if (c.includes('used') || c.includes('pre-owned')) return 'used';
+  if (c.includes('refurbished')) return 'refurbished';
+  if (c.includes('open box')) return 'open_box';
+  return undefined;
+}
+
+/** Take the leaf segment of a category path ("A/B/C" → "C"). */
+export function leafCategory(path?: string): string | undefined {
+  if (!path) return undefined;
+  const parts = path.split('/').map((p) => p.trim()).filter(Boolean);
+  return parts.length > 0 ? parts[parts.length - 1] : undefined;
 }
 
 export function normalizeWalmartProduct(product: WalmartProduct): UnifiedProduct {
@@ -95,6 +122,8 @@ export function normalizeWalmartProduct(product: WalmartProduct): UnifiedProduct
     image: product.largeImage || product.mediumImage || product.thumbnailImage,
     productUrl: productUrl,
     source: 'walmart',
+    category: leafCategory(product.categoryPath),
+    condition: 'new',
     customerRating: product.customerRating ? parseFloat(product.customerRating) : undefined,
     reviewCount: product.numReviews,
     shortDescription: product.shortDescription,
@@ -135,6 +164,11 @@ export function normalizeBestBuyProduct(product: BestBuyProduct): UnifiedProduct
     image: product.largeFrontImage || product.image || product.mediumImage || product.thumbnailImage || '',
     productUrl: product.url,
     source: 'bestbuy',
+    brand: product.manufacturer,
+    category: product.categoryPath?.length
+      ? product.categoryPath[product.categoryPath.length - 1].name
+      : undefined,
+    condition: 'new',
     customerRating: product.customerReviewAverage,
     reviewCount: product.customerReviewCount,
     shortDescription: product.shortDescription,
@@ -159,6 +193,7 @@ export function normalizeBestBuyTrendingProduct(product: BestBuyTrendingProduct)
     image: product.images.standard,
     productUrl: product.links.web,
     source: 'bestbuy',
+    condition: 'new',
     customerRating: product.customerReviews?.averageScore,
     reviewCount: product.customerReviews?.count,
     shortDescription: product.descriptions?.short || undefined,
@@ -203,6 +238,15 @@ export function normalizeTargetProduct(product: TargetProduct | TargetFeaturedDe
     : undefined;
   const productUrl = buyUrl || `https://www.target.com/p/-/A-${product.tcin}`;
 
+  // Category lives under different keys for search vs. featured-deals payloads.
+  const classification = product.item?.product_classification;
+  const category =
+    classification && 'product_type_name' in classification
+      ? classification.product_type_name
+      : classification && 'item_type' in classification
+        ? classification.item_type?.name
+        : undefined;
+
   return {
     id: uniqueId,
     name: title,
@@ -211,6 +255,11 @@ export function normalizeTargetProduct(product: TargetProduct | TargetFeaturedDe
     image: imageUrl,
     productUrl: productUrl,
     source: 'target',
+    brand: product.item && 'primary_brand' in product.item
+      ? product.item.primary_brand?.name
+      : undefined,
+    category,
+    condition: 'new',
     customerRating: rating,
     reviewCount: reviewCount,
     shortDescription: description,
@@ -268,6 +317,10 @@ export function normalizeEbayProduct(product: EbayItemSummary): UnifiedProduct {
     image: imageUrl,
     productUrl: product.itemAffiliateWebUrl || product.itemWebUrl || `https://www.ebay.com/itm/${product.legacyItemId || product.itemId}`,
     source: 'ebay',
+    category: product.categories?.length
+      ? product.categories[product.categories.length - 1].categoryName
+      : undefined,
+    condition: normalizeCondition(product.condition),
     customerRating: undefined, // eBay only provides seller ratings, not product ratings
     reviewCount: undefined, // eBay only provides seller feedback, not product reviews
     shortDescription: product.shortDescription,
@@ -335,6 +388,8 @@ export function normalizeCostcoProduct(product: CostcoProduct): UnifiedProduct {
     image: imageUrl,
     productUrl: productUrl,
     source: 'costco',
+    brand: product.Brand_attr?.[0],
+    condition: 'new',
     customerRating: rating,
     reviewCount: reviewCount,
     shortDescription: product.item_short_description || product.description,

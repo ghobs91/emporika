@@ -1,4 +1,4 @@
-import { UnifiedProduct } from '@/types/unified';
+import { UnifiedProduct, normalizeCondition } from '@/types/unified';
 import type {
   ShopifyProduct,
   ShopifySearchParams,
@@ -702,6 +702,11 @@ export function convertShopifyToUnified(
     // Variant GID for Cart MCP calls
     const variantId = firstVariant?.id;
 
+    // Leaf category from the taxonomy path, when present
+    const category = product.categories?.length
+      ? product.categories[product.categories.length - 1].value
+      : undefined;
+
     return {
       id: `shopify-${extractUPID(product.id)}`,
       name: sellerName
@@ -716,6 +721,8 @@ export function convertShopifyToUnified(
       sellerName,
       variantId,
       source: 'shopify' as const,
+      category,
+      condition: normalizeCondition(firstVariant?.condition?.[0]) ?? 'new',
       availableOnline,
       shortDescription:
         product.description?.plain ??

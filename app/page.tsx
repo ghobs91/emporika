@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import SearchBar from '@/components/SearchBar';
 import ProductGrid from '@/components/ProductGrid';
@@ -22,7 +22,8 @@ import { UnifiedProduct, RetailerSource, ProviderStatus } from '@/types/unified'
 import { ShoppingBag, SlidersHorizontal, X } from 'lucide-react';
 import { useTargetStore } from '@/hooks/useTargetStore';
 import SearchFilters, { ActiveFilters } from '@/components/SearchFilters';
-import { ProductFilters, applyProductFilters } from '@/lib/filters';
+import { ProductFilters, applyProductFilters, matchesProductFilters } from '@/lib/filters';
+import { rankedProductToUnified } from '@/lib/ranked-products';
 import { useIntelligentSearch } from '@/hooks/useIntelligentSearch';
 import { SearchModeToggle } from '@/components/WebLLMStatus';
 import SortSelect, { SortOption } from '@/components/SortSelect';
@@ -278,6 +279,9 @@ export default function Home() {
     filters.freeShipping,
     filters.availableOnline,
     filters.hasReviews,
+    !!filters.categories?.length,
+    !!filters.brands?.length,
+    !!filters.conditions?.length,
   ].filter(Boolean).length;
 
   // Any filter/sort/size change re-paginates from the first page
@@ -305,11 +309,30 @@ export default function Home() {
   // ── Pagination ──────────────────────────────────────────────────────
   // The server applies the requested ordering before capping results and
   // renumbers ranks to match, so the returned order is already correct here.
-  const sortedAiResults = aiState.response?.results ?? [];
+  // Ranked results are projected into the unified shape so the same sidebar
+  // filters that drive the classic grid also apply to AI-ranked results.
+  const aiProducts = useMemo(
+    () =>
+      (aiState.response?.results ?? []).map((ranked) => ({
+        ranked,
+        product: rankedProductToUnified(ranked),
+      })),
+    [aiState.response]
+  );
+  const filteredAiProducts = aiProducts.filter(({ product }) =>
+    matchesProductFilters(product, filters)
+  );
 
-  const aiTotalPages = Math.max(1, Math.ceil(sortedAiResults.length / RESULTS_PER_PAGE));
+  // Facets are derived from whichever result set is on screen, so the options
+  // and counts always match what the filters act on.
+  const filterFacetProducts = useMemo(
+    () => (aiState.aiEnabled ? aiProducts.map((entry) => entry.product) : products),
+    [aiState.aiEnabled, aiProducts, products]
+  );
+
+  const aiTotalPages = Math.max(1, Math.ceil(filteredAiProducts.length / RESULTS_PER_PAGE));
   const aiPage = Math.min(currentPage, aiTotalPages);
-  const aiPageItems = sortedAiResults.slice(
+  const aiPageItems = filteredAiProducts.slice(
     (aiPage - 1) * RESULTS_PER_PAGE,
     aiPage * RESULTS_PER_PAGE
   );
@@ -456,7 +479,7 @@ export default function Home() {
               <div className="sticky top-28">
                 <SortSelect value={sortBy} onChange={handleSortChange} />
                 <SearchFilters
-                  products={products}
+                  products={filterFacetProducts}
                   filters={filters}
                   onChange={handleFiltersChange}
                   selectedSources={selectedSources}
@@ -487,7 +510,7 @@ export default function Home() {
                   </div>
                   <SortSelect value={sortBy} onChange={handleSortChange} />
                   <SearchFilters
-                    products={products}
+                    products={filterFacetProducts}
                     filters={filters}
                     onChange={handleFiltersChange}
                     selectedSources={selectedSources}
@@ -605,25 +628,13 @@ export default function Home() {
                     </div>
                   )}
 
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {aiPageItems.map((ranked) => {
-                      const best = ranked.bestOffer?.offer;
-                      const product: UnifiedProduct = {
-                        id: ranked.product.canonicalId,
-                        name: ranked.product.title,
-                        price: best?.price?.amount ?? 0,
-                        originalPrice: best?.listPrice && best.listPrice.amount > (best.price?.amount ?? 0) ? best.listPrice.amount : undefined,
-                        image: ranked.product.imageUrls?.[0] ?? best?.imageUrls?.[0] ?? '',
-                        productUrl: best?.productUrl ?? '#',
-                        source: (best?.providerId ?? 'shopify') as RetailerSource,
-                        brand: ranked.product.brand,
-                        sellerName: best?.seller?.name,
-                        sellerDomain: best?.seller?.domain,
-                        customerRating: ranked.product.rating,
-                        reviewCount: ranked.product.reviewCount,
-                        shortDescription: ranked.reasonsToChoose.slice(0, 2).join(' · '),
-                      };
-                      return (
+                  {aiPageItems.length === 0 ? (
+                    <p className="py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                      No results match your filters.
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {aiPageItems.map(({ ranked, product }) => (
                         <ProductCard
                           key={ranked.product.canonicalId}
                           product={product}
@@ -631,14 +642,14 @@ export default function Home() {
                           ranked={ranked}
                           onClick={() => setSelectedProduct(product)}
                         />
-                      );
-                    })}
-                  </div>
+                      ))}
+                    </div>
+                  )}
 
                   <Pagination
                     currentPage={aiPage}
                     totalPages={aiTotalPages}
-                    totalItems={sortedAiResults.length}
+                    totalItems={filteredAiProducts.length}
                     pageSize={RESULTS_PER_PAGE}
                     onPageChange={setCurrentPage}
                   />

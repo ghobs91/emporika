@@ -9,6 +9,9 @@ export interface ProductFilters {
   availableOnline?: boolean;
   hasReviews?: boolean;
   shippingSpeed?: 'free' | 'twoDay' | 'twoThreeDay';
+  categories?: string[];
+  brands?: string[];
+  conditions?: string[];
 }
 
 export interface PriceBucket {
@@ -40,56 +43,85 @@ export const SHIPPING_SPEED_OPTIONS: { label: string; value: ProductFilters['shi
 ];
 
 /**
+ * Whether a single product satisfies all active filters. Shared by the
+ * classic grid and the AI-ranked results so both filter identically.
+ */
+export function matchesProductFilters(
+  product: UnifiedProduct,
+  filters: ProductFilters
+): boolean {
+  if (filters.minPrice !== undefined && product.price < filters.minPrice) {
+    return false;
+  }
+  if (filters.maxPrice !== undefined && product.price >= filters.maxPrice) {
+    return false;
+  }
+  if (
+    filters.minRating !== undefined &&
+    (product.customerRating ?? 0) < filters.minRating
+  ) {
+    return false;
+  }
+  if (
+    filters.onSale &&
+    (!product.originalPrice || product.originalPrice <= product.price)
+  ) {
+    return false;
+  }
+  if (
+    filters.freeShipping &&
+    !product.freeShipping &&
+    !product.shipping?.freeShipping
+  ) {
+    return false;
+  }
+  if (filters.availableOnline && product.availableOnline === false) {
+    return false;
+  }
+  if (filters.hasReviews && !(product.reviewCount && product.reviewCount > 0)) {
+    return false;
+  }
+  // Facet filters: a product missing the attribute is excluded while the
+  // filter is active, matching the rating/review behavior above.
+  if (
+    filters.categories?.length &&
+    (!product.category || !filters.categories.includes(product.category))
+  ) {
+    return false;
+  }
+  if (
+    filters.brands?.length &&
+    (!product.brand || !filters.brands.includes(product.brand))
+  ) {
+    return false;
+  }
+  if (
+    filters.conditions?.length &&
+    (!product.condition || !filters.conditions.includes(product.condition))
+  ) {
+    return false;
+  }
+  // Shipping speed filter
+  if (filters.shippingSpeed === 'free') {
+    if (!product.freeShipping && !product.shipping?.freeShipping) return false;
+  }
+  if (filters.shippingSpeed === 'twoDay') {
+    if (!product.shipping?.twoDay) return false;
+  }
+  if (filters.shippingSpeed === 'twoThreeDay') {
+    if (!product.shipping?.twoThreeDay) return false;
+  }
+  return true;
+}
+
+/**
  * Apply property-based filters to a list of unified products.
  */
 export function applyProductFilters(
   products: UnifiedProduct[],
   filters: ProductFilters
 ): UnifiedProduct[] {
-  return products.filter((product) => {
-    if (filters.minPrice !== undefined && product.price < filters.minPrice) {
-      return false;
-    }
-    if (filters.maxPrice !== undefined && product.price >= filters.maxPrice) {
-      return false;
-    }
-    if (
-      filters.minRating !== undefined &&
-      (product.customerRating ?? 0) < filters.minRating
-    ) {
-      return false;
-    }
-    if (
-      filters.onSale &&
-      (!product.originalPrice || product.originalPrice <= product.price)
-    ) {
-      return false;
-    }
-    if (
-      filters.freeShipping &&
-      !product.freeShipping &&
-      !product.shipping?.freeShipping
-    ) {
-      return false;
-    }
-    if (filters.availableOnline && product.availableOnline === false) {
-      return false;
-    }
-    if (filters.hasReviews && !(product.reviewCount && product.reviewCount > 0)) {
-      return false;
-    }
-    // Shipping speed filter
-    if (filters.shippingSpeed === 'free') {
-      if (!product.freeShipping && !product.shipping?.freeShipping) return false;
-    }
-    if (filters.shippingSpeed === 'twoDay') {
-      if (!product.shipping?.twoDay) return false;
-    }
-    if (filters.shippingSpeed === 'twoThreeDay') {
-      if (!product.shipping?.twoThreeDay) return false;
-    }
-    return true;
-  });
+  return products.filter((product) => matchesProductFilters(product, filters));
 }
 
 /**
@@ -124,6 +156,44 @@ export function getFilterCounts(products: UnifiedProduct[]) {
     twoDay: products.filter((p) => p.shipping?.twoDay).length,
     twoThreeDay: products.filter((p) => p.shipping?.twoThreeDay).length,
   };
+}
+
+export interface FacetValue {
+  value: string;
+  count: number;
+}
+
+/**
+ * Group products by a string attribute and count occurrences, most common first.
+ */
+function countFacet(
+  products: UnifiedProduct[],
+  select: (product: UnifiedProduct) => string | undefined
+): FacetValue[] {
+  const counts = new Map<string, number>();
+  for (const product of products) {
+    const value = select(product);
+    if (!value) continue;
+    counts.set(value, (counts.get(value) ?? 0) + 1);
+  }
+  return Array.from(counts, ([value, count]) => ({ value, count })).sort(
+    (a, b) => b.count - a.count || a.value.localeCompare(b.value)
+  );
+}
+
+/** Category facets present in the result set, most common first. */
+export function getCategoryFacets(products: UnifiedProduct[]): FacetValue[] {
+  return countFacet(products, (product) => product.category);
+}
+
+/** Brand facets present in the result set, most common first. */
+export function getBrandFacets(products: UnifiedProduct[]): FacetValue[] {
+  return countFacet(products, (product) => product.brand);
+}
+
+/** Condition facets present in the result set, most common first. */
+export function getConditionFacets(products: UnifiedProduct[]): FacetValue[] {
+  return countFacet(products, (product) => product.condition);
 }
 
 /**

@@ -6,12 +6,27 @@ import { UnifiedProduct, RetailerSource } from '@/types/unified';
 import Image from 'next/image';
 import {
   ProductFilters,
+  FacetValue,
   PRICE_BUCKETS,
   RATING_OPTIONS,
   getAvailablePriceBuckets,
   getFilterCounts,
+  getCategoryFacets,
+  getBrandFacets,
+  getConditionFacets,
   formatPriceBucketLabel,
 } from '@/lib/filters';
+
+const CONDITION_LABELS: Record<string, string> = {
+  new: 'New',
+  used: 'Used',
+  refurbished: 'Refurbished',
+  open_box: 'Open box',
+};
+
+// Facet lists can grow with broad queries; cap rendered options so the sidebar
+// stays scannable (the most common values are listed first).
+const FACET_LIMIT = 15;
 
 interface SearchFiltersProps {
   products: UnifiedProduct[];
@@ -95,6 +110,9 @@ export default function SearchFilters({
     [products]
   );
   const counts = useMemo(() => getFilterCounts(products), [products]);
+  const categoryFacets = useMemo(() => getCategoryFacets(products), [products]);
+  const brandFacets = useMemo(() => getBrandFacets(products), [products]);
+  const conditionFacets = useMemo(() => getConditionFacets(products), [products]);
 
   const activeCount = [
     filters.minPrice !== undefined || filters.maxPrice !== undefined,
@@ -104,6 +122,9 @@ export default function SearchFilters({
     filters.availableOnline,
     filters.hasReviews,
     filters.shippingSpeed,
+    !!filters.categories?.length,
+    !!filters.brands?.length,
+    !!filters.conditions?.length,
   ].filter(Boolean).length;
 
   const togglePriceBucket = (bucket: (typeof PRICE_BUCKETS)[number]) => {
@@ -122,6 +143,42 @@ export default function SearchFilters({
 
   const toggleBoolean = (key: keyof ProductFilters) => {
     onChange({ ...filters, [key]: !filters[key] });
+  };
+
+  const toggleFacet = (
+    key: 'categories' | 'brands' | 'conditions',
+    value: string
+  ) => {
+    const current = filters[key] ?? [];
+    const next = current.includes(value)
+      ? current.filter((v) => v !== value)
+      : [...current, value];
+    onChange({ ...filters, [key]: next.length > 0 ? next : undefined });
+  };
+
+  const renderFacetSection = (
+    title: string,
+    key: 'categories' | 'brands' | 'conditions',
+    facets: FacetValue[],
+    labelFor: (value: string) => string = (value) => value
+  ) => {
+    if (facets.length === 0) return null;
+    const selected = filters[key] ?? [];
+    return (
+      <FilterSection title={title}>
+        <div className="space-y-2">
+          {facets.slice(0, FACET_LIMIT).map((facet) => (
+            <Checkbox
+              key={facet.value}
+              checked={selected.includes(facet.value)}
+              onChange={() => toggleFacet(key, facet.value)}
+              label={labelFor(facet.value)}
+              count={facet.count}
+            />
+          ))}
+        </div>
+      </FilterSection>
+    );
   };
 
   const clearAll = () => {
@@ -183,6 +240,10 @@ export default function SearchFilters({
         </FilterSection>
       )}
 
+      {renderFacetSection('Category', 'categories', categoryFacets)}
+
+      {renderFacetSection('Brand', 'brands', brandFacets)}
+
       {availableBuckets.length > 0 && (
         <FilterSection title="Price" defaultOpen>
           <div className="space-y-2">
@@ -222,6 +283,8 @@ export default function SearchFilters({
           ))}
         </div>
       </FilterSection>
+
+      {renderFacetSection('Condition', 'conditions', conditionFacets, (value) => CONDITION_LABELS[value] ?? value)}
 
       <FilterSection title="Deals & Shipping" defaultOpen>
         <div className="space-y-2">
@@ -324,6 +387,22 @@ interface ActiveFiltersProps {
 export function ActiveFilters({ filters, onChange }: ActiveFiltersProps) {
   const chips: { key: string; label: string; remove: () => void }[] = [];
 
+  const addFacetChips = (
+    key: 'categories' | 'brands' | 'conditions',
+    labelFor: (value: string) => string = (value) => value
+  ) => {
+    for (const value of filters[key] ?? []) {
+      chips.push({
+        key: `${key}:${value}`,
+        label: labelFor(value),
+        remove: () => {
+          const next = (filters[key] ?? []).filter((v) => v !== value);
+          onChange({ ...filters, [key]: next.length > 0 ? next : undefined });
+        },
+      });
+    }
+  };
+
   if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
     chips.push({
       key: 'price',
@@ -373,6 +452,10 @@ export function ActiveFilters({ filters, onChange }: ActiveFiltersProps) {
       remove: () => onChange({ ...filters, hasReviews: false }),
     });
   }
+
+  addFacetChips('categories');
+  addFacetChips('brands');
+  addFacetChips('conditions', (value) => CONDITION_LABELS[value] ?? value);
 
   if (filters.shippingSpeed) {
     const labels: Record<string, string> = {
