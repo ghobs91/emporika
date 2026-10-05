@@ -1,9 +1,16 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { Star } from 'lucide-react';
 import { UnifiedProduct } from '@/types/unified';
-import { getRetailerInfo, decodeHtmlEntities } from '@/lib/retailer';
+import MerchantLogo from '@/components/MerchantLogo';
+import {
+  getRetailerInfo,
+  decodeHtmlEntities,
+  retailerExploreHref,
+  merchantExploreHref,
+} from '@/lib/retailer';
 
 interface DealCardProps {
   product: UnifiedProduct;
@@ -12,6 +19,7 @@ interface DealCardProps {
 /**
  * Wide, image-forward card for the "Deals for you" carousel.
  * Shows the dollar savings, retailer logo, rating + review count, and price.
+ * The image and title open the product; the retailer row opens its explore page.
  */
 export default function DealCard({ product }: DealCardProps) {
   const { label: sourceLabel, favicon: sourceFavicon } = getRetailerInfo(product.source);
@@ -20,16 +28,22 @@ export default function DealCard({ product }: DealCardProps) {
       ? product.originalPrice - product.price
       : 0;
 
+  const hasMerchant = product.source === 'shopify' && !!product.sellerName;
+  const exploreHref = hasMerchant
+    ? merchantExploreHref(product.sellerName!, product.sellerDomain)
+    : retailerExploreHref(product.source);
+  const retailerLabel = hasMerchant ? product.sellerName! : sourceLabel;
+
   return (
-    <a
-      href={product.productUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group w-60 md:w-72 shrink-0 snap-start bg-white dark:bg-[#242424] rounded-3xl overflow-hidden flex flex-col border border-gray-200 dark:border-gray-800 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
-      aria-label={`${decodeHtmlEntities(product.name)} — Save $${savings.toFixed(0)}`}
-    >
+    <div className="group w-60 md:w-72 shrink-0 snap-start bg-white dark:bg-[#242424] rounded-3xl overflow-hidden flex flex-col border border-gray-200 dark:border-gray-800 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
       {/* Image */}
-      <div className="relative aspect-square bg-white dark:bg-[#1a1a1a]">
+      <Link
+        href={product.productUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="relative block aspect-square bg-white dark:bg-[#1a1a1a]"
+        aria-label={`${decodeHtmlEntities(product.name)} — Save $${savings.toFixed(0)}`}
+      >
         {product.image && (
           <Image
             src={product.image}
@@ -45,39 +59,59 @@ export default function DealCard({ product }: DealCardProps) {
             Save ${savings.toFixed(0)}
           </span>
         )}
-      </div>
+      </Link>
 
       {/* Content */}
       <div className="p-4 flex flex-col grow gap-1.5">
-        {/* Retailer */}
-        <div className="flex items-center gap-1.5">
-          {sourceFavicon && (
-            <Image
-              src={sourceFavicon}
-              alt={sourceLabel}
-              width={18}
-              height={18}
-              className="rounded-sm"
-              unoptimized
+        {/* Retailer / merchant — links to their explore page */}
+        <Link
+          href={exploreHref}
+          className="flex items-center gap-1.5 self-start max-w-full hover:underline"
+          title={`Explore ${retailerLabel}`}
+        >
+          {hasMerchant ? (
+            <MerchantLogo
+              domain={product.sellerDomain}
+              alt={retailerLabel}
+              size={18}
+              className="rounded-sm shrink-0"
             />
+          ) : (
+            sourceFavicon && (
+              <Image
+                src={sourceFavicon}
+                alt={retailerLabel}
+                width={18}
+                height={18}
+                className="rounded-sm shrink-0"
+                unoptimized
+              />
+            )
           )}
           <span className="text-xs font-medium text-gray-600 dark:text-gray-300 truncate">
-            {sourceLabel}
+            {retailerLabel}
           </span>
-        </div>
+        </Link>
 
-        <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-2 leading-snug">
-          {decodeHtmlEntities(product.name)}
-        </h3>
+        <Link
+          href={product.productUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:underline"
+        >
+          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-2 leading-snug">
+            {decodeHtmlEntities(product.name)}
+          </h3>
+        </Link>
 
         {/* Rating */}
-        {product.customerRating !== undefined && (
+        {product.customerRating != null && (
           <div className="flex items-center gap-1">
             <Star className="fill-yellow-400 text-yellow-400" size={14} />
             <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
               {product.customerRating.toFixed(1)}
             </span>
-            {product.reviewCount !== undefined && (
+            {product.reviewCount != null && (
               <span className="text-xs text-gray-400 dark:text-gray-500">
                 ({product.reviewCount.toLocaleString()})
               </span>
@@ -97,6 +131,6 @@ export default function DealCard({ product }: DealCardProps) {
           )}
         </div>
       </div>
-    </a>
+    </div>
   );
 }

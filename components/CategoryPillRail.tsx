@@ -1,12 +1,9 @@
 'use client';
 
+import Link from 'next/link';
 import { getAllCategories } from '@/types/categories';
 import type { ProductCategory } from '@/types/categories';
 import { Smartphone, Home, Shirt, Dumbbell, Gamepad2, type LucideIcon } from 'lucide-react';
-
-interface CategoryPillRailProps {
-  onSelect: (categoryName: string) => void;
-}
 
 type BrowseCategory = Exclude<ProductCategory, 'all'>;
 
@@ -40,9 +37,10 @@ function cleanCategoryName(name: string): string {
 
 /**
  * Horizontal, swipeable rail of category pills (shop.app-style).
- * Hidden scrollbar on all breakpoints; each pill triggers a category search.
+ * Hidden scrollbar on all breakpoints; each pill opens that category's
+ * explore page.
  */
-export default function CategoryPillRail({ onSelect }: CategoryPillRailProps) {
+export default function CategoryPillRail() {
   const categories = getAllCategories().filter(
     (cat): cat is (typeof cat) & { id: BrowseCategory } => cat.id !== 'all'
   );
@@ -55,12 +53,11 @@ export default function CategoryPillRail({ onSelect }: CategoryPillRailProps) {
           const Icon = style.icon;
           const name = cleanCategoryName(cat.name);
           return (
-            <button
+            <Link
               key={cat.id}
-              type="button"
-              onClick={() => onSelect(name)}
+              href={`/explore?category=${cat.id}`}
               className="group flex flex-col items-center gap-2 shrink-0 snap-start focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-500 rounded-2xl"
-              aria-label={`Search ${name}`}
+              aria-label={`Explore ${name}`}
             >
               <span
                 className={`w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center shadow-sm group-hover:scale-105 group-active:scale-95 transition-transform duration-200 ${style.className}`}
@@ -70,7 +67,7 @@ export default function CategoryPillRail({ onSelect }: CategoryPillRailProps) {
               <span className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
                 {name}
               </span>
-            </button>
+            </Link>
           );
         })}
       </div>

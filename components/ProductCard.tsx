@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { UnifiedProduct } from '@/types/unified';
 import type { RankedOffer, RankedProduct } from '@/search/types';
 import { Star, ExternalLink, Truck, ChevronDown, ChevronUp, TrendingUp, Info } from 'lucide-react';
 import Image from 'next/image';
 import MerchantLogo from '@/components/MerchantLogo';
-import { getRetailerInfo, decodeHtmlEntities } from '@/lib/retailer';
+import { getRetailerInfo, decodeHtmlEntities, retailerExploreHref, merchantExploreHref } from '@/lib/retailer';
 
 interface ProductCardProps {
   product: UnifiedProduct;
@@ -20,7 +21,8 @@ interface ProductCardProps {
 export default function ProductCard({ product, rank, ranked, onClick }: ProductCardProps) {
   const [showOffers, setShowOffers] = useState(false);
 
-  const formatPrice = (price: number) => `$${price.toFixed(2)}`;
+  const formatPrice = (price: number | null | undefined) =>
+    typeof price === 'number' && Number.isFinite(price) ? `$${price.toFixed(2)}` : '—';
 
   const discount = product.originalPrice && product.originalPrice > product.price
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
@@ -111,7 +113,12 @@ export default function ProductCard({ product, rank, ranked, onClick }: ProductC
         <div className="flex flex-col gap-1 min-w-0">
           {hasMerchant ? (
             <>
-              <div className="flex items-center gap-1.5 min-w-0">
+              <Link
+                href={merchantExploreHref(product.sellerName!, product.sellerDomain)}
+                onClick={handleExternalLinkClick}
+                className="flex items-center gap-1.5 min-w-0 group/merchant"
+                title={`Explore ${product.sellerName}`}
+              >
                 <MerchantLogo
                   domain={product.sellerDomain}
                   alt={product.sellerName!}
@@ -119,21 +126,23 @@ export default function ProductCard({ product, rank, ranked, onClick }: ProductC
                   className="rounded-sm shrink-0"
                 />
                 <span
-                  className="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate"
+                  className="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate group-hover/merchant:underline"
                   title={product.sellerName}
                 >
                   {product.sellerName}
                 </span>
-              </div>
-              <span
-                className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-[10px] font-medium shrink-0 self-start"
-                title="Fulfilled via Shopify"
+              </Link>
+              <Link
+                href={retailerExploreHref('shopify')}
+                onClick={handleExternalLinkClick}
+                className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-[10px] font-medium shrink-0 self-start hover:underline"
+                title="Explore Shopify merchants"
               >
                 <Image src="/shopify-logo.svg" alt="" width={10} height={10} className="rounded-sm" unoptimized />
                 Shopify
-              </span>
+              </Link>
             </>
-          ) : (
+          ) : multipleStores ? (
             <div className="flex items-center gap-1.5 min-w-0">
               {sourceFavicon && (
                 <Image
@@ -146,9 +155,30 @@ export default function ProductCard({ product, rank, ranked, onClick }: ProductC
                 />
               )}
               <span className="text-xs font-medium text-gray-600 dark:text-gray-300 truncate">
-                {multipleStores ? `${storeCount} stores` : sourceLabel}
+                {storeCount} stores
               </span>
             </div>
+          ) : (
+            <Link
+              href={retailerExploreHref(product.source)}
+              onClick={handleExternalLinkClick}
+              className="flex items-center gap-1.5 min-w-0 hover:underline"
+              title={`Explore ${sourceLabel}`}
+            >
+              {sourceFavicon && (
+                <Image
+                  src={sourceFavicon}
+                  alt={sourceLabel}
+                  width={18}
+                  height={18}
+                  className="rounded-sm shrink-0"
+                  unoptimized
+                />
+              )}
+              <span className="text-xs font-medium text-gray-600 dark:text-gray-300 truncate">
+                {sourceLabel}
+              </span>
+            </Link>
           )}
         </div>
 
@@ -157,13 +187,13 @@ export default function ProductCard({ product, rank, ranked, onClick }: ProductC
         </h3>
 
         {/* Rating — always between name and price */}
-        {product.customerRating !== undefined && (
+        {product.customerRating != null && (
           <div className="flex items-center gap-1">
             <Star className="fill-yellow-400 text-yellow-400" size={13} />
             <span className="text-xs font-semibold text-gray-800 dark:text-gray-200">
               {product.customerRating.toFixed(1)}
             </span>
-            {product.reviewCount !== undefined && (
+            {product.reviewCount != null && (
               <span className="text-xs text-gray-400 dark:text-gray-500">
                 ({product.reviewCount.toLocaleString()})
               </span>

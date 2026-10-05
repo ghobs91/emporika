@@ -459,7 +459,7 @@ export default function Home() {
               </div>
             </section>
 
-            <CategoryPillRail onSelect={(name) => handleSearch(name)} />
+            <CategoryPillRail />
 
             <DealsCarousel />
 

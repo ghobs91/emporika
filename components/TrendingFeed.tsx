@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { UnifiedProduct } from '@/types/unified';
 import { ChevronRight, Sparkles } from 'lucide-react';
 import ProductCard from './ProductCard';
@@ -95,16 +96,13 @@ export default function TrendingFeed() {
                 {catData.description}
               </p>
             </div>
-            <button
-              onClick={() => {
-                // Could navigate to dedicated category page in the future
-                document.getElementById(`category-${catData.category}`)?.scrollIntoView({ behavior: 'smooth' });
-              }}
+            <Link
+              href={`/explore?category=${catData.category}`}
               className="shrink-0 flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-[#242424] hover:bg-gray-100 dark:hover:bg-[#2a2a2a] rounded-full border border-gray-200 dark:border-gray-700 transition-colors"
             >
               Explore
               <ChevronRight size={14} />
-            </button>
+            </Link>
           </div>
 
           {/* Sublabel */}

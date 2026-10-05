@@ -25,6 +25,27 @@ export function getRetailerInfo(source: RetailerSource): RetailerInfo {
   }
 }
 
+/** Explore-page href listing only products from a single retailer. */
+export function retailerExploreHref(source: RetailerSource): string {
+  return `/explore?source=${encodeURIComponent(source)}`;
+}
+
+/**
+ * Explore-page href for a specific Shopify merchant storefront. Passing the
+ * storefront domain lets the explore feed scope the Shopify catalog search to
+ * that merchant; the name is used as a display label and fallback match.
+ */
+export function merchantExploreHref(sellerName: string, sellerDomain?: string): string {
+  const params = new URLSearchParams({ source: 'shopify', merchant: sellerName });
+  if (sellerDomain) params.set('merchantDomain', sellerDomain);
+  return `/explore?${params.toString()}`;
+}
+
+/** Explore-page href for a browse category. */
+export function categoryExploreHref(category: string): string {
+  return `/explore?category=${encodeURIComponent(category)}`;
+}
+
 /** Decode HTML entities in retailer-provided titles (client-safe). */
 export function decodeHtmlEntities(text: string): string {
   if (typeof document === 'undefined') return text;
