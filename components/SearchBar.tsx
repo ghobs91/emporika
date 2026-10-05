@@ -48,16 +48,14 @@ export default function SearchBar({
   return (
     <form onSubmit={handleSubmit} className="w-full">
       <div
-        className={`relative flex items-end gap-2 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-700 shadow-sm hover:border-gray-300 dark:hover:border-gray-600 focus-within:border-blue-500 dark:focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-500/20 transition-all ${
+        className={`relative flex items-center gap-3 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-700 shadow-sm hover:border-gray-300 dark:hover:border-gray-600 focus-within:border-blue-500 dark:focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-500/20 transition-all ${
           isLarge
             ? 'rounded-3xl px-6 py-4 shadow-lg dark:border-gray-600'
-            : 'rounded-xl px-3.5 py-1.5'
+            : 'rounded-xl px-3.5 py-2'
         }`}
       >
         <Search
-          className={`text-gray-400 dark:text-gray-500 shrink-0 ${
-            isLarge ? 'mt-2.5' : 'mt-1.5'
-          }`}
+          className="text-gray-400 dark:text-gray-500 shrink-0"
           size={isLarge ? 24 : 18}
         />
         <textarea
@@ -68,7 +66,7 @@ export default function SearchBar({
           placeholder={placeholder}
           rows={1}
           disabled={isLoading}
-          className={`w-full resize-none bg-transparent text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none leading-relaxed py-0.5 ${
+          className={`w-full self-center resize-none bg-transparent text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none leading-normal py-0 ${
             isLarge ? 'text-lg md:text-xl' : 'text-base'
           }`}
         />
