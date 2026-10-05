@@ -7,8 +7,8 @@ import DealCard from './DealCard';
 
 /**
  * "Deals for you" — horizontal carousel of discounted products.
- * Reuses the existing /api/trending response (no new API routes) and keeps
- * only items with a meaningful discount (originalPrice > price).
+ * Data comes from /api/deals, which mixes multiple retailers and categories
+ * and keeps only genuine markdowns (see the route for the selection rules).
  */
 export default function DealsCarousel() {
   const [deals, setDeals] = useState<UnifiedProduct[]>([]);
@@ -21,22 +21,12 @@ export default function DealsCarousel() {
 
     const loadDeals = async () => {
       try {
-        const response = await fetch('/api/trending');
+        const response = await fetch('/api/deals');
         const data = await response.json();
 
         if (cancelled) return;
 
-        const categorized = (data.categorizedProducts ?? {}) as Record<string, UnifiedProduct[]>;
-        const all = Object.values(categorized).flat();
-        const discounted = all
-          .filter((p) => p.originalPrice !== undefined && p.originalPrice > p.price)
-          .sort(
-            (a, b) =>
-              ((b.originalPrice ?? b.price) - b.price) - ((a.originalPrice ?? a.price) - a.price)
-          )
-          .slice(0, 12);
-
-        setDeals(discounted);
+        setDeals((data.deals ?? []) as UnifiedProduct[]);
       } catch (err) {
         console.error('Failed to fetch deals:', err);
         if (!cancelled) setError('Could not load deals');
