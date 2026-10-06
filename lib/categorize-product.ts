@@ -50,23 +50,9 @@ const CATEGORY_KEYWORDS: Record<ProductCategory, string[]> = {
   all: [] // 'all' category doesn't need keywords
 };
 
-/**
- * Categorize a product based on its title, description, and other metadata
- * @param product The unified product to categorize
- * @returns The best matching category for this product
- */
-export function categorizeProduct(product: UnifiedProduct): ProductCategory {
-  // Combine all searchable text from the product
-  const searchText = [
-    product.name,
-    product.shortDescription,
-  ]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase();
-
-  // Count keyword matches for each category
-  const categoryScores: Record<ProductCategory, number> = {
+/** Count word-boundary keyword hits for each category in a piece of text. */
+function scoreCategories(text: string): Record<ProductCategory, number> {
+  const scores: Record<ProductCategory, number> = {
     electronics: 0,
     home: 0,
     fashion: 0,
@@ -75,37 +61,69 @@ export function categorizeProduct(product: UnifiedProduct): ProductCategory {
     all: 0,
   };
 
-  // Score each category based on keyword matches
+  if (!text) return scores;
+
+  const haystack = text.toLowerCase();
   for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
     if (category === 'all') continue;
-    
     for (const keyword of keywords) {
       // Use word boundaries to avoid partial matches
-      const regex = new RegExp(`\\b${keyword}\\b`, 'i');
-      if (regex.test(searchText)) {
-        categoryScores[category as ProductCategory]++;
+      if (new RegExp(`\\b${keyword}\\b`, 'i').test(haystack)) {
+        scores[category as ProductCategory]++;
       }
     }
   }
 
-  // Find the category with the highest score
-  let bestCategory: ProductCategory = 'all';
-  let highestScore = 0;
+  return scores;
+}
 
-  for (const [category, score] of Object.entries(categoryScores)) {
-    if (score > highestScore) {
-      highestScore = score;
-      bestCategory = category as ProductCategory;
+/** Highest-scoring category; ties resolve by CATEGORY_KEYWORDS declaration order. */
+function bestCategory(scores: Record<ProductCategory, number>): {
+  category: ProductCategory;
+  score: number;
+} {
+  let category: ProductCategory = 'all';
+  let score = 0;
+  for (const [candidate, candidateScore] of Object.entries(scores)) {
+    if (candidateScore > score) {
+      score = candidateScore;
+      category = candidate as ProductCategory;
     }
   }
+  return { category, score };
+}
+
+/**
+ * Categorize a product based on its title, description, and other metadata.
+ *
+ * The product name is the strongest signal. The description is only consulted
+ * when the name matches nothing, because retailer copy is full of generic
+ * category words — e.g. a kids tablet whose description says "carry from room
+ * to room" and "64 GB of storage" would otherwise outscore its own "tablet"
+ * signal and land in Home & Kitchen.
+ */
+export function categorizeProduct(product: UnifiedProduct): ProductCategory {
+  const fromName = bestCategory(scoreCategories(product.name));
+  const resolved =
+    fromName.score > 0
+      ? fromName
+      : bestCategory(
+          scoreCategories(
+            [product.name, product.shortDescription].filter(Boolean).join(' ')
+          )
+        );
 
   // Log categorization for debugging (only in development)
   if (process.env.NODE_ENV === 'development') {
-    console.log(`Categorized "${product.name}" as ${bestCategory} (score: ${highestScore}, scores:`, categoryScores, ')');
+    console.log(
+      `Categorized "${product.name}" as ${resolved.category} (score: ${resolved.score}${
+        resolved.score > 0 && fromName.score === 0 ? ', from description' : ''
+      })`
+    );
   }
 
   // If no clear category match, return 'all'
-  return highestScore > 0 ? bestCategory : 'all';
+  return resolved.score > 0 ? resolved.category : 'all';
 }
 
 /**
