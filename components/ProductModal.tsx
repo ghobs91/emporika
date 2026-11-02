@@ -175,6 +175,11 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
   const handleAddToCart = async () => {
     if (!product.variantId || !product.sellerDomain) {
       // Fall back to cart permalink if we don't have Cart MCP data
+      console.warn('Add to Cart: missing Cart MCP data, opening merchant page', {
+        variantId: product.variantId,
+        sellerDomain: product.sellerDomain,
+        source: product.source,
+      });
       window.open(product.checkoutUrl || product.productUrl, '_blank', 'noopener,noreferrer');
       return;
     }

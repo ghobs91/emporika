@@ -76,6 +76,57 @@ describe('rankedProductToUnified', () => {
     expect(product.reviewCount).toBe(120);
   });
 
+  it('carries the Shopify variant GID and merchant domain for Cart MCP', () => {
+    const ranked = makeRanked({
+      bestOffer: {
+        offer: makeOffer({
+          providerId: 'shopify',
+          providerProductId: 'gid://shopify/Product/1',
+          seller: {
+            name: 'Allbirds',
+            type: 'retailer',
+            domain: 'weareallbirds.myshopify.com',
+          },
+          comparableVariant: {
+            id: 'gid://shopify/ProductVariant/33191200751696',
+            selectedOptions: [],
+            comparability: 'unknown',
+          },
+        }),
+        offerScore: 1,
+        reasonsToChoose: [],
+        tradeoffs: [],
+        uncertaintyFlags: [],
+      },
+    });
+
+    const product = rankedProductToUnified(ranked);
+    expect(product.variantId).toBe('gid://shopify/ProductVariant/33191200751696');
+    expect(product.sellerDomain).toBe('weareallbirds.myshopify.com');
+    expect(product.sellerName).toBe('Allbirds');
+  });
+
+  it('does not attach a variant id for non-Shopify offers', () => {
+    const ranked = makeRanked({
+      bestOffer: {
+        offer: makeOffer({
+          providerId: 'ebay',
+          comparableVariant: {
+            id: 'ebay-variant-1',
+            selectedOptions: [],
+            comparability: 'unknown',
+          },
+        }),
+        offerScore: 1,
+        reasonsToChoose: [],
+        tradeoffs: [],
+        uncertaintyFlags: [],
+      },
+    });
+
+    expect(rankedProductToUnified(ranked).variantId).toBeUndefined();
+  });
+
   it('omits condition when the offer condition is unknown', () => {
     const ranked = makeRanked({
       bestOffer: {

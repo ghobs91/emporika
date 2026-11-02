@@ -6,6 +6,10 @@ import type { RetailerSource, UnifiedProduct } from '@/types/unified';
  * filters. The sidebar filters operate on this shape, so every filterable
  * field the ranking data carries is mapped here (best-offer price/list price,
  * condition, shipping, availability, brand, category, rating).
+ *
+ * Shopify offers also carry the Cart MCP identity: `seller.domain` for the
+ * merchant endpoint and `comparableVariant.id` for the variant GID. Dropping
+ * them makes "Add to Cart" fall back to opening the merchant page in a new tab.
  */
 export function rankedProductToUnified(ranked: RankedProduct): UnifiedProduct {
   const best = ranked.bestOffer?.offer;
@@ -15,6 +19,9 @@ export function rankedProductToUnified(ranked: RankedProduct): UnifiedProduct {
   const availability = best?.availability;
   const condition =
     best && best.condition !== 'unknown' ? best.condition : undefined;
+  // Only Shopify has a Cart MCP; other providers add to the local cart.
+  const variantId =
+    best?.providerId === 'shopify' ? best.comparableVariant?.id : undefined;
 
   return {
     id: ranked.product.canonicalId,
@@ -25,6 +32,7 @@ export function rankedProductToUnified(ranked: RankedProduct): UnifiedProduct {
     image: ranked.product.imageUrls?.[0] ?? best?.imageUrls?.[0] ?? '',
     productUrl: best?.productUrl ?? '#',
     source: (best?.providerId ?? 'shopify') as RetailerSource,
+    variantId,
     brand: ranked.product.brand,
     category: ranked.product.category,
     condition,
