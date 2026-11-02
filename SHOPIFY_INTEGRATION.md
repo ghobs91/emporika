@@ -317,6 +317,8 @@ Merchant discovery and per-checkout enablement are different things. On 2026-11-
 
 Per the UCP spec an absent binding means redirect-only continuation, so the app hands off to `continue_url` in a new tab. Embedded checkout turns on automatically once a merchant returns the binding; no client change is needed.
 
+To make that visible, the checkout modal shows a green **Embedded checkout** badge when the binding is present, and an amber **Merchant checkout** badge with an explanation plus an "Open merchant checkout" button when it is not. The checkout route also logs `returned no embedded binding` for every such session, so the switch-over is visible in server logs.
+
 ### Fallback
 
 If `ec.ready` never arrives within 12 s (for example the merchant cannot be framed), or checkout signals a fatal `ec.error`, Emporika hands off to `continue_url` in a new tab and keeps an "Open checkout in a new tab" button visible, since browsers may block a programmatic `window.open`.

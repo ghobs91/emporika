@@ -121,7 +121,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(checkoutEnvelope(result, key));
+    const envelope = checkoutEnvelope(result, key);
+    // Visibility for the day a merchant starts returning the ECP binding.
+    if (!envelope.embedded.available) {
+      console.info(
+        `Shopify checkout ${result.id}: ${shopDomain} returned no embedded binding (status ${result.status}); using merchant handoff.`
+      );
+    }
+    return NextResponse.json(envelope);
   } catch (error) {
     console.error('Checkout creation error:', error);
     return NextResponse.json(

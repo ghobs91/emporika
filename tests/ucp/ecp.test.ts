@@ -13,6 +13,7 @@ import {
   readEcpError,
   readEcpOrder,
   readEmbeddedBinding,
+  resolveCheckoutHandoff,
 } from '@/lib/ucp/ecp';
 import type { ShopifyUCPMetadata } from '@/types/shopify';
 
@@ -126,6 +127,60 @@ describe('buildEmbeddedCheckoutUrl', () => {
     expect(
       buildEmbeddedCheckoutUrl({ continueUrl: 'javascript:alert(1)', version: VERSION })
     ).toBeNull();
+  });
+});
+
+describe('resolveCheckoutHandoff', () => {
+  it('embeds when the merchant returned the binding and a version', () => {
+    const handoff = resolveCheckoutHandoff({
+      continueUrl: CONTINUE_URL,
+      ucpVersion: VERSION,
+      embedded: { available: true, delegates: ['window.open', 'payment.credential'] },
+      colorScheme: 'dark',
+    });
+
+    expect(handoff?.mode).toBe('embedded');
+    expect(handoff?.version).toBe(VERSION);
+    expect(handoff?.delegates).toEqual(['window.open']);
+    const url = new URL(handoff!.url);
+    expect(url.searchParams.get('ec_version')).toBe(VERSION);
+    expect(url.searchParams.get('ec_delegate')).toBe('window.open');
+    expect(url.searchParams.get('ec_color_scheme')).toBe('dark');
+  });
+
+  it('redirects when the merchant omitted the binding', () => {
+    const handoff = resolveCheckoutHandoff({
+      continueUrl: CONTINUE_URL,
+      ucpVersion: VERSION,
+      embedded: { available: false, delegates: ['window.open'] },
+    });
+
+    expect(handoff).toEqual({
+      mode: 'redirect',
+      url: CONTINUE_URL,
+      version: VERSION,
+      delegates: [],
+    });
+  });
+
+  it('redirects when the version is missing, since ECP requires ec_version', () => {
+    const handoff = resolveCheckoutHandoff({
+      continueUrl: CONTINUE_URL,
+      ucpVersion: null,
+      embedded: { available: true, delegates: ['window.open'] },
+    });
+
+    expect(handoff?.mode).toBe('redirect');
+    expect(handoff?.version).toBe('');
+    expect(handoff?.url).toBe(CONTINUE_URL);
+  });
+
+  it('returns null without a continue_url or for non-web URLs', () => {
+    expect(resolveCheckoutHandoff({ continueUrl: null, ucpVersion: VERSION })).toBeNull();
+    expect(
+      resolveCheckoutHandoff({ continueUrl: 'javascript:alert(1)', ucpVersion: VERSION })
+    ).toBeNull();
+    expect(resolveCheckoutHandoff({ continueUrl: 'nope' })).toBeNull();
   });
 });
 

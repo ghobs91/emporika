@@ -109,6 +109,66 @@ export function originOf(url: string): string | null {
   }
 }
 
+export interface CheckoutHandoffInput {
+  continueUrl?: string | null;
+  /** `ucp.version` from the checkout response. */
+  ucpVersion?: string | null;
+  /** Per-checkout ECP availability from the checkout response. */
+  embedded?: { available: boolean; delegates?: readonly string[] } | null;
+  colorScheme?: 'light' | 'dark';
+}
+
+export interface CheckoutHandoff {
+  /** `embedded` when the merchant returned the ECP binding, otherwise `redirect`. */
+  mode: 'embedded' | 'redirect';
+  /** ECP URL for embedded mode; the merchant's own checkout URL for redirect mode. */
+  url: string;
+  /** Session-bound UCP version (`''` when the merchant omitted it). */
+  version: string;
+  delegates: EcpDelegation[];
+}
+
+/**
+ * Decide how to present a created checkout.
+ *
+ * ECP applies only when the merchant returned the `embedded` binding in the
+ * checkout response *and* supplied a usable `ucp.version`. Anything else — no
+ * binding, no version, or an unusable `continue_url` — is redirect-only
+ * continuation, which is the documented general-access flow.
+ */
+export function resolveCheckoutHandoff(
+  input: CheckoutHandoffInput
+): CheckoutHandoff | null {
+  const continueUrl = input.continueUrl;
+  if (!continueUrl) return null;
+
+  // Never hand a non-web URL to the browser, even for the redirect fallback.
+  try {
+    const parsed = new URL(continueUrl);
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return null;
+  } catch {
+    return null;
+  }
+
+  const version =
+    typeof input.ucpVersion === 'string' && input.ucpVersion.length > 0
+      ? input.ucpVersion
+      : '';
+  const delegates = negotiateDelegations(input.embedded?.delegates ?? []);
+
+  if (input.embedded?.available && version) {
+    const url = buildEmbeddedCheckoutUrl({
+      continueUrl,
+      version,
+      delegates,
+      colorScheme: input.colorScheme,
+    });
+    if (url) return { mode: 'embedded', url, version, delegates };
+  }
+
+  return { mode: 'redirect', url: continueUrl, version, delegates: [] };
+}
+
 /** `window.open` delegation: only https links may be handed to the browser. */
 export function isAllowedWindowOpenUrl(url: unknown): url is string {
   if (typeof url !== 'string') return false;

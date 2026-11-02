@@ -3,7 +3,7 @@
 import { useCallback, useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useEmbeddedCheckout } from '@/context/EmbeddedCheckoutContext';
-import { buildEmbeddedCheckoutUrl, negotiateDelegations } from '@/lib/ucp/ecp';
+import { resolveCheckoutHandoff } from '@/lib/ucp/ecp';
 import type { CartItem } from '@/types/cart';
 
 interface MerchantCartEnvelope {
@@ -115,31 +115,30 @@ export function useMerchantCheckout() {
         }
 
         if (data.success && checkout && continueUrl) {
-          const delegates = negotiateDelegations(data.embedded?.delegates ?? []);
-          const embeddedUrl =
-            data.embedded?.available && data.ucpVersion
-              ? buildEmbeddedCheckoutUrl({
-                  continueUrl,
-                  version: data.ucpVersion,
-                  delegates,
-                  colorScheme:
-                    typeof document !== 'undefined' &&
-                    document.documentElement.classList.contains('dark')
-                      ? 'dark'
-                      : 'light',
-                })
-              : null;
+          // Embedded when the merchant returned the ECP binding, otherwise the
+          // merchant's own checkout — the documented general-access handoff.
+          const handoff = resolveCheckoutHandoff({
+            continueUrl,
+            ucpVersion: data.ucpVersion,
+            embedded: data.embedded,
+            colorScheme:
+              typeof document !== 'undefined' &&
+              document.documentElement.classList.contains('dark')
+                ? 'dark'
+                : 'light',
+          });
 
-          if (embeddedUrl && data.ucpVersion) {
+          if (handoff) {
             setIsOpen(false);
             openEmbeddedCheckout({
               shopDomain,
               merchantName: merchantName || shopDomain,
               checkoutId: checkout.id,
               continueUrl,
-              url: embeddedUrl,
-              version: data.ucpVersion,
-              delegates,
+              url: handoff.url,
+              version: handoff.version,
+              delegates: handoff.delegates,
+              mode: handoff.mode,
             });
             return true;
           }

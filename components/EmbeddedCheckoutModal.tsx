@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -23,6 +23,18 @@ const CONNECT_TIMEOUT_MS = 12_000;
 /** React has no type for the `credentialless` iframe attribute yet. */
 const CREDENTIALLESS_IFRAME = { credentialless: '' } as Record<string, string>;
 
+const BADGE_CLASS: Record<EmbeddedCheckoutSession['mode'], string> = {
+  embedded:
+    'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  redirect:
+    'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+};
+
+const BADGE_LABEL: Record<EmbeddedCheckoutSession['mode'], string> = {
+  embedded: 'Embedded checkout',
+  redirect: 'Merchant checkout',
+};
+
 function linkHost(url: string): string {
   try {
     return new URL(url).host;
@@ -31,15 +43,143 @@ function linkHost(url: string): string {
   }
 }
 
+/** Focus, Escape and body scroll are shared by both checkout modes. */
+function useCheckoutChrome(
+  close: () => void,
+  closeButtonRef: RefObject<HTMLButtonElement | null>
+) {
+  useEffect(() => {
+    closeButtonRef.current?.focus();
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') close();
+    };
+    document.addEventListener('keydown', handleKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handleKey);
+      document.body.style.overflow = 'unset';
+    };
+  }, [close, closeButtonRef]);
+}
+
+function CheckoutHeader({
+  session,
+  closeButtonRef,
+  onClose,
+}: {
+  session: EmbeddedCheckoutSession;
+  closeButtonRef: RefObject<HTMLButtonElement | null>;
+  onClose: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 border-b border-gray-200 px-5 py-3 dark:border-gray-800">
+      <div className="flex min-w-0 items-center gap-2">
+        <ShieldCheck size={18} className="shrink-0 text-green-600" />
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">
+              {session.merchantName}
+            </p>
+            <span
+              className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${BADGE_CLASS[session.mode]}`}
+            >
+              {BADGE_LABEL[session.mode]}
+            </span>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            {session.mode === 'embedded'
+              ? 'Secure checkout, embedded'
+              : 'Continuing on the merchant site'}
+          </p>
+        </div>
+      </div>
+      <button
+        ref={closeButtonRef}
+        onClick={onClose}
+        aria-label="Close checkout"
+        className="rounded-lg p-1.5 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+      >
+        <X size={20} className="text-gray-500" />
+      </button>
+    </div>
+  );
+}
+
 /**
- * Embedded checkout surface (ECP). Mounted once; renders nothing until
- * `useMerchantCheckout` opens a session.
+ * Checkout surface. Mounted once; renders nothing until `useMerchantCheckout`
+ * opens a session. The badge always states which checkout mode is in effect:
+ * embedded (merchant returned the ECP binding) or on the merchant's site.
  */
 export default function EmbeddedCheckoutModal() {
   const { session } = useEmbeddedCheckout();
   if (!session) return null;
-  // Keyed by checkout id so a new checkout always gets a fresh protocol state machine.
-  return <EmbeddedCheckoutPanel key={session.checkoutId} session={session} />;
+
+  // Keyed by checkout id so a new checkout always gets fresh protocol state.
+  return session.mode === 'redirect' ? (
+    <RedirectCheckoutPanel key={session.checkoutId} session={session} />
+  ) : (
+    <EmbeddedCheckoutPanel key={session.checkoutId} session={session} />
+  );
+}
+
+function RedirectCheckoutPanel({ session }: { session: EmbeddedCheckoutSession }) {
+  const { closeEmbeddedCheckout } = useEmbeddedCheckout();
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const openedRef = useRef(false);
+
+  useCheckoutChrome(closeEmbeddedCheckout, closeButtonRef);
+
+  const openMerchantCheckout = useCallback(() => {
+    window.open(session.continueUrl, '_blank', 'noopener,noreferrer');
+  }, [session.continueUrl]);
+
+  // Absent ECP binding: try the handoff once, but keep the button for blockers.
+  useEffect(() => {
+    if (openedRef.current) return;
+    openedRef.current = true;
+    openMerchantCheckout();
+  }, [openMerchantCheckout]);
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Checkout with ${session.merchantName}`}
+        className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-[#1a1a1a]"
+      >
+        <CheckoutHeader
+          session={session}
+          closeButtonRef={closeButtonRef}
+          onClose={closeEmbeddedCheckout}
+        />
+
+        <div className="flex flex-col items-center gap-3 px-6 py-8 text-center">
+          <ExternalLink size={28} className="text-amber-500" />
+          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+            Checkout continues on {session.merchantName}
+          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            {session.merchantName} doesn&apos;t offer embedded checkout for this
+            order, so payment is completed on their secure site.
+          </p>
+          <button
+            onClick={openMerchantCheckout}
+            className="mt-2 flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-700"
+          >
+            Open merchant checkout
+            <ExternalLink size={14} />
+          </button>
+          <button
+            onClick={closeEmbeddedCheckout}
+            className="text-xs text-gray-400 transition-colors hover:text-red-500"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function EmbeddedCheckoutPanel({ session }: { session: EmbeddedCheckoutSession }) {
@@ -49,6 +189,8 @@ function EmbeddedCheckoutPanel({ session }: { session: EmbeddedCheckoutSession }
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const handedOffRef = useRef(false);
   const [timedOut, setTimedOut] = useState(false);
+
+  useCheckoutChrome(closeEmbeddedCheckout, closeButtonRef);
 
   const handleComplete = useCallback(() => {
     // The merchant created the order — drop this merchant's local cart lines.
@@ -87,19 +229,6 @@ function EmbeddedCheckoutPanel({ session }: { session: EmbeddedCheckoutSession }
     handOff();
   }, [needsHandoff, handOff]);
 
-  useEffect(() => {
-    closeButtonRef.current?.focus();
-    const handleKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') closeEmbeddedCheckout();
-    };
-    document.addEventListener('keydown', handleKey);
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.removeEventListener('keydown', handleKey);
-      document.body.style.overflow = 'unset';
-    };
-  }, [closeEmbeddedCheckout]);
-
   const showIframe = status === 'active' || status === 'complete';
 
   return (
@@ -110,28 +239,11 @@ function EmbeddedCheckoutPanel({ session }: { session: EmbeddedCheckoutSession }
         aria-label={`Checkout with ${session.merchantName}`}
         className="flex h-full w-full max-w-3xl flex-col overflow-hidden bg-white shadow-2xl dark:bg-[#1a1a1a] sm:h-[85vh] sm:rounded-2xl"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between gap-3 border-b border-gray-200 px-5 py-3 dark:border-gray-800">
-          <div className="flex min-w-0 items-center gap-2">
-            <ShieldCheck size={18} className="shrink-0 text-green-600" />
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">
-                {session.merchantName}
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Secure checkout in Emporika
-              </p>
-            </div>
-          </div>
-          <button
-            ref={closeButtonRef}
-            onClick={closeEmbeddedCheckout}
-            aria-label="Close checkout"
-            className="rounded-lg p-1.5 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
-          >
-            <X size={20} className="text-gray-500" />
-          </button>
-        </div>
+        <CheckoutHeader
+          session={session}
+          closeButtonRef={closeButtonRef}
+          onClose={closeEmbeddedCheckout}
+        />
 
         {/* Embedded checkout */}
         <div className="relative flex-1 overflow-hidden bg-white dark:bg-[#1a1a1a]">
