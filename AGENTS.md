@@ -65,7 +65,7 @@ There is no Makefile/justfile and no CI workflow in this repo.
 - **Progressive enhancement**: WebLLM is optional. Everything must work via `search/planner.ts` (deterministic fallback).
 - **Unsupported filters are reported, never faked**: adapters set `metadata.unsupportedFilters` rather than pretending a filter was applied (`search/providers/capabilities.ts`).
 - **Server-only credentials**: retailer API keys, tokens, and provider URLs are read server-side only and must never reach the browser bundle or client components.
-- **Git**: Conventional Commits (`type(scope): subject`, e.g. `feat(search):`, `fix(costco):`), matching the repo history. Two remotes: `origin` (GitHub) and `rad` (Radicle).
+- **Git**: Conventional Commits (`type(scope): subject`, e.g. `feat(search):`, `fix(costco):`), matching the repo history. Two remotes exist: `origin` (GitHub) and `rad` (Radicle). **Push only to `origin`** — Radicle is intentionally not used.
 
 ## Testing expectations
 
