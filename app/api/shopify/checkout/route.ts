@@ -6,6 +6,7 @@ import {
   cancelShopifyCheckout,
   classifyShopifyCheckout,
 } from '@/lib/shopify';
+import { readEmbeddedBinding } from '@/lib/ucp/ecp';
 import type { ShopifyCheckout } from '@/types/shopify';
 
 /**
@@ -18,8 +19,9 @@ import type { ShopifyCheckout } from '@/types/shopify';
  *
  * Deployment model: build + handoff. Emporika starts/refreshes a checkout and
  * opens its `continue_url` so the buyer completes payment on the merchant's
- * storefront. `complete_checkout` is intentionally not exposed (requires a
- * token permitted to complete purchases).
+ * storefront — embedded via ECP when the merchant advertises the `embedded`
+ * service binding, otherwise in a new tab. `complete_checkout` is intentionally
+ * not exposed (requires a token permitted to complete purchases).
  *
  * UCP notes:
  * - Every upstream tools/call carries meta `idempotency-key` (client key
@@ -48,6 +50,11 @@ function checkoutEnvelope(checkout: ShopifyCheckout, key: string) {
     action,
     status: checkout.status,
     idempotencyKey: key,
+    // ECP session inputs: the host appends these to `continueUrl` to open the
+    // checkout embedded (see lib/ucp/ecp.ts). Absent `embedded.available` means
+    // the merchant only supports the redirect handoff.
+    ucpVersion: checkout.ucp?.version ?? null,
+    embedded: readEmbeddedBinding(checkout.ucp),
     checkout: {
       id: checkout.id,
       status: checkout.status,

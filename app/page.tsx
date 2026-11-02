@@ -13,11 +13,13 @@ import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import ShoeSizeFilter from '@/components/ShoeSizeFilter';
 import ClothingSizeFilter from '@/components/ClothingSizeFilter';
 import CartDrawer from '@/components/CartDrawer';
+import EmbeddedCheckoutModal from '@/components/EmbeddedCheckoutModal';
 import Sidebar from '@/components/Sidebar';
 import CategoryPillRail from '@/components/CategoryPillRail';
 import DealsCarousel from '@/components/DealsCarousel';
 import CartSummarySection from '@/components/CartSummarySection';
 import { CartProvider } from '@/context/CartContext';
+import { EmbeddedCheckoutProvider } from '@/context/EmbeddedCheckoutContext';
 import { UnifiedProduct, RetailerSource, ProviderStatus } from '@/types/unified';
 import { ShoppingBag, SlidersHorizontal, X } from 'lucide-react';
 import { useTargetStore } from '@/hooks/useTargetStore';
@@ -346,6 +348,7 @@ export default function Home() {
 
   return (
     <CartProvider>
+    <EmbeddedCheckoutProvider>
     <div className="min-h-screen flex bg-white dark:bg-[#1a1a1a] transition-colors duration-300">
       {/* Left icon sidebar (desktop lg+ only) */}
       <Sidebar />
@@ -696,8 +699,12 @@ export default function Home() {
 
       {/* Cart Drawer */}
       <CartDrawer />
+
+      {/* Embedded checkout (ECP) */}
+      <EmbeddedCheckoutModal />
       </div>
     </div>
+    </EmbeddedCheckoutProvider>
     </CartProvider>
   );
 }

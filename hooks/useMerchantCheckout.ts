@@ -2,6 +2,8 @@
 
 import { useCallback, useState } from 'react';
 import { useCart } from '@/context/CartContext';
+import { useEmbeddedCheckout } from '@/context/EmbeddedCheckoutContext';
+import { buildEmbeddedCheckoutUrl, negotiateDelegations } from '@/lib/ucp/ecp';
 import type { CartItem } from '@/types/cart';
 
 interface MerchantCartEnvelope {
@@ -19,6 +21,10 @@ interface MerchantCheckoutEnvelope {
   success: boolean;
   action?: 'completed' | 'canceled' | 'handoff' | 'retry_or_fallback';
   status?: string;
+  /** UCP version bound to the session — required for `ec_version`. */
+  ucpVersion?: string | null;
+  /** Per-checkout ECP availability (`ucp.services…config.delegate`). */
+  embedded?: { available: boolean; delegates: string[] };
   checkout?: {
     id: string;
     status: string;
@@ -70,8 +76,9 @@ async function postCheckoutFromCart(
 
 /**
  * Shared merchant-cart + checkout flows (all scoped to one shopDomain):
- * - startCheckout: convert a Cart MCP cart into a Checkout MCP session and
- *   open its continue_url, falling back to the cart's continue_url.
+ * - startCheckout: convert a Cart MCP cart into a Checkout MCP session, then
+ *   either open it embedded via ECP (when the merchant advertises the
+ *   `embedded` service binding) or hand off to its continue_url in a new tab.
  * - checkoutMerchant: create combined cart + start checkout (fallback: per-item links).
  * - refreshMerchantCart: re-create combined cart WITHOUT opening a tab and
  *   patch local refs (continueUrl/cartId). Used after quantity edits and as
@@ -80,23 +87,67 @@ async function postCheckoutFromCart(
  *   drop local items regardless of upstream outcome.
  */
 export function useMerchantCheckout() {
-  const { itemsByMerchant, updateItem, removeMerchantItems } = useCart();
+  const { itemsByMerchant, updateItem, removeMerchantItems, setIsOpen } = useCart();
+  const { openEmbeddedCheckout } = useEmbeddedCheckout();
   const [checkingOut, setCheckingOut] = useState<string | null>(null);
 
   /**
-   * Hand off to Checkout MCP. Opens the checkout continue_url (or order
-   * permalink when already completed); falls back to the cart continue_url if
-   * Checkout MCP is unavailable for this merchant.
+   * Hand off to Checkout MCP. Prefers an embedded ECP session; falls back to
+   * the checkout continue_url (or the cart continue_url) in a new tab when the
+   * merchant doesn't advertise embedded support.
    */
   const startCheckout = useCallback(
-    async (shopDomain: string, cartId: string, cartContinueUrl?: string) => {
+    async (
+      shopDomain: string,
+      cartId: string,
+      cartContinueUrl?: string,
+      merchantName?: string
+    ) => {
       try {
         const data = await postCheckoutFromCart(shopDomain, cartId);
-        const url = data.checkout?.order?.permalinkUrl || data.checkout?.continueUrl;
-        if (data.success && url) {
-          window.open(url, '_blank', 'noopener,noreferrer');
+        const checkout = data.checkout;
+        const continueUrl = checkout?.continueUrl ?? cartContinueUrl;
+
+        // Already-completed sessions only have an order permalink to show.
+        if (data.success && checkout?.order?.permalinkUrl) {
+          window.open(checkout.order.permalinkUrl, '_blank', 'noopener,noreferrer');
           return true;
         }
+
+        if (data.success && checkout && continueUrl) {
+          const delegates = negotiateDelegations(data.embedded?.delegates ?? []);
+          const embeddedUrl =
+            data.embedded?.available && data.ucpVersion
+              ? buildEmbeddedCheckoutUrl({
+                  continueUrl,
+                  version: data.ucpVersion,
+                  delegates,
+                  colorScheme:
+                    typeof document !== 'undefined' &&
+                    document.documentElement.classList.contains('dark')
+                      ? 'dark'
+                      : 'light',
+                })
+              : null;
+
+          if (embeddedUrl && data.ucpVersion) {
+            setIsOpen(false);
+            openEmbeddedCheckout({
+              shopDomain,
+              merchantName: merchantName || shopDomain,
+              checkoutId: checkout.id,
+              continueUrl,
+              url: embeddedUrl,
+              version: data.ucpVersion,
+              delegates,
+            });
+            return true;
+          }
+
+          window.open(continueUrl, '_blank', 'noopener,noreferrer');
+          return false;
+        }
+
         console.warn(
           'Checkout MCP handoff failed, falling back to cart continue_url:',
           data.error
@@ -109,7 +160,7 @@ export function useMerchantCheckout() {
       }
       return false;
     },
-    []
+    [openEmbeddedCheckout, setIsOpen]
   );
 
   const checkoutMerchant = useCallback(
@@ -135,7 +186,12 @@ export function useMerchantCheckout() {
         if (data.success && data.cart) {
           // Convert the cart into a checkout session and hand off to the
           // merchant's prefilled checkout (falls back to the cart URL).
-          await startCheckout(shopDomain, data.cart.id, data.cart.continueUrl);
+          await startCheckout(
+            shopDomain,
+            data.cart.id,
+            data.cart.continueUrl,
+            merchantItems[0]?.merchantName
+          );
         } else {
           // Fallback: open each item's individual checkout
           console.warn('Combined cart failed, opening items individually:', data.error);

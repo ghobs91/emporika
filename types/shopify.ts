@@ -22,9 +22,21 @@ export interface ShopifyProductDetailResponse {
 
 // ── UCP metadata ──────────────────────────────────────────────────────
 
+export interface ShopifyUCPService {
+  version?: string;
+  /** Transport binding: `rest`, `mcp`, or `embedded` (ECP). */
+  transport?: string;
+  endpoint?: string;
+  schema?: string;
+  /** Per-checkout configuration. `delegate` confirms the delegations ECP will honor. */
+  config?: { delegate?: string[] };
+}
+
 export interface ShopifyUCPMetadata {
   version: string;
   capabilities: Record<string, Array<{ version: string }>>;
+  /** Service bindings. An `embedded` entry means ECP is available for this checkout. */
+  services?: Record<string, ShopifyUCPService[]>;
   /** Forwarded business rules for the next request (UCP Request Constraints). Opaque to us — passed through to callers. */
   request_constraints?: unknown;
   payment_handlers?: Record<string, unknown>;

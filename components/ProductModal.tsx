@@ -242,7 +242,10 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
     // Convert the Cart MCP cart into a Checkout MCP session and hand off;
     // falls back to the cart continue_url if Checkout MCP is unavailable.
     if (cartId && shopDomain) {
-      void startCheckout(shopDomain, cartId, checkoutUrl);
+      const merchantName =
+        product.sellerName ||
+        (product.name.includes(' — ') ? product.name.split(' — ').pop() : undefined);
+      void startCheckout(shopDomain, cartId, checkoutUrl, merchantName);
     } else {
       window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
     }
