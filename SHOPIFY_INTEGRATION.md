@@ -209,12 +209,12 @@ Cart and checkout are merchant-scoped: both target `https://{shop-domain}/api/uc
 
 | Tool | Description |
 |---|---|
-| `create_checkout` | Start a checkout session, or pass `cart_id` to convert a cart |
+| `create_checkout` | Start a checkout session, or pass `cart_id` inside `checkout` (`line_items: []`) to convert a cart |
 | `get_checkout` | Refresh checkout state and messages |
 | `update_checkout` | Replace the checkout's full state (PUT semantics) |
 | `cancel_checkout` | Cancel a session (requires `idempotency-key`) |
 
-`create_checkout` accepts an optional top-level `cart_id`; the merchant then inherits the cart's line items, context, buyer, and attribution (overlapping `checkout` fields are ignored). The response `status` drives the next step — `incomplete` / `requires_escalation` / `ready_for_complete` hand off via `continue_url`, `completed` returns `order.permalink_url`, `canceled` starts over. `classifyShopifyCheckout()` maps these to an `action` hint (`handoff` / `completed` / `canceled` / `retry_or_fallback`).
+`create_checkout` takes a required `checkout` object. To convert a cart, send `cart_id` **inside** that object together with `line_items: []` — the merchant then inherits the cart's line items, context, buyer, and attribution (overlapping fields are ignored). A top-level `cart_id` is rejected by the live tool ("Missing required arguments: checkout"). The response `status` drives the next step — `incomplete` / `requires_escalation` / `ready_for_complete` hand off via `continue_url`, `completed` returns `order.permalink_url`, `canceled` starts over. `classifyShopifyCheckout()` maps these to an `action` hint (`handoff` / `completed` / `canceled` / `retry_or_fallback`).
 
 `complete_checkout` is intentionally not implemented: it requires a token granted permission to complete purchases. Emporika uses the general-access build + handoff flow where the buyer completes payment on the merchant's prefilled checkout.
 
@@ -310,6 +310,12 @@ GET /api/shopify/capabilities?shopDomain=www.allbirds.com[&refresh=1]
 - `delegates` at this level is only a hint and is usually empty; delegation is negotiated per checkout.
 
 Verified live on 2026-11-02: `www.allbirds.com` and `www.deathwishcoffee.com` advertise `embedded`, while `www.gymshark.com` returns no profile (`ok: false`).
+
+### Per-checkout availability today
+
+Merchant discovery and per-checkout enablement are different things. On 2026-11-02, `create_checkout` against `weareallbirds.myshopify.com` and `deathwishcoffee.myshopify.com` returned `status: requires_escalation` with `ucp.services['dev.ucp.shopping'] = []` — no `embedded` binding, so no ECP session — even though both stores advertise `embedded` in `/.well-known/ucp`. Declaring `embedded` in Emporika's own agent profile did not change the response.
+
+Per the UCP spec an absent binding means redirect-only continuation, so the app hands off to `continue_url` in a new tab. Embedded checkout turns on automatically once a merchant returns the binding; no client change is needed.
 
 ### Fallback
 

@@ -477,7 +477,7 @@ export interface ShopifyCheckout {
 
 export interface ShopifyCreateCheckoutParams {
   shopDomain: string;
-  /** Optional Cart MCP cart id to convert into this checkout. When set, `checkout` is optional. */
+  /** Optional Cart MCP cart id to convert into this checkout. Sent inside the `checkout` object with `line_items: []`. */
   cartId?: string;
   /** Checkout payload. Required only when `cartId` is omitted. */
   checkout?: ShopifyCheckoutInput;

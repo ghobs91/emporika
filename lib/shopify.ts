@@ -519,9 +519,13 @@ function normalizeCheckoutInput(input: ShopifyCheckoutInput): Record<string, unk
 
 /**
  * Create a Checkout MCP session, optionally converting an existing Cart MCP
- * cart by passing its id as `cart_id`. When a cart id is supplied the merchant
- * inherits the cart's line items, context, buyer, and attribution and the
- * `checkout` payload becomes optional.
+ * cart by passing its id inside the `checkout` object.
+ *
+ * Tool schema (verified against the live merchant endpoint): `checkout` is
+ * required, `line_items` is required inside it (send `[]` when converting a
+ * cart — the cart's lines are used), and `cart_id` must be nested in
+ * `checkout`, not top-level. Sending a top-level `cart_id` fails with
+ * "Missing required arguments: checkout".
  */
 export async function createShopifyCheckout(
   params: ShopifyCreateCheckoutParams
@@ -530,14 +534,19 @@ export async function createShopifyCheckout(
     throw new Error('createShopifyCheckout: provide cartId or a checkout payload');
   }
 
-  const args: Record<string, unknown> = { meta: buildMeta(params.idempotencyKey) };
-  if (params.cartId) args.cart_id = params.cartId;
-  if (params.checkout) args.checkout = normalizeCheckoutInput(params.checkout);
+  const checkout = params.checkout ? normalizeCheckoutInput(params.checkout) : {};
+  if (params.cartId) {
+    checkout.cart_id = params.cartId;
+    checkout.line_items = checkout.line_items ?? [];
+  }
 
   const result = await ucpRpcCall<{ structuredContent: CheckoutStructuredContent }>(
     merchantEndpoint(params.shopDomain),
     'tools/call',
-    { name: 'create_checkout', arguments: args },
+    {
+      name: 'create_checkout',
+      arguments: { meta: buildMeta(params.idempotencyKey), checkout },
+    },
     'buyer' // Attach a buyer-linked token for auto-discounts when configured; else anonymous
   );
 

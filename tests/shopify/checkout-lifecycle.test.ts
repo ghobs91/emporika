@@ -51,7 +51,7 @@ beforeEach(() => {
 });
 
 describe('checkout lifecycle tools', () => {
-  it('create_checkout converts a cart via top-level cart_id', async () => {
+  it('create_checkout converts a cart via cart_id inside the checkout object', async () => {
     const fetchMock = vi.fn(async () => okResponse(checkoutPayload()));
     vi.stubGlobal('fetch', fetchMock);
 
@@ -61,7 +61,11 @@ describe('checkout lifecycle tools', () => {
     expect(checkout?.status).toBe('requires_escalation');
     const body = lastRequestBody(fetchMock);
     expect(body.params.name).toBe('create_checkout');
-    expect(body.params.arguments.cart_id).toBe(CART_ID);
+    // The live tool rejects a top-level cart_id and still requires line_items.
+    expect(body.params.arguments.cart_id).toBeUndefined();
+    const payload = body.params.arguments.checkout as Record<string, unknown>;
+    expect(payload.cart_id).toBe(CART_ID);
+    expect(payload.line_items).toEqual([]);
     const meta = body.params.arguments.meta as Record<string, unknown>;
     expect((meta['ucp-agent'] as { profile: string }).profile).toContain('2026-08-25');
     expect(typeof meta['idempotency-key']).toBe('string');
