@@ -31,8 +31,8 @@ User query → /api/search
 Add to cart / checkout → /api/shopify/cart → /api/shopify/checkout
   ├─ Cart MCP ({shop}/api/ucp/mcp)     create_cart / get_cart / update_cart / cancel_cart
   └─ Checkout MCP ({shop}/api/ucp/mcp) create_checkout(cart_id) → continue_url handoff
-       │
-       └→ buyer completes payment on the merchant storefront
+       ├─ ECP available → embedded checkout iframe (ec_version / ec_delegate)
+       └─ otherwise     → buyer completes payment on the merchant storefront
 ```
 
 
@@ -129,7 +129,15 @@ When `SHOPIFY_BUYER_TOKEN` is set (server-side only), catalog search and checkou
 | `lib/shopify.ts` | API client: catalog (`searchShopifyProducts`, `lookupShopifyProducts`, `getShopifyProductDetails`), Cart MCP (`create/get/update/cancelShopifyCart`), Checkout MCP (`create/get/update/cancelShopifyCheckout`, `classifyShopifyCheckout`), `convertShopifyToUnified` |
 | `app/api/search/route.ts` | Shopify integrated into unified search via `Promise.allSettled` |
 | `app/api/shopify/cart/route.ts` | Cart MCP lifecycle API route |
-| `app/api/shopify/checkout/route.ts` | Checkout MCP lifecycle API route (build + handoff) |
+| `app/api/shopify/checkout/route.ts` | Checkout MCP lifecycle API route (build + handoff); returns `ucpVersion` + ECP `embedded` availability |
+| `lib/ucp/ecp.ts` | ECP helpers: embedded URL construction, `config.delegate` negotiation, JSON-RPC parsing/response builders, origin and `window.open` URL validation |
+| `lib/ucp/discovery.ts` | Merchant-level ECP discovery: `/.well-known/ucp` probe, hostname validation (SSRF guard), TTL cache + in-flight de-dupe |
+| `app/api/shopify/capabilities/route.ts` | `GET /api/shopify/capabilities` merchant capability probe |
+| `tests/ucp/discovery.test.ts` | Unit tests for discovery parsing, validation and caching |
+| `context/EmbeddedCheckoutContext.tsx` | Shared embedded-checkout session state (cart drawer + product modal) |
+| `hooks/useEcpSession.ts` | Host side of an ECP session: origin-validated `postMessage`, `ec.ready` handshake, lifecycle events, delegated links |
+| `components/EmbeddedCheckoutModal.tsx` | Embedded checkout iframe with connecting / handoff / completed states |
+| `tests/ucp/ecp.test.ts` | Unit tests for the ECP protocol helpers |
 | `app/api/trending/route.ts` | Shopify high-rated products injected into trending categories |
 | `components/ProductCard.tsx` | Shopify source badge (green, with logo) |
 | `components/ProductModal.tsx` | Shopify **Add to Cart** (Cart MCP), **Proceed to Checkout** (Checkout MCP), + **View Product Page** |
@@ -212,6 +220,102 @@ Cart and checkout are merchant-scoped: both target `https://{shop-domain}/api/uc
 
 Attribution defaults to `utm_source=emporika` / `utm_medium=agentic_commerce` and is overridable per call.
 
+## Embedded Checkout (ECP)
+
+When a checkout response advertises the `embedded` service binding, Emporika opens the merchant's checkout **inside the app** using the [Embedded Checkout Protocol](https://shopify.dev/docs/agents/carts-and-checkout/ecp) instead of a new tab. Redirect handoff stays the default whenever ECP is unavailable.
+
+### Flow
+
+```
+create_checkout(cart_id)
+  └─ checkout.continue_url + checkout.ucp.version
+       ├─ ucp.services['dev.ucp.shopping'] has transport: "embedded"?
+       │    ├─ yes → iframe(continue_url + ec_version + ec_delegate + ec_color_scheme)
+       │    │         ├─ ec.ready        → host responds with the UCP envelope (checkout renders only after this)
+       │    │         ├─ ec.start        → checkout is visible
+       │    │         ├─ ec.*.change     → informational; merchant UI already updated
+       │    │         ├─ ec.window.open_request → buyer confirms → host opens the https link, then responds
+       │    │         ├─ ec.complete     → order created; Emporika clears that merchant's cart lines
+       │    │         └─ ec.error        → host tears down and offers the redirect handoff
+       │    └─ no  → window.open(continue_url)
+       └─ no continue_url → cart continue_url fallback
+```
+
+### URL parameters
+
+| Parameter | Value |
+|---|---|
+| `ec_version` | `checkout.ucp.version` from the Checkout MCP response (session-bound) |
+| `ec_delegate` | `window.open` — only if the merchant lists it in `config.delegate` |
+| `ec_color_scheme` | Emporika's current theme (`light` / `dark`) |
+
+`ec_auth` is **never** sent. Emporika has no buyer identity to hand the merchant, and minting one would expose `SHOPIFY_BUYER_TOKEN` to the browser.
+
+### Delegations
+
+Only `window.open` is requested, because it is the only delegation Emporika can genuinely fulfil:
+
+- `payment.credential` and `payment.instruments_change` need a payment handler/wallet.
+- `fulfillment.address_change` needs a saved address book.
+
+Both stay inside the merchant's checkout UI, which is the protocol's non-delegated (Option A) path. Every delegated link is confirmed by the buyer in the modal before it opens, and only `https:` URLs are allowed.
+
+### Messages handled
+
+| Message | Type | Host behavior |
+|---|---|---|
+| `ec.ready` | request | Respond `{ ucp: { status: "success", version } }`; an `auth` request fails the handshake because no credential can be supplied |
+| `ec.start` | notification | Mark the embedded checkout as visible |
+| `ec.*.change` | notification | Ignored — merchant UI already reflects the change |
+| `ec.complete` | notification | Show the order, clear that merchant's cart lines |
+| `ec.error` | notification | Tear down the iframe, offer the `continue_url` handoff |
+| `ec.window.open_request` | request | Buyer confirms → open the `https:` URL → respond success, otherwise `abort_error` |
+| anything else | request | JSON-RPC `-32601` so checkout is never left waiting |
+
+### Security
+
+- Inbound messages must come from the iframe's `contentWindow` **and** match the `continue_url` origin; responses are posted back to that origin only.
+- The iframe uses `sandbox="allow-scripts allow-forms allow-same-origin"`, `credentialless`, and `referrer-policy: no-referrer` per the UCP security guidance.
+- `window.open` payloads are untrusted input: non-`https` schemes are rejected with `window_open_rejected_error`.
+
+### Filtering for ECP-capable merchants
+
+Merchants advertise ECP in their `/.well-known/ucp` profile with a
+`transport: "embedded"` service binding. That is discoverable **before**
+creating a checkout:
+
+```
+GET /api/shopify/capabilities?shopDomain=www.allbirds.com[&refresh=1]
+```
+
+```json
+{
+  "shopDomain": "www.allbirds.com",
+  "profileUrl": "https://www.allbirds.com/.well-known/ucp",
+  "ok": true,
+  "embedded": true,
+  "delegates": [],
+  "transports": ["mcp", "embedded"],
+  "version": "2026-08-25",
+  "mcpEndpoint": "https://weareallbirds.myshopify.com/api/ucp/mcp",
+  "fetchedAt": "2026-11-02T09:04:32.984Z",
+  "cached": false
+}
+```
+
+- Read-only `https` probe of `<shopDomain>/.well-known/ucp`; `embedded: true` means the merchant advertises the ECP transport.
+- In-memory cache: 1 hour on success, 5 minutes on failure. Concurrent probes for the same domain share one request; `refresh=1` bypasses the cache.
+- `shopDomain` must be a public hostname. IP literals, `localhost`, and `.local` / `.internal` suffixes are rejected with `400` because the value becomes a server-side request.
+- **Candidate filter only.** A merchant-level advertisement does not guarantee that a specific checkout enables ECP — cart contents, agent authorization, and merchant policy can narrow it. `/api/shopify/checkout` returns the authoritative `embedded.available` + `config.delegate` used by the UI.
+- `delegates` at this level is only a hint and is usually empty; delegation is negotiated per checkout.
+
+Verified live on 2026-11-02: `www.allbirds.com` and `www.deathwishcoffee.com` advertise `embedded`, while `www.gymshark.com` returns no profile (`ok: false`).
+
+### Fallback
+
+If `ec.ready` never arrives within 12 s (for example the merchant cannot be framed), or checkout signals a fatal `ec.error`, Emporika hands off to `continue_url` in a new tab and keeps an "Open checkout in a new tab" button visible, since browsers may block a programmatic `window.open`.
+
+
 ## Usage
 
 ```typescript
@@ -255,6 +359,9 @@ const product = await getShopifyProductDetails({
 - [Global Catalog MCP](https://shopify.dev/docs/agents/catalog/global-catalog)
 - [Cart MCP](https://shopify.dev/docs/agents/carts-and-checkout/cart-mcp)
 - [Checkout MCP](https://shopify.dev/docs/agents/carts-and-checkout/checkout-mcp)
+- [Embedded Checkout Protocol](https://shopify.dev/docs/agents/carts-and-checkout/ecp)
+- [UCP Embedded Protocol](https://ucp.dev/2026-08-25/specification/embedded-protocol/)
+- [UCP Checkout — EP binding](https://ucp.dev/2026-08-25/specification/shopping/checkout/embedded/)
 - [Auth and rate limiting](https://shopify.dev/docs/agents/profiles/auth-and-rate-limiting)
 - [Agent Profiles & UCP Negotiation](https://shopify.dev/docs/agents/profiles)
 - [Getting Started: Search Catalog](https://shopify.dev/docs/agents/get-started/search-catalog)
