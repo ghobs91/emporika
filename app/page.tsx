@@ -33,7 +33,9 @@ import Pagination from '@/components/Pagination';
 import ClarificationPrompt from '@/components/ClarificationPrompt';
 import SearchPromptPills from '@/components/SearchPromptPills';
 
-const ALL_SOURCES: RetailerSource[] = ['walmart', 'bestbuy', 'target', 'ebay', 'costco', 'shopify'];
+const ALL_SOURCES: RetailerSource[] = [
+  'walmart', 'bestbuy', 'target', 'ebay', 'costco', 'shopify', 'backmarket',
+];
 
 // Maps the UI sort to the server's ordering key (applied before the result cap).
 const SORT_TO_SEARCH_SORT: Record<SortOption, import('@/search/types').SearchSort> = {
@@ -215,8 +217,16 @@ export default function Home() {
     }
   };
 
+  // Selecting a retailer narrows the visible result set immediately. The
+  // search still runs across every enabled provider, so toggling a retailer
+  // back on doesn't require a round trip.
+  const sourceFilteredProducts = useMemo(
+    () => products.filter((product) => selectedSources.includes(product.source)),
+    [products, selectedSources]
+  );
+
   // Apply property-based filters from the left sidebar
-  let filteredProducts = applyProductFilters(products, filters);
+  let filteredProducts = applyProductFilters(sourceFilteredProducts, filters);
 
   // Filter products by shoe size if a size is selected
   filteredProducts = selectedShoeSize
@@ -277,10 +287,7 @@ export default function Home() {
   const activeFilterCount = [
     filters.minPrice !== undefined || filters.maxPrice !== undefined,
     filters.minRating !== undefined,
-    filters.onSale,
-    filters.freeShipping,
-    filters.availableOnline,
-    filters.hasReviews,
+    filters.shippingSpeed,
     !!filters.categories?.length,
     !!filters.brands?.length,
     !!filters.conditions?.length,
@@ -322,14 +329,19 @@ export default function Home() {
     [aiState.response]
   );
   const filteredAiProducts = aiProducts.filter(({ product }) =>
-    matchesProductFilters(product, filters)
+    selectedSources.includes(product.source) && matchesProductFilters(product, filters)
   );
 
   // Facets are derived from whichever result set is on screen, so the options
   // and counts always match what the filters act on.
   const filterFacetProducts = useMemo(
-    () => (aiState.aiEnabled ? aiProducts.map((entry) => entry.product) : products),
-    [aiState.aiEnabled, aiProducts, products]
+    () =>
+      aiState.aiEnabled
+        ? aiProducts
+            .map((entry) => entry.product)
+            .filter((product) => selectedSources.includes(product.source))
+        : sourceFilteredProducts,
+    [aiState.aiEnabled, aiProducts, sourceFilteredProducts, selectedSources]
   );
 
   const aiTotalPages = Math.max(1, Math.ceil(filteredAiProducts.length / RESULTS_PER_PAGE));
@@ -479,7 +491,10 @@ export default function Home() {
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Desktop filters sidebar */}
             <aside className="hidden lg:block w-64 shrink-0">
-              <div className="sticky top-28">
+              {/* Independently scrollable: the sidebar no longer inherits the
+                  page height, so it scrolls without reaching the end of the
+                  results column first. */}
+              <div className="sticky top-28 max-h-[calc(100vh-8rem)] overflow-y-auto overscroll-contain pr-1">
                 <SortSelect value={sortBy} onChange={handleSortChange} />
                 <SearchFilters
                   products={filterFacetProducts}

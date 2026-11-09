@@ -131,29 +131,9 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
 
-  const getSourceLabel = () => {
-    switch (product.source) {
-      case 'walmart': return 'Walmart';
-      case 'target': return 'Target';
-      case 'bestbuy': return 'Best Buy';
-      case 'ebay': return 'eBay';
-      case 'costco': return 'Costco';
-      case 'shopify': return 'Shopify';
-      default: return product.source;
-    }
-  };
-
-  const getSourceFavicon = () => {
-    switch (product.source) {
-      case 'walmart': return '/walmart-favicon.png';
-      case 'target': return '/target-favicon.png';
-      case 'bestbuy': return '/bestbuy-favicon.png';
-      case 'ebay': return '/favicon-ebay.png';
-      case 'costco': return '/costco-favicon.png';
-      case 'shopify': return '/shopify-logo.svg';
-      default: return '';
-    }
-  };
+  // Label and favicon come from the shared retailer registry so a new
+  // provider cannot silently fall through to a lowercase slug + no icon.
+  const { label: sourceLabel, favicon: sourceFavicon } = getRetailerInfo(product.source);
 
   const getSourceColor = () => {
     switch (product.source) {
@@ -163,12 +143,11 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
       case 'ebay': return 'bg-purple-600';
       case 'costco': return 'bg-gray-600';
       case 'shopify': return 'bg-green-600';
+      case 'backmarket': return 'bg-neutral-900';
       default: return 'bg-gray-600';
     }
   };
 
-  const sourceLabel = getSourceLabel();
-  const sourceFavicon = getSourceFavicon();
   const sourceColor = getSourceColor();
   const isShopify = product.source === 'shopify';
 

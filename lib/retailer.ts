@@ -20,6 +20,8 @@ export function getRetailerInfo(source: RetailerSource): RetailerInfo {
       return { label: 'Costco', favicon: '/costco-favicon.png' };
     case 'shopify':
       return { label: 'Shopify', favicon: '/shopify-logo.svg' };
+    case 'backmarket':
+      return { label: 'Back Market', favicon: '/backmarket-favicon.svg' };
     default:
       return { label: source, favicon: '' };
   }

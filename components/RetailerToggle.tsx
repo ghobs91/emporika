@@ -15,6 +15,7 @@ const RETAILERS: { source: RetailerSource; label: string; color: string; icon: s
   { source: 'ebay', label: 'eBay', color: 'bg-purple-600', icon: '/favicon-ebay.png' },
   { source: 'costco', label: 'Costco', color: 'bg-gray-600', icon: '/costco-favicon.png' },
   { source: 'shopify', label: 'Shopify', color: 'bg-green-600', icon: '/shopify-logo.svg' },
+  { source: 'backmarket', label: 'Back Market', color: 'bg-neutral-900', icon: '/backmarket-favicon.svg' },
 ];
 
 export default function RetailerToggle({ selected, onChange }: RetailerToggleProps) {

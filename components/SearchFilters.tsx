@@ -7,9 +7,7 @@ import Image from 'next/image';
 import {
   ProductFilters,
   FacetValue,
-  PRICE_BUCKETS,
   RATING_OPTIONS,
-  getAvailablePriceBuckets,
   getFilterCounts,
   getCategoryFacets,
   getBrandFacets,
@@ -105,10 +103,42 @@ export default function SearchFilters({
   selectedSources,
   onSourcesChange,
 }: SearchFiltersProps) {
-  const availableBuckets = useMemo(
-    () => getAvailablePriceBuckets(products),
-    [products]
-  );
+  // Bounds for the price slider, taken from the products actually in view.
+  // Only finite positive prices participate; if the range collapses, the
+  // section is hidden rather than rendered as 0–0.
+  const priceBounds = useMemo(() => {
+    const prices = products
+      .map((product) => product.price)
+      .filter((price) => Number.isFinite(price) && price > 0);
+    if (prices.length === 0) return null;
+    const min = Math.floor(Math.min(...prices));
+    const max = Math.ceil(Math.max(...prices));
+    return max > min ? { min, max } : null;
+  }, [products]);
+
+  const priceSlider = useMemo(() => {
+    if (!priceBounds) return null;
+    // Clamp to the current bounds: switching retailers can shrink the range
+    // below an existing filter, which would otherwise invert the handles.
+    const lower = Math.min(
+      Math.max(filters.minPrice ?? priceBounds.min, priceBounds.min),
+      priceBounds.max
+    );
+    const upper = Math.max(
+      Math.min(filters.maxPrice ?? priceBounds.max, priceBounds.max),
+      lower
+    );
+    const span = priceBounds.max - priceBounds.min;
+    return {
+      lower,
+      upper,
+      span,
+      // Coarser steps on wide ranges so the handles stay controllable.
+      step: span > 500 ? 10 : span > 200 ? 5 : 1,
+      leftPct: ((lower - priceBounds.min) / span) * 100,
+      rightPct: ((upper - priceBounds.min) / span) * 100,
+    };
+  }, [priceBounds, filters.minPrice, filters.maxPrice]);
   const counts = useMemo(() => getFilterCounts(products), [products]);
   const categoryFacets = useMemo(() => getCategoryFacets(products), [products]);
   const brandFacets = useMemo(() => getBrandFacets(products), [products]);
@@ -117,32 +147,28 @@ export default function SearchFilters({
   const activeCount = [
     filters.minPrice !== undefined || filters.maxPrice !== undefined,
     filters.minRating !== undefined,
-    filters.onSale,
-    filters.freeShipping,
-    filters.availableOnline,
-    filters.hasReviews,
     filters.shippingSpeed,
     !!filters.categories?.length,
     !!filters.brands?.length,
     !!filters.conditions?.length,
   ].filter(Boolean).length;
 
-  const togglePriceBucket = (bucket: (typeof PRICE_BUCKETS)[number]) => {
-    const isActive =
-      filters.minPrice === bucket.min && filters.maxPrice === bucket.max;
+  const allSelected =
+    !!selectedSources && selectedSources.length === RETAILERS.length;
+
+  const setPriceRange = (nextMin: number, nextMax: number) => {
+    if (!priceBounds) return;
     onChange({
       ...filters,
-      minPrice: isActive ? undefined : bucket.min,
-      maxPrice: isActive ? undefined : bucket.max,
+      // Leave the filter unset while a handle rests at its bound, so the
+      // active-filter chip and "clear all" behave predictably.
+      minPrice: nextMin <= priceBounds.min ? undefined : nextMin,
+      maxPrice: nextMax >= priceBounds.max ? undefined : nextMax,
     });
   };
 
   const setRating = (value: number | undefined) => {
     onChange({ ...filters, minRating: value });
-  };
-
-  const toggleBoolean = (key: keyof ProductFilters) => {
-    onChange({ ...filters, [key]: !filters[key] });
   };
 
   const toggleFacet = (
@@ -206,6 +232,19 @@ export default function SearchFilters({
       {selectedSources && onSourcesChange && (
         <FilterSection title="Retailers" defaultOpen>
           <div className="flex flex-wrap gap-1.5">
+            <button
+              type="button"
+              onClick={() => onSourcesChange(RETAILERS.map((retailer) => retailer.source))}
+              disabled={allSelected}
+              aria-pressed={allSelected}
+              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border transition-all ${
+                allSelected
+                  ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-transparent'
+                  : 'bg-transparent text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500'
+              }`}
+            >
+              All
+            </button>
             {RETAILERS.map((retailer) => {
               const active = selectedSources.includes(retailer.source);
               return (
@@ -244,20 +283,54 @@ export default function SearchFilters({
 
       {renderFacetSection('Brand', 'brands', brandFacets)}
 
-      {availableBuckets.length > 0 && (
+      {priceSlider && priceBounds && (
         <FilterSection title="Price" defaultOpen>
-          <div className="space-y-2">
-            {availableBuckets.map((bucket) => (
-              <Checkbox
-                key={bucket.label}
-                checked={
-                  filters.minPrice === bucket.min &&
-                  filters.maxPrice === bucket.max
-                }
-                onChange={() => togglePriceBucket(bucket)}
-                label={bucket.label}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-xs font-medium text-gray-600 dark:text-gray-400">
+              <span>${priceSlider.lower.toLocaleString()}</span>
+              <span>${priceSlider.upper.toLocaleString()}</span>
+            </div>
+
+            <div className="relative h-5">
+              <div className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-gray-200 dark:bg-gray-700" />
+              <div
+                className="absolute top-1/2 h-1 -translate-y-1/2 rounded-full bg-blue-500"
+                style={{
+                  left: `${priceSlider.leftPct}%`,
+                  right: `${100 - priceSlider.rightPct}%`,
+                }}
               />
-            ))}
+              <input
+                type="range"
+                aria-label="Minimum price"
+                min={priceBounds.min}
+                max={priceBounds.max}
+                step={priceSlider.step}
+                value={priceSlider.lower}
+                onChange={(event) =>
+                  setPriceRange(
+                    Math.min(Number(event.target.value), priceSlider.upper),
+                    priceSlider.upper
+                  )
+                }
+                className="pointer-events-none absolute inset-x-0 top-1/2 h-5 w-full -translate-y-1/2 appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:shadow [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-blue-600"
+              />
+              <input
+                type="range"
+                aria-label="Maximum price"
+                min={priceBounds.min}
+                max={priceBounds.max}
+                step={priceSlider.step}
+                value={priceSlider.upper}
+                onChange={(event) =>
+                  setPriceRange(
+                    priceSlider.lower,
+                    Math.max(Number(event.target.value), priceSlider.lower)
+                  )
+                }
+                className="pointer-events-none absolute inset-x-0 top-1/2 h-5 w-full -translate-y-1/2 appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:shadow [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-blue-600"
+              />
+            </div>
           </div>
         </FilterSection>
       )}
@@ -286,36 +359,7 @@ export default function SearchFilters({
 
       {renderFacetSection('Condition', 'conditions', conditionFacets, (value) => CONDITION_LABELS[value] ?? value)}
 
-      <FilterSection title="Deals & Shipping" defaultOpen>
-        <div className="space-y-2">
-          <Checkbox
-            checked={!!filters.onSale}
-            onChange={() => toggleBoolean('onSale')}
-            label="On sale"
-            count={counts.onSale}
-          />
-          <Checkbox
-            checked={!!filters.freeShipping}
-            onChange={() => toggleBoolean('freeShipping')}
-            label="Free shipping"
-            count={counts.freeShipping}
-          />
-          <Checkbox
-            checked={!!filters.availableOnline}
-            onChange={() => toggleBoolean('availableOnline')}
-            label="Available online"
-            count={counts.availableOnline}
-          />
-          <Checkbox
-            checked={!!filters.hasReviews}
-            onChange={() => toggleBoolean('hasReviews')}
-            label="Has reviews"
-            count={counts.hasReviews}
-          />
-        </div>
-      </FilterSection>
-
-      <FilterSection title="Shipping Speed" defaultOpen>
+      <FilterSection title="Shipping" defaultOpen>
         <div className="space-y-2">
           {[
             { value: undefined, label: 'Any speed' as const },
@@ -359,6 +403,7 @@ const RETAILERS: { source: RetailerSource; label: string; color: string; icon: s
   { source: 'ebay', label: 'eBay', color: 'bg-purple-600', icon: '/favicon-ebay.png' },
   { source: 'costco', label: 'Costco', color: 'bg-gray-600', icon: '/costco-favicon.png' },
   { source: 'shopify', label: 'Shopify', color: 'bg-green-600', icon: '/shopify-logo.svg' },
+  { source: 'backmarket', label: 'Back Market', color: 'bg-neutral-900', icon: '/backmarket-favicon.svg' },
 ];
 
 interface ActiveFilterChipProps {
@@ -418,38 +463,6 @@ export function ActiveFilters({ filters, onChange }: ActiveFiltersProps) {
       key: 'rating',
       label: option?.label || `${filters.minRating}★ & up`,
       remove: () => onChange({ ...filters, minRating: undefined }),
-    });
-  }
-
-  if (filters.onSale) {
-    chips.push({
-      key: 'onSale',
-      label: 'On sale',
-      remove: () => onChange({ ...filters, onSale: false }),
-    });
-  }
-
-  if (filters.freeShipping) {
-    chips.push({
-      key: 'freeShipping',
-      label: 'Free shipping',
-      remove: () => onChange({ ...filters, freeShipping: false }),
-    });
-  }
-
-  if (filters.availableOnline) {
-    chips.push({
-      key: 'availableOnline',
-      label: 'Available online',
-      remove: () => onChange({ ...filters, availableOnline: false }),
-    });
-  }
-
-  if (filters.hasReviews) {
-    chips.push({
-      key: 'hasReviews',
-      label: 'Has reviews',
-      remove: () => onChange({ ...filters, hasReviews: false }),
     });
   }
 
