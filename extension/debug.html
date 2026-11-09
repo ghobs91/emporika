@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Emporika · provider harness</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+        margin: 0; padding: 24px; max-width: 900px;
+      }
+      h1 { font-size: 16px; margin: 0 0 4px; }
+      p.hint { margin: 0 0 20px; opacity: 0.7; }
+      .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 20px; }
+      input {
+        font: inherit; padding: 6px 10px; border-radius: 6px;
+        border: 1px solid #8884; background: transparent; min-width: 200px;
+      }
+      button {
+        font: inherit; padding: 6px 12px; border-radius: 6px; cursor: pointer;
+        border: 1px solid #8884; background: #8881;
+      }
+      button:hover { background: #8882; }
+      section { border-top: 1px solid #8883; padding-top: 12px; margin-top: 12px; }
+      h2 { font-size: 13px; margin: 0 0 8px; font-weight: 600; }
+      pre {
+        margin: 0; padding: 12px; border-radius: 6px; background: #8881;
+        overflow: auto; max-height: 340px; white-space: pre-wrap; word-break: break-word;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Emporika · provider harness</h1>
+    <p class="hint">
+      Runs inside the extension origin, so host permissions apply and CORS is
+      bypassed — the same network path the service worker uses.
+    </p>
+
+    <div class="controls">
+      <input id="query" value="iphone 15" aria-label="Search query" />
+      <button data-run="backmarket">Back Market</button>
+      <button data-capture="backmarket">Capture Back Market</button>
+      <button data-save="backmarket">Save BM HTML</button>
+    </div>
+
+    <div id="output" role="log" aria-live="polite"></div>
+
+    <script type="module" src="./src/debug.js"></script>
+  </body>
+</html>

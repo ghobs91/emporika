@@ -11,6 +11,7 @@ import type {
   Money,
 } from '../types';
 import { getCapabilities } from './capabilities';
+import type { BrowserProviderId } from '../browser-providers';
 import { walmartAPI } from '@/lib/walmart';
 import { bestBuyAPI } from '@/lib/bestbuy';
 import { targetAPI } from '@/lib/target';
@@ -656,8 +657,15 @@ function extractUPID(shopifyId: string): string {
 
 // ── Provider registry ──────────────────────────────────────────────────
 
+/**
+ * Providers callable from the server. Back Market has no server
+ * adapter: it is collected in the user's browser and arrives as
+ * pre-supplied results (see `search/browser-providers.ts`).
+ */
+export type ServerProviderId = Exclude<ProviderId, BrowserProviderId>;
+
 /** All provider adapters in a lookup map. */
-export const providerAdapters: Record<ProviderId, RetailerSearchProvider> = {
+export const providerAdapters: Record<ServerProviderId, RetailerSearchProvider> = {
   walmart: walmartAdapter,
   bestbuy: bestbuyAdapter,
   target: targetAdapter,
@@ -667,14 +675,20 @@ export const providerAdapters: Record<ProviderId, RetailerSearchProvider> = {
 };
 
 /** Get a provider adapter by ID. */
-export function getProvider(id: ProviderId): RetailerSearchProvider {
+export function getProvider(id: ServerProviderId): RetailerSearchProvider {
   const adapter = providerAdapters[id];
   if (!adapter) throw new Error(`Unknown provider: ${id}`);
   return adapter;
 }
 
-/** All provider IDs that are available (configured with credentials). */
-export function getAvailableProviders(): ProviderId[] {
+/**
+ * Provider IDs that can serve this request: API-backed providers configured
+ * with credentials, plus browser-collected providers the caller actually
+ * supplied listings for.
+ */
+export function getAvailableProviders(
+  browserProviders: readonly BrowserProviderId[] = []
+): ProviderId[] {
   const available: ProviderId[] = [];
 
   if (process.env.WALMART_CONSUMER_ID || process.env.WALMART_PRIVATE_KEY_BASE64) {
@@ -695,6 +709,12 @@ export function getAvailableProviders(): ProviderId[] {
   // Shopify always available (uses agent profile without auth)
   if (process.env.SHOPIFY_AGENT_PROFILE || process.env.SHOPIFY_CLIENT_ID) {
     available.push('shopify');
+  }
+
+  // A browser-collected provider is only "available" when this request
+  // actually carries its listings.
+  for (const id of browserProviders) {
+    if (!available.includes(id)) available.push(id);
   }
 
   return available;

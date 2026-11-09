@@ -1,6 +1,7 @@
 // ── Core domain types for federated shopping search ─────────────────────
 
 import { RetailerSource } from '@/types/unified';
+import type { BrowserResults } from './browser-providers';
 
 // ── Provider identity ──────────────────────────────────────────────────
 
@@ -380,6 +381,12 @@ export interface SearchRequest {
   destination?: { country: string; postalCode?: string };
   preferences?: ShopperPreferences;
   candidatePlan?: SearchPlan;
+  /**
+   * Listings collected in the user's own browser (Back Market) and
+   * uploaded for this request. Merged as pre-supplied provider results and
+   * then ranked by the same server-side pipeline as every other provider.
+   */
+  browserResults?: BrowserResults;
   /**
    * Ordering for the returned result set. Applied before `maxResults` is
    * sliced so the requested order determines which items survive the cap.

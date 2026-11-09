@@ -2,11 +2,13 @@
 
 import { z } from 'zod';
 import type { ProviderId } from './types';
+import { browserResultsSchema } from './browser-providers';
 
 // ── Helpers ────────────────────────────────────────────────────────────
 
 const PROVIDER_IDS = [
   'walmart', 'bestbuy', 'target', 'ebay', 'costco', 'shopify',
+  'backmarket',
 ] as const;
 
 const providerIdSchema = z.enum(PROVIDER_IDS);
@@ -125,6 +127,8 @@ export const searchRequestSchema = z.object({
     .optional(),
   preferences: shopperPreferencesSchema.optional(),
   candidatePlan: searchPlanSchema.optional(),
+  /** Listings collected in the user's browser by the extension. */
+  browserResults: browserResultsSchema.optional(),
   sort: z
     .enum(['relevance', 'most-popular', 'price-asc', 'price-desc', 'rating-desc'])
     .optional(),

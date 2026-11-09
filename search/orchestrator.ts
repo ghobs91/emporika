@@ -25,6 +25,12 @@ import type {
 import { validatePlan } from './schemas';
 import { createFallbackPlan, resolveEligibleProviders, withCategoryIntent } from './planner';
 import { getProvider, getAvailableProviders } from './providers/adapter';
+import {
+  BROWSER_PROVIDER_IDS,
+  isBrowserProvider,
+  toProviderSearchResults,
+} from './browser-providers';
+import type { BrowserProviderId } from './browser-providers';
 import { getCapabilities } from './providers/capabilities';
 import { normalizeProviderResults } from './normalize';
 import { resolveEntities } from './entity-resolution';
@@ -70,7 +76,11 @@ function prepareSearch(
   telemetry: Telemetry,
   timing: SearchMetadata['timingMs']
 ): PrepareOutcome {
-  const availableProviders = getAvailableProviders();
+  const availableProviders = getAvailableProviders(
+    BROWSER_PROVIDER_IDS.filter(
+      (id) => request.browserResults?.providers[id] !== undefined
+    )
+  );
   if (availableProviders.length === 0) {
     return {
       early: {
@@ -188,6 +198,7 @@ async function searchProviders(
   queryVariants: SearchPlan['searches'],
   plan: SearchPlan,
   telemetry: Telemetry,
+  browserResults?: Partial<Record<BrowserProviderId, ProviderSearchResult>>,
   onProviderDone?: (outcome: ProviderOutcome) => void
 ): Promise<ProviderOutcome[]> {
   return mapWithConcurrency(
@@ -195,6 +206,27 @@ async function searchProviders(
     CONFIG.maxConcurrency,
     async (providerId) => {
       let outcome: ProviderOutcome;
+
+      // Browser-collected providers arrive pre-fetched; never route them to
+      // a server adapter.
+      const supplied = isBrowserProvider(providerId)
+        ? browserResults?.[providerId]
+        : undefined;
+      if (supplied) {
+        outcome = { ok: true, providerId, results: [supplied] };
+        onProviderDone?.(outcome);
+        return outcome;
+      }
+      if (isBrowserProvider(providerId)) {
+        outcome = {
+          ok: false,
+          providerId,
+          error: new Error('No browser results were supplied for this provider'),
+        };
+        onProviderDone?.(outcome);
+        return outcome;
+      }
+
       try {
         const provider = getProvider(providerId);
         const results = await mapWithConcurrency(
@@ -419,7 +451,16 @@ export async function executeSearch(request: SearchRequest): Promise<SearchApiRe
   const { plan, eligibleProviders, queryVariants } = prepared as PreparedSearch;
 
   const searchStart = performance.now();
-  const outcomes = await searchProviders(eligibleProviders, queryVariants, plan, telemetry);
+  const browserResults = request.browserResults
+    ? toProviderSearchResults(request.browserResults)
+    : undefined;
+  const outcomes = await searchProviders(
+    eligibleProviders,
+    queryVariants,
+    plan,
+    telemetry,
+    browserResults
+  );
   timing.search = Math.round(performance.now() - searchStart);
 
   const { providerSearched, providerFailed, allOffers } = aggregateOutcomes(
@@ -566,7 +607,10 @@ export async function executeSearchStream(
     });
   };
 
-  await searchProviders(eligibleProviders, queryVariants, plan, telemetry, (outcome) => {
+  const browserResults = request.browserResults
+    ? toProviderSearchResults(request.browserResults)
+    : undefined;
+  await searchProviders(eligibleProviders, queryVariants, plan, telemetry, browserResults, (outcome) => {
     const index = eligibleProviders.indexOf(outcome.providerId);
     outcomes[index] = outcome;
     pending.delete(outcome.providerId);

@@ -142,6 +142,31 @@ export const PROVIDER_CAPABILITIES: Record<ProviderId, ProviderCapabilities> = {
       'Condition, price, and shipping filters supported',
     ],
   },
+  backmarket: {
+    providerId: 'backmarket',
+    supportsKeywordSearch: true,
+    supportsCategorySearch: false,
+    supportsBrandFilters: false,
+    supportsPriceFilters: false,
+    supportsAvailabilityFilters: false,
+    supportsDestinationFiltering: false,
+    supportsVariantLookup: false,
+    supportsProductDetailLookup: false,
+    supportsGTINLookup: false,
+    supportsShippingData: false,
+    supportsPickupData: false,
+    supportsReturnPolicyData: false,
+    maxQueriesPerRequest: 1,
+    maxResultsPerQuery: 25,
+    maxConcurrentRequests: 1,
+    supportedCountries: ['US'],
+    notes: [
+      'Collected in the user\'s browser via the extension — no server-side adapter',
+      'Every listing is a refurbished device; condition is carried per listing',
+      'Hard filters are applied server-side after collection, never faked',
+    ],
+  },
+
 };
 
 /** Get capabilities for a provider, throwing if unknown. */

@@ -46,6 +46,14 @@ export function buildSearchCacheKey(request: SearchRequest): string {
     p: request.preferences ?? {},
     c: request.candidatePlan ?? null,
     s: request.sort ?? 'relevance',
+    // Which browser-collected providers this request carried. The listings
+    // themselves are interchangeable for one query, but a cached response
+    // must never be served to a user whose browser cannot produce them.
+    b: request.browserResults
+      ? Object.values(request.browserResults.providers)
+          .map((provider) => provider.providerId)
+          .sort()
+      : [],
   });
 }
 

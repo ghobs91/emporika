@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Emporika Browser Search",
+  "version": "0.1.0",
+  "description": "Fetches refurbished-electronics listings from Back Market inside your own browser, on Emporika's behalf.",
+  "permissions": ["declarativeNetRequest", "storage"],
+  "host_permissions": ["https://www.backmarket.com/*"],
+  "action": {
+    "default_title": "Emporika: test Back Market"
+  },
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://localhost:3000/*", "https://emporika.netlify.app/*"],
+      "js": ["src/bridge.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

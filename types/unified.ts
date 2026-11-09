@@ -4,7 +4,10 @@ import { TargetProduct, TargetFeaturedDealsProduct } from './target';
 import { EbayItemSummary } from './ebay';
 import { CostcoProduct } from './costco';
 
-export type RetailerSource = 'walmart' | 'bestbuy' | 'target' | 'ebay' | 'costco' | 'shopify';
+export type RetailerSource =
+  | 'walmart' | 'bestbuy' | 'target' | 'ebay' | 'costco' | 'shopify'
+  // Collected in the user's browser via the extension — see search/browser-providers.ts
+  | 'backmarket';
 
 /** Normalized product condition, used for the condition facet. */
 export type ProductCondition = 'new' | 'used' | 'refurbished' | 'open_box';

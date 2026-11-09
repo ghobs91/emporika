@@ -338,6 +338,14 @@ export function createFallbackPlan(
     allowedConditions.push('new');
   }
 
+  // Enabling a refurbished-only marketplace is itself a condition
+  // preference. Back Market never sells new stock, so without this the
+  // 'new' default above filters out every one of its listings and the
+  // results vanish with no explanation the shopper could act on.
+  if (availableProviders.includes('backmarket') && !allowedConditions.includes('refurbished')) {
+    allowedConditions.push('refurbished');
+  }
+
   // ── Detect feature / size / compatibility hints ─────────────────────
 
   const requiredFeatures: string[] = [];

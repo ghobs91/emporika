@@ -7,6 +7,19 @@ import type { ProviderId } from '@/search/types';
 
 const ALL: ProviderId[] = ['walmart', 'bestbuy', 'target', 'ebay', 'costco', 'shopify'];
 
+describe('createFallbackPlan condition defaults for browser providers', () => {
+  it('allows refurbished listings when Back Market is available', () => {
+    const plan = createFallbackPlan('iphone 15', ['walmart', 'backmarket']);
+    expect(plan.hardFilters.allowedConditions).toContain('refurbished');
+    expect(plan.hardFilters.allowedConditions).toContain('new');
+  });
+
+  it('leaves the new-only default alone without browser providers', () => {
+    const plan = createFallbackPlan('iphone 15', ALL);
+    expect(plan.hardFilters.allowedConditions).toEqual(['new']);
+  });
+});
+
 describe('createFallbackPlan query understanding', () => {
   it('extracts shoe sizes into feature tokens', () => {
     const plan = createFallbackPlan('trail running shoes mens size 10', ALL);

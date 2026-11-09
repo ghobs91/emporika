@@ -20,6 +20,8 @@ import type {
 import { getWebLLMClient } from '@/lib/webllm/client';
 import { derivePreferences, loadLearnedProfile, mergePreferences } from '@/lib/learning';
 import type { RetailerSource } from '@/types/unified';
+import { BROWSER_PROVIDER_IDS } from '@/search/browser-providers';
+import { requestBrowserResults } from '@/lib/extension-bridge';
 
 export type { SearchStatusType, SearchApiResponse };
 
@@ -273,6 +275,16 @@ export function useIntelligentSearch() {
       maxResults: MAX_RESULTS,
     };
 
+    // Back Market listings are collected in the user's own browser by the
+    // extension. Best-effort: no extension → the provider is simply absent
+    // from the request and from the eligible set.
+    const browserProviders = BROWSER_PROVIDER_IDS.filter(
+      (id) => !selectedSources || selectedSources.includes(id)
+    );
+    const browserResults = browserProviders.length
+      ? await requestBrowserResults({ query, providers: browserProviders })
+      : null;
+
     const payload = {
       query,
       destination,
@@ -280,6 +292,7 @@ export function useIntelligentSearch() {
       preferences: requestPreferences,
       // No candidatePlan on first search — WebLLM may not be ready yet
       // Server falls back to deterministic planner
+      ...(browserResults ? { browserResults } : {}),
     };
 
     // Stream first; fall back to batched when the stream dies early.
@@ -316,6 +329,7 @@ export function useIntelligentSearch() {
               sort,
               preferences: requestPreferences,
               candidatePlan: planResult.plan,
+              ...(browserResults ? { browserResults } : {}),
             }),
             signal: AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined,
           });

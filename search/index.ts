@@ -17,5 +17,14 @@ export { rankProducts } from './ranker';
 export { providerAdapters, getProvider, getAvailableProviders } from './providers/adapter';
 export { getCapabilities, supportsDetailEnrichment, PROVIDER_CAPABILITIES } from './providers/capabilities';
 
+// Browser-collected providers (no server-side adapter)
+export {
+  BROWSER_PROVIDER_IDS,
+  isBrowserProvider,
+  toProviderSearchResults,
+  browserResultsSchema,
+} from './browser-providers';
+export type { BrowserProviderId, BrowserResults } from './browser-providers';
+
 // Telemetry
 export { createTelemetry } from './telemetry';

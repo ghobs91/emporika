@@ -34,8 +34,10 @@ function isValidOrder(value: string | null): value is ValidOrderValue {
 }
 
 function parseSources(param: string | null): RetailerSource[] {
+  const valid: RetailerSource[] = [
+    'walmart', 'bestbuy', 'target', 'ebay', 'costco', 'shopify', 'backmarket',
+  ];
   if (!param) return ['walmart', 'bestbuy', 'target', 'ebay', 'costco', 'shopify'];
-  const valid: RetailerSource[] = ['walmart', 'bestbuy', 'target', 'ebay', 'costco', 'shopify'];
   return param
     .split(',')
     .map((s) => s.trim().toLowerCase())
@@ -337,9 +339,12 @@ function interleaveProducts(products: UnifiedProduct[]): UnifiedProduct[] {
     ebay: products.filter(p => p.source === 'ebay'),
     costco: products.filter(p => p.source === 'costco'),
     shopify: products.filter(p => p.source === 'shopify'),
+    backmarket: products.filter(p => p.source === 'backmarket'),
   };
   
-  const sources: RetailerSource[] = ['walmart', 'bestbuy', 'target', 'ebay', 'costco', 'shopify'];
+  const sources: RetailerSource[] = [
+    'walmart', 'bestbuy', 'target', 'ebay', 'costco', 'shopify', 'backmarket',
+  ];
   const result: UnifiedProduct[] = [];
   const maxLength = Math.max(...sources.map(s => sourceBuckets[s].length));
   
