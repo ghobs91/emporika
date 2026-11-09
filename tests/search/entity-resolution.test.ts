@@ -222,3 +222,40 @@ describe('Entity resolution', () => {
     expect(products[0].category).toBe('Headphones');
   });
 });
+
+describe('Entity resolution — generation separation', () => {
+  // Regression: "PlayStation 5 Slim" and "PlayStation 4 Slim" merged into one
+  // canonical product because bare generation numbers were not model tokens.
+  // The result was a card showing the PS5's title and image with the PS4's
+  // price and link.
+  it('never merges different console generations', () => {
+    const ps5 = makeOffer({
+      providerId: 'backmarket',
+      title: 'PlayStation 5 Slim • Unlocked',
+      price: { amount: 449, currency: 'USD' },
+    });
+    const ps4 = makeOffer({
+      providerId: 'backmarket',
+      title: 'PlayStation 4 Slim • Unlocked',
+      price: { amount: 170, currency: 'USD' },
+    });
+
+    const products = resolveEntities([ps5, ps4]);
+    expect(products).toHaveLength(2);
+    for (const product of products) {
+      expect(product.offers).toHaveLength(1);
+    }
+  });
+
+  it('never merges different phone generations', () => {
+    const newer = makeOffer({ title: 'Apple iPhone 15 128GB' });
+    const older = makeOffer({ title: 'Apple iPhone 14 128GB' });
+    expect(resolveEntities([newer, older])).toHaveLength(2);
+  });
+
+  it('still merges the same generation across providers', () => {
+    const a = makeOffer({ providerId: 'walmart', title: 'PlayStation 5 Slim Console' });
+    const b = makeOffer({ providerId: 'bestbuy', title: 'PlayStation 5 Slim Console' });
+    expect(resolveEntities([a, b])).toHaveLength(1);
+  });
+});

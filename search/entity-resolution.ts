@@ -206,17 +206,19 @@ function matchOffers(a: NormalizedOffer, b: NormalizedOffer): MatchResult {
   // variants of the same family. Never merge those.
   const modelsA = modelTokens(a.title);
   const modelsB = modelTokens(b.title);
-  if (modelsA.size > 0 && modelsB.size > 0) {
-    let overlap = false;
-    for (const t of modelsA) {
-      if (modelsB.has(t)) {
-        overlap = true;
-        break;
-      }
-    }
-    if (!overlap) {
-      return { matched: false, method: 'unmatched', confidence: 'low' };
-    }
+  if (modelsA.size > 0 && modelsB.size > 0 && !hasOverlap(modelsA, modelsB)) {
+    return { matched: false, method: 'unmatched', confidence: 'low' };
+  }
+
+  // Generation veto: bare model numbers are invisible to `modelTokens`,
+  // which requires letters AND digits. "PlayStation 4 Slim" and
+  // "PlayStation 5 Slim" both reduced to {playstation, slim, unlocked} and
+  // merged, producing a card whose title/image came from one generation and
+  // whose price and link came from the other.
+  const generationsA = generationTokens(a.title);
+  const generationsB = generationTokens(b.title);
+  if (generationsA.size > 0 && generationsB.size > 0 && !hasOverlap(generationsA, generationsB)) {
+    return { matched: false, method: 'unmatched', confidence: 'low' };
   }
 
   const sim = titleSimilarity(a.title, b.title);
@@ -243,6 +245,29 @@ function modelTokens(title: string): Set<string> {
     if (raw.length >= 3 && /[a-z]/.test(raw) && /\d/.test(raw)) {
       tokens.add(raw);
     }
+  }
+  return tokens;
+}
+
+/** True when the two token sets share at least one token. */
+function hasOverlap(a: Set<string>, b: Set<string>): boolean {
+  for (const token of a) {
+    if (b.has(token)) return true;
+  }
+  return false;
+}
+
+/**
+ * Bare numeric model tokens — generations and model years ("4", "15", "2024").
+ *
+ * `modelTokens` deliberately requires letters *and* digits, which leaves
+ * "PlayStation 4" and "PlayStation 5" with identical token sets and therefore
+ * mergeable. These tokens are only used to veto, never to match.
+ */
+function generationTokens(title: string): Set<string> {
+  const tokens = new Set<string>();
+  for (const raw of title.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean)) {
+    if (/^\d{1,4}$/.test(raw)) tokens.add(raw);
   }
   return tokens;
 }
