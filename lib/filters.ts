@@ -33,7 +33,20 @@ export const RATING_OPTIONS: { label: string; value: number | undefined }[] = [
   { label: '4★ & up', value: 4 },
   { label: '3★ & up', value: 3 },
   { label: '2★ & up', value: 2 },
+  { label: '1★ & up', value: 1 },
   { label: 'Any rating', value: undefined },
+];
+
+/**
+ * Minimum-rating choices offered as segmented pills, highest first. The
+ * `undefined` entry is the reset option and always leads the list.
+ */
+export const RATING_PILLS: { label: string; value: number | undefined }[] = [
+  { label: 'All', value: undefined },
+  { label: '4+', value: 4 },
+  { label: '3+', value: 3 },
+  { label: '2+', value: 2 },
+  { label: '1+', value: 1 },
 ];
 
 export const SHIPPING_SPEED_OPTIONS: { label: string; value: ProductFilters['shippingSpeed'] }[] = [
@@ -161,6 +174,25 @@ export function getFilterCounts(products: UnifiedProduct[]) {
 export interface FacetValue {
   value: string;
   count: number;
+}
+
+/**
+ * How many filters are currently narrowing the results. Every chip the panel
+ * would show counts once, so the mobile "Filters" badge and the panel agree.
+ */
+export function countActiveFilters(filters: ProductFilters): number {
+  let count = 0;
+  if (filters.minPrice !== undefined || filters.maxPrice !== undefined) count += 1;
+  if (filters.minRating !== undefined) count += 1;
+  if (filters.onSale) count += 1;
+  if (filters.freeShipping) count += 1;
+  if (filters.availableOnline) count += 1;
+  if (filters.hasReviews) count += 1;
+  if (filters.shippingSpeed) count += 1;
+  count += filters.categories?.length ?? 0;
+  count += filters.brands?.length ?? 0;
+  count += filters.conditions?.length ?? 0;
+  return count;
 }
 
 /**

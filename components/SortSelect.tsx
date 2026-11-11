@@ -1,5 +1,7 @@
 'use client';
 
+import { ChevronDown } from 'lucide-react';
+
 export type SortOption = 'most-popular' | 'price-asc' | 'price-desc' | 'rating-desc';
 
 const OPTIONS: { value: SortOption; label: string }[] = [
@@ -14,16 +16,18 @@ interface SortSelectProps {
   onChange: (value: SortOption) => void;
 }
 
+/**
+ * Compact sort chip for the results toolbar. Sort lives next to the results
+ * rather than inside the filter panel, matching how shopping feeds expose it.
+ */
 export default function SortSelect({ value, onChange }: SortSelectProps) {
   return (
-    <label className="flex items-center gap-2 mb-4">
-      <span className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
-        Sort by:
-      </span>
+    <label className="relative inline-flex items-center">
+      <span className="sr-only">Sort by</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value as SortOption)}
-        className="flex-1 min-w-0 px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#242424] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer transition-all"
+        className="appearance-none rounded-full border border-gray-200 dark:border-[#4a4a4a] bg-white dark:bg-[#232323] py-1.5 pl-3.5 pr-8 text-[13px] font-medium text-gray-700 dark:text-gray-100 hover:border-gray-400 dark:hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 cursor-pointer transition-colors"
       >
         {OPTIONS.map((option) => (
           <option key={option.value} value={option.value}>
@@ -31,6 +35,11 @@ export default function SortSelect({ value, onChange }: SortSelectProps) {
           </option>
         ))}
       </select>
+      <ChevronDown
+        size={14}
+        className="pointer-events-none absolute right-2.5 text-gray-500 dark:text-gray-400"
+        aria-hidden="true"
+      />
     </label>
   );
 }

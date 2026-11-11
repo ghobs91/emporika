@@ -55,7 +55,7 @@ export default function Sidebar() {
     <>
       {/* Desktop left icon rail (lg+) */}
       <aside
-        className="hidden lg:flex sticky top-0 h-screen w-20 shrink-0 flex-col items-center py-5 gap-1.5 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-[#1a1a1a] z-40"
+        className="hidden lg:flex sticky top-0 h-screen w-20 shrink-0 flex-col items-center py-5 gap-1.5 border-r border-gray-200 dark:border-[#2b2b2b] bg-white dark:bg-[#131313] z-40"
         aria-label="Primary navigation"
       >
         {/* Logo */}

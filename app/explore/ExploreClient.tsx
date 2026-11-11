@@ -109,8 +109,8 @@ export default function ExploreClient() {
 
   return (
     <CartProvider>
-      <div className="min-h-screen bg-white dark:bg-[#1a1a1a]">
-        <header className="sticky top-0 z-40 border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-[#1a1a1a]/80 backdrop-blur-xl">
+      <div className="min-h-screen bg-white dark:bg-[#131313]">
+        <header className="sticky top-0 z-40 border-b border-gray-200 dark:border-[#2b2b2b] bg-white/80 dark:bg-[#131313]/80 backdrop-blur-xl">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
             <Link href="/" className="flex items-center gap-2 hover:opacity-75 transition-opacity">
               <ShoppingBag size={22} className="text-blue-500 dark:text-blue-400" />

@@ -1,26 +1,59 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { UnifiedProduct } from '@/types/unified';
-import type { RankedOffer, RankedProduct } from '@/search/types';
-import { Star, ExternalLink, Truck, ChevronDown, ChevronUp, TrendingUp, Info } from 'lucide-react';
+import type { RankedProduct } from '@/search/types';
+import { Star, ExternalLink } from 'lucide-react';
 import Image from 'next/image';
 import MerchantLogo from '@/components/MerchantLogo';
 import { getRetailerInfo, decodeHtmlEntities, retailerExploreHref, merchantExploreHref } from '@/lib/retailer';
 
 interface ProductCardProps {
   product: UnifiedProduct;
-  /** 1-based rank, shown as a badge when the result is from ranked search. */
+  /** 1-based rank, shown as a subtle label when the result is from ranked search. */
   rank?: number;
-  /** Full ranked contract (best offer, alternates, reasons) when available. */
+  /** Full ranked contract (best offer, alternates) when available. */
   ranked?: RankedProduct;
   onClick?: () => void;
 }
 
-export default function ProductCard({ product, rank, ranked, onClick }: ProductCardProps) {
-  const [showOffers, setShowOffers] = useState(false);
+const STAR_SLOTS = [1, 2, 3, 4, 5];
 
+/**
+ * Five star glyphs filled to the rounded rating, plus the review count.
+ * The numeric rating stays in the accessible label so screen readers get
+ * the exact value while the card stays visually quiet.
+ */
+function RatingRow({ rating, count }: { rating?: number; count?: number }) {
+  if (rating == null) return null;
+  const filled = Math.round(rating);
+  return (
+    <div
+      className="flex items-center gap-1"
+      aria-label={`Rated ${rating.toFixed(1)} out of 5${
+        count ? ` from ${count.toLocaleString()} reviews` : ''
+      }`}
+    >
+      <span className="flex items-center gap-[1px]" aria-hidden="true">
+        {STAR_SLOTS.map((slot) => (
+          <Star
+            key={slot}
+            size={11}
+            strokeWidth={0}
+            className={slot <= filled ? 'fill-amber-400' : 'fill-gray-200 dark:fill-gray-600'}
+          />
+        ))}
+      </span>
+      {count != null && count > 0 && (
+        <span className="text-[11px] text-gray-400 dark:text-gray-500" aria-hidden="true">
+          ({count.toLocaleString()})
+        </span>
+      )}
+    </div>
+  );
+}
+
+export default function ProductCard({ product, rank, ranked, onClick }: ProductCardProps) {
   const formatPrice = (price: number | null | undefined) =>
     typeof price === 'number' && Number.isFinite(price) ? `$${price.toFixed(2)}` : '—';
 
@@ -39,39 +72,18 @@ export default function ProductCard({ product, rank, ranked, onClick }: ProductC
     ? product.name.split(' — ')[0]
     : product.name;
 
-  // ── Ranked contract (#1): offers, reasons, confidence ─────────────────
-  const offers: RankedOffer[] = ranked
-    ? [ranked.bestOffer, ...ranked.alternateOffers].filter((o): o is RankedOffer => Boolean(o))
+  // ── Cross-retailer price context ──────────────────────────────────────
+  const offers = ranked
+    ? [ranked.bestOffer, ...ranked.alternateOffers].filter(
+        (offer): offer is NonNullable<typeof offer> => Boolean(offer)
+      )
     : [];
-  const best = ranked?.bestOffer?.offer;
-  const storeCount = new Set(offers.map((o) => o.offer.providerId)).size;
+  const storeCount = new Set(offers.map((offer) => offer.offer.providerId)).size;
   const priceValues = offers
-    .map((o) => o.offer.price?.amount)
-    .filter((n): n is number => n !== undefined);
+    .map((offer) => offer.offer.price?.amount)
+    .filter((amount): amount is number => amount !== undefined);
   const minPrice = priceValues.length > 0 ? Math.min(...priceValues) : undefined;
   const multipleStores = storeCount > 1;
-
-  const shippingDays = product.shipping?.estimatedDates?.min
-    ? Math.max(1, Math.ceil((new Date(product.shipping.estimatedDates.min).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
-    : null;
-
-  // Landed cost (#3): prefer the ranked best-offer shipping, else the
-  // normalized retailer shipping cost.
-  const shippingCost =
-    best?.fulfillment?.shippingCost?.amount ?? product.shippingCost;
-  const landedCost = shippingCost !== undefined ? product.price + shippingCost : undefined;
-
-  // Condensed shipping summary — one or two compact tags max to reduce clutter
-  const shippingTags: string[] = [];
-  if (shippingCost === 0 || product.shipping?.freeShipping) shippingTags.push('Free shipping');
-  else if (shippingCost !== undefined) shippingTags.push(`+${formatPrice(shippingCost)} ship`);
-  else if (product.shipping?.twoDay) shippingTags.push('2-day shipping');
-  else if (product.shipping?.twoThreeDay) shippingTags.push('2-3 day shipping');
-  else if (product.shipping?.speed) shippingTags.push(product.shipping.speed);
-  if (shippingDays) shippingTags.push(`${shippingDays} day shipping`);
-
-  const primaryReason = ranked?.reasonsToChoose?.[0];
-  const primaryTradeoff = ranked?.uncertaintyFlags?.[0] ?? ranked?.tradeoffs?.[0];
 
   const handleExternalLinkClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -79,253 +91,127 @@ export default function ProductCard({ product, rank, ranked, onClick }: ProductC
 
   return (
     <div
-      className="relative bg-white dark:bg-[#242424] rounded-3xl overflow-hidden group hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex flex-col border border-gray-200 dark:border-gray-800 cursor-pointer"
+      className="group flex min-w-0 cursor-pointer flex-col"
       onClick={onClick}
     >
-      {/* Image — image-forward with generous padding */}
-      <div className="relative aspect-square bg-white dark:bg-[#1a1a1a]">
+      {/* Image plate — square, neutral ground, generous padding */}
+      <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-100 dark:bg-[#333333]">
         {product.image && (
           <Image
             src={product.image}
             alt={product.name}
             fill
-            className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+            className="object-contain p-5 transition-transform duration-300 group-hover:scale-[1.04]"
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
             quality={85}
             unoptimized
           />
         )}
-        {rank !== undefined && (
-          <div className="absolute top-3 left-3 z-10 w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/50 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs font-bold flex items-center justify-center shadow-sm">
-            {rank}
-          </div>
-        )}
+
+        {/* Discount / savings badge, top-left */}
         {discount > 0 && (
-          <div className="absolute top-3 right-3 bg-red-600 text-white px-2.5 py-1 rounded-full text-xs font-bold shadow-sm">
-            {discount}% OFF
+          <div className="absolute left-2.5 top-2.5 rounded-lg bg-red-600 px-2 py-0.5 text-[11px] font-semibold text-white">
+            {discount}% off
           </div>
         )}
+
+        {/* Rank is positional, so it stays small and secondary */}
+        {rank !== undefined && (
+          <div
+            className="absolute bottom-2.5 left-2.5 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-gray-600 dark:bg-black/70 dark:text-gray-200"
+            aria-label={`Rank ${rank}`}
+          >
+            #{rank}
+          </div>
+        )}
+
+        {/* External link — revealed on hover/focus to keep the plate clean */}
+        <a
+          href={product.productUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={handleExternalLinkClick}
+          className="absolute right-2.5 top-2.5 rounded-full bg-white/90 p-1.5 text-gray-600 opacity-0 shadow-sm transition-opacity hover:bg-white focus-visible:opacity-100 group-hover:opacity-100 dark:bg-black/70 dark:text-gray-200 dark:hover:bg-black/90"
+          aria-label={`Open ${displayTitle} at ${sourceLabel}`}
+        >
+          <ExternalLink size={13} />
+        </a>
       </div>
 
-      {/* Content */}
-      <div className="p-4 flex flex-col grow gap-2">
-        {/* Retailer (merchant name + Shopify pill, or source favicon/label) */}
-        <div className="flex flex-col gap-1 min-w-0">
+      {/* Caption — merchant, title, rating, price. Nothing else. */}
+      <div className="flex min-w-0 flex-col gap-1 px-0.5 pt-2.5">
+        <div className="flex min-w-0 items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
           {hasMerchant ? (
-            <>
-              <Link
-                href={merchantExploreHref(product.sellerName!, product.sellerDomain)}
-                onClick={handleExternalLinkClick}
-                className="flex items-center gap-1.5 min-w-0 group/merchant"
-                title={`Explore ${product.sellerName}`}
-              >
-                <MerchantLogo
-                  domain={product.sellerDomain}
-                  alt={product.sellerName!}
-                  size={18}
-                  className="rounded-sm shrink-0"
-                />
-                <span
-                  className="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate group-hover/merchant:underline"
-                  title={product.sellerName}
-                >
-                  {product.sellerName}
-                </span>
-              </Link>
-              <Link
-                href={retailerExploreHref('shopify')}
-                onClick={handleExternalLinkClick}
-                className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-[10px] font-medium shrink-0 self-start hover:underline"
-                title="Explore Shopify merchants"
-              >
-                <Image src="/shopify-logo.svg" alt="" width={10} height={10} className="rounded-sm" unoptimized />
-                Shopify
-              </Link>
-            </>
-          ) : multipleStores ? (
-            <div className="flex items-center gap-1.5 min-w-0">
-              {sourceFavicon && (
-                <Image
-                  src={sourceFavicon}
-                  alt={sourceLabel}
-                  width={18}
-                  height={18}
-                  className="rounded-sm shrink-0"
-                  unoptimized
-                />
-              )}
-              <span className="text-xs font-medium text-gray-600 dark:text-gray-300 truncate">
-                {storeCount} stores
-              </span>
-            </div>
+            <Link
+              href={merchantExploreHref(product.sellerName!, product.sellerDomain)}
+              onClick={handleExternalLinkClick}
+              className="flex min-w-0 items-center gap-1 hover:underline"
+              title={`Explore ${product.sellerName}`}
+            >
+              <MerchantLogo
+                domain={product.sellerDomain}
+                alt={product.sellerName!}
+                size={13}
+                className="rounded-sm shrink-0"
+              />
+              <span className="truncate">{product.sellerName}</span>
+            </Link>
           ) : (
             <Link
               href={retailerExploreHref(product.source)}
               onClick={handleExternalLinkClick}
-              className="flex items-center gap-1.5 min-w-0 hover:underline"
+              className="flex min-w-0 items-center gap-1 hover:underline"
               title={`Explore ${sourceLabel}`}
             >
               {sourceFavicon && (
                 <Image
                   src={sourceFavicon}
-                  alt={sourceLabel}
-                  width={18}
-                  height={18}
+                  alt=""
+                  width={13}
+                  height={13}
                   className="rounded-sm shrink-0"
                   unoptimized
                 />
               )}
-              <span className="text-xs font-medium text-gray-600 dark:text-gray-300 truncate">
-                {sourceLabel}
-              </span>
+              <span className="truncate">{sourceLabel}</span>
             </Link>
+          )}
+          {multipleStores && (
+            <span className="shrink-0 text-gray-400 dark:text-gray-500">
+              · {storeCount} stores
+            </span>
           )}
         </div>
 
-        <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-2 leading-snug">
-          {decodeHtmlEntities(displayTitle)}
+        <h3 className="min-w-0 text-[13px] leading-snug text-gray-900 dark:text-gray-50">
+          {/* The title is the keyboard entry point into the detail view. */}
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onClick?.();
+            }}
+            className="line-clamp-2 w-full text-left [overflow-wrap:anywhere] hover:underline focus-visible:underline"
+          >
+            {decodeHtmlEntities(displayTitle)}
+          </button>
         </h3>
 
-        {/* Rating — always between name and price */}
-        {product.customerRating != null && (
-          <div className="flex items-center gap-1">
-            <Star className="fill-yellow-400 text-yellow-400" size={13} />
-            <span className="text-xs font-semibold text-gray-800 dark:text-gray-200">
-              {product.customerRating.toFixed(1)}
-            </span>
-            {product.reviewCount != null && (
-              <span className="text-xs text-gray-400 dark:text-gray-500">
-                ({product.reviewCount.toLocaleString()})
-              </span>
-            )}
-          </div>
-        )}
+        <RatingRow rating={product.customerRating} count={product.reviewCount} />
 
-        {/* Price — show "from" when the same product is available cheaper elsewhere */}
-        <div className="mt-auto pt-1 flex items-baseline gap-2">
-          <span className="text-lg font-bold text-gray-900 dark:text-white">
+        <div className="mt-0.5 flex items-baseline gap-2">
+          <span className="text-[15px] font-semibold text-gray-900 dark:text-white">
             {multipleStores && minPrice !== undefined && minPrice < product.price
               ? `from ${formatPrice(minPrice)}`
               : formatPrice(product.price)}
           </span>
           {discount > 0 && product.originalPrice && (
-            <span className="text-xs text-gray-400 dark:text-gray-500 line-through">
+            <span className="text-[12px] text-gray-400 line-through dark:text-gray-500">
               {formatPrice(product.originalPrice)}
             </span>
           )}
         </div>
-
-        {/* Landed cost — only when paid shipping is known (free shipping is shown below) */}
-        {landedCost !== undefined && shippingCost !== 0 && (
-          <div className="text-[11px] text-gray-500 dark:text-gray-400">
-            {formatPrice(landedCost)} delivered
-          </div>
-        )}
-
-        {/* Reasons / uncertainty from the ranked contract */}
-        {ranked && (primaryReason || primaryTradeoff) && (
-          <div className="flex flex-wrap gap-1">
-            {primaryReason && (
-              <span className="inline-flex items-center gap-0.5 text-[11px] text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-1.5 py-0.5 rounded">
-                <TrendingUp size={10} />
-                {primaryReason}
-              </span>
-            )}
-            {primaryTradeoff && (
-              <span className="inline-flex items-center gap-0.5 text-[11px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-1.5 py-0.5 rounded">
-                <Info size={10} />
-                {primaryTradeoff}
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Shipping — compact single line */}
-        {shippingTags.length > 0 && (
-          <div className="flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400">
-            <Truck size={11} className="shrink-0" />
-            <span className="truncate">{shippingTags.slice(0, 2).join(' · ')}</span>
-          </div>
-        )}
-
-        {/* Alternate offers (cross-retailer comparison) */}
-        {multipleStores && (
-          <div className="pt-1">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowOffers((v) => !v);
-              }}
-              className="flex items-center gap-1 text-[11px] font-medium text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              {showOffers ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
-              Compare {storeCount} offers
-            </button>
-            {showOffers && (
-              <div className="mt-1.5 space-y-1">
-                {offers.map((ro) => {
-                  const offer = ro.offer;
-                  const info = getRetailerInfo(offer.providerId as UnifiedProduct['source']);
-                  const offerLanded =
-                    offer.price && offer.fulfillment?.shippingCost?.amount !== undefined
-                      ? offer.price.amount + offer.fulfillment.shippingCost.amount
-                      : offer.price?.amount;
-                  return (
-                    <div
-                      key={offer.offerId}
-                      className="flex items-center justify-between gap-2 bg-gray-50 dark:bg-gray-800/40 rounded px-2 py-1 text-[11px]"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <span className="flex items-center gap-1 min-w-0">
-                        {info.favicon && (
-                          <Image src={info.favicon} alt="" width={12} height={12} className="rounded-sm shrink-0" unoptimized />
-                        )}
-                        <span className="text-gray-700 dark:text-gray-300 truncate">{info.label}</span>
-                      </span>
-                      <span className="flex items-center gap-1.5 shrink-0">
-                        <span className="font-semibold text-gray-900 dark:text-white">
-                          {offerLanded !== undefined ? formatPrice(offerLanded) : 'N/A'}
-                        </span>
-                        {offer.productUrl && (
-                          <a
-                            href={offer.productUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-500 hover:text-blue-600 dark:text-blue-400"
-                            aria-label={`Open ${info.label} offer`}
-                          >
-                            <ExternalLink size={11} />
-                          </a>
-                        )}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Match confidence */}
-        {ranked && ranked.product.identity.confidence !== 'high' && (
-          <div className="text-[10px] text-amber-500 dark:text-amber-400">
-            {ranked.product.identity.confidence} match across stores
-          </div>
-        )}
       </div>
-
-      {/* External link */}
-      <a
-        href={product.productUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={handleExternalLinkClick}
-        className="absolute top-3 right-3 bg-white/90 dark:bg-[#242424]/90 hover:bg-white dark:hover:bg-[#242424] p-1.5 rounded-full shadow-sm transition-colors opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
-        aria-label="Open product page"
-      >
-        <ExternalLink size={14} className="text-gray-600 dark:text-gray-300" />
-      </a>
     </div>
   );
 }

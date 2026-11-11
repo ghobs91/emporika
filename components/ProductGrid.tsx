@@ -10,14 +10,24 @@ interface ProductGridProps {
   isLoading?: boolean;
 }
 
+// Wide generation gaps keep the borderless, image-forward cards readable:
+// the whitespace, not a card outline, separates results.
+export const RESULTS_GRID_CLASS =
+  'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8 sm:gap-x-5 sm:gap-y-10';
+
 export default function ProductGrid({ products, isLoading }: ProductGridProps) {
   const [selectedProduct, setSelectedProduct] = useState<UnifiedProduct | null>(null);
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className={RESULTS_GRID_CLASS}>
         {[...Array(10)].map((_, i) => (
-          <div key={i} className="bg-white dark:bg-[#242424] rounded-xl h-80 animate-pulse border border-gray-200 dark:border-gray-800" />
+          <div key={i} className="flex min-w-0 flex-col gap-2.5">
+            <div className="aspect-square rounded-2xl bg-gray-100 dark:bg-[#333333] animate-pulse" />
+            <div className="h-2.5 w-1/3 rounded bg-gray-100 dark:bg-[#333333] animate-pulse" />
+            <div className="h-2.5 w-full rounded bg-gray-100 dark:bg-[#333333] animate-pulse" />
+            <div className="h-2.5 w-2/3 rounded bg-gray-100 dark:bg-[#333333] animate-pulse" />
+          </div>
         ))}
       </div>
     );
@@ -33,7 +43,7 @@ export default function ProductGrid({ products, isLoading }: ProductGridProps) {
 
   return (
     <>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className={RESULTS_GRID_CLASS}>
         {products.map((product) => (
           <ProductCard 
             key={product.id} 
