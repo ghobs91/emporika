@@ -7,6 +7,8 @@ interface SearchBarProps {
   onSearch: (query: string) => void;
   isLoading?: boolean;
   placeholder?: string;
+  /** Seeds the input, e.g. the query already present in a results URL. */
+  initialQuery?: string;
   /** 'large' is used by the centered hero search on the empty state */
   size?: 'default' | 'large';
 }
@@ -15,11 +17,21 @@ export default function SearchBar({
   onSearch,
   isLoading,
   placeholder = 'Search for anything...',
+  initialQuery = '',
   size = 'default',
 }: SearchBarProps) {
   const isLarge = size === 'large';
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initialQuery);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Keep the field in step with the URL (back/forward, shared links) without
+  // fighting the user while they type. Adjusting state during render — rather
+  // than in an effect — is the documented way to react to a changed prop.
+  const [syncedQuery, setSyncedQuery] = useState(initialQuery);
+  if (syncedQuery !== initialQuery) {
+    setSyncedQuery(initialQuery);
+    setQuery(initialQuery);
+  }
 
   // Auto-resize textarea
   useEffect(() => {
