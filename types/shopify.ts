@@ -233,7 +233,12 @@ export interface ShopifySearchParams {
     limit?: number;
   };
   view?: string;
-  saved_catalog_slug?: string;
+  /**
+   * Identifier of a saved catalog whose configuration supplies search
+   * constraints (and may enable affiliate placement). Renamed from the
+   * non-existent `saved_catalog_slug`, which the endpoint silently ignored.
+   */
+  catalog_id?: string;
 }
 
 export interface ShopifySearchFilters {
@@ -261,10 +266,11 @@ export interface ShopifySearchFilters {
     };
   };
   price_tier?: string[];
-  categories?: Array<{
-    id: string;
-    taxonomy?: string;
-  }>;
+  /**
+   * Category filters, combined with OR logic. The live schema takes plain
+   * strings (taxonomy values/names), not `{ id, taxonomy }` objects.
+   */
+  categories?: string[];
 }
 
 export interface ShopifyProductDetailsParams {

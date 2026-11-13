@@ -262,7 +262,7 @@ export async function searchShopifyProducts(
         filters: params.filters,
         pagination: params.pagination ?? { limit: 10 },
         view: params.view,
-        saved_catalog_slug: params.saved_catalog_slug,
+        catalog_id: params.catalog_id,
       },
     },
   }, 'token');
