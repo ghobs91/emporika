@@ -1,9 +1,18 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, BadgePercent } from 'lucide-react';
+import Link from 'next/link';
+import { ChevronLeft, ChevronRight, BadgePercent, ArrowRight } from 'lucide-react';
 import { UnifiedProduct } from '@/types/unified';
 import DealCard from './DealCard';
+
+/** One deal as served by /api/deals (see `DealItem` in the route). */
+export interface DealItem {
+  product: UnifiedProduct;
+  category: string;
+  savings: number;
+  discountPct: number;
+}
 
 /**
  * "Deals for you" — horizontal carousel of discounted products.
@@ -11,8 +20,7 @@ import DealCard from './DealCard';
  * and keeps only genuine markdowns (see the route for the selection rules).
  */
 export default function DealsCarousel() {
-  const [deals, setDeals] = useState<UnifiedProduct[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [deals, setDeals] = useState<UnifiedProduct[]>([]);  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -26,7 +34,7 @@ export default function DealsCarousel() {
 
         if (cancelled) return;
 
-        setDeals((data.deals ?? []) as UnifiedProduct[]);
+        setDeals(((data.deals ?? []) as DealItem[]).map((deal) => deal.product));
       } catch (err) {
         console.error('Failed to fetch deals:', err);
         if (!cancelled) setError('Could not load deals');
@@ -59,8 +67,15 @@ export default function DealsCarousel() {
           <BadgePercent size={20} className="text-red-500" />
         </div>
 
-        {/* Scroll affordances — desktop only; mobile swipes */}
+        {/* Scroll affordances + link to the full deals page — desktop only; mobile swipes */}
         <div className="hidden md:flex items-center gap-2">
+          <Link
+            href="/deals"
+            className="inline-flex items-center gap-1 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors mr-1"
+          >
+            All deals
+            <ArrowRight size={14} />
+          </Link>
           <button
             type="button"
             onClick={() => scrollByAmount(-1)}

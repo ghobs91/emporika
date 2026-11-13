@@ -71,11 +71,30 @@ export interface ShopifyProduct {
     min: ShopifyMoney;
     max: ShopifyMoney;
   };
+  /**
+   * List price range before discounts (strikethrough display), per the UCP
+   * catalog spec.
+   *
+   * Optional in the spec, and Shopify's Global Catalog does not currently emit
+   * it (verified against the live endpoint, UCP 2026-08-25: absent on 10/10
+   * products, with and without `view: "compact"`). Per-variant `list_price` is
+   * the markdown signal that is actually returned — use that.
+   */
+  list_price_range?: {
+    min?: ShopifyMoney;
+    max?: ShopifyMoney;
+  };
   media?: ShopifyMedia[];
   options?: ShopifyProductOption[];
   variants: ShopifyVariant[];
   rating?: ShopifyRating | null;
   selected?: ShopifySelectedOption[];
+  /**
+   * Product tags for categorization and search, per the UCP catalog spec.
+   * Optional in the spec and not returned by the Global Catalog today — never
+   * assume presence.
+   */
+  tags?: string[];
   // Extension fields
   inferred_fields?: string[];
   unique_selling_point?: string;
@@ -127,6 +146,12 @@ export interface ShopifyVariant {
   };
   url?: string; // product page URL
   price?: ShopifyMoney;
+  /**
+   * List price before discounts for this variant. Present only when the offer
+   * is actually marked down, and the only discount signal the Global Catalog
+   * returns. A markdown is `list_price.amount > price.amount`.
+   */
+  list_price?: ShopifyMoney;
   checkout_url?: string;
   condition?: string[];
   eligible?: {

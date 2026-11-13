@@ -14,14 +14,19 @@ import {
 
 interface DealCardProps {
   product: UnifiedProduct;
+  /**
+   * Sizing overrides. The default is the fixed-width carousel card; the
+   * `/deals` page passes `w-full` so cards fill their grid cell.
+   */
+  className?: string;
 }
 
 /**
- * Wide, image-forward card for the "Deals for you" carousel.
+ * Wide, image-forward card for the "Deals for you" carousel and the `/deals` page.
  * Shows the dollar savings, retailer logo, rating + review count, and price.
  * The image and title open the product; the retailer row opens its explore page.
  */
-export default function DealCard({ product }: DealCardProps) {
+export default function DealCard({ product, className }: DealCardProps) {
   const { label: sourceLabel, favicon: sourceFavicon } = getRetailerInfo(product.source);
   const savings =
     product.originalPrice && product.originalPrice > product.price
@@ -35,7 +40,7 @@ export default function DealCard({ product }: DealCardProps) {
   const retailerLabel = hasMerchant ? product.sellerName! : sourceLabel;
 
   return (
-    <div className="group w-60 md:w-72 shrink-0 snap-start bg-white dark:bg-[#242424] rounded-3xl overflow-hidden flex flex-col border border-gray-200 dark:border-gray-800 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+    <div className={`group ${className ?? 'w-60 md:w-72 shrink-0 snap-start'} bg-white dark:bg-[#242424] rounded-3xl overflow-hidden flex flex-col border border-gray-200 dark:border-gray-800 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200`}>
       {/* Image */}
       <Link
         href={product.productUrl}

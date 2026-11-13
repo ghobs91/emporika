@@ -1,6 +1,7 @@
 import { UnifiedProduct, normalizeCondition } from '@/types/unified';
 import type {
   ShopifyProduct,
+  ShopifyVariant,
   ShopifySearchParams,
   ShopifySearchResponse,
   ShopifyProductDetailsParams,
@@ -666,17 +667,78 @@ export function classifyShopifyCheckout(
 // ── Conversion ────────────────────────────────────────────────────────
 
 /**
+ * Absolute markdown on a single variant, in minor units: its own list price
+ * above its own price. Zero when the variant is not discounted.
+ *
+ * UCP exposes no "on sale" search filter, and product-level `list_price_range`
+ * is not returned by the Global Catalog, so this per-variant comparison is the
+ * only discount signal available to us.
+ */
+function variantSavingsMinorUnits(variant: ShopifyVariant): number {
+  const price = variant.price?.amount;
+  const listPrice = variant.list_price?.amount;
+  if (price === undefined || listPrice === undefined) return 0;
+  return listPrice > price ? listPrice - price : 0;
+}
+
+/**
+ * Pick the variant the deals feeds should describe.
+ *
+ * Prefers the in-stock variant with the deepest genuine markdown, so the
+ * displayed price and the strikethrough describe the same available offer and
+ * an out-of-stock markdown can never surface as a deal. Falls back to the first
+ * in-stock variant, then to the featured one.
+ */
+function pickDealVariant(
+  variants: ShopifyVariant[]
+): ShopifyVariant | undefined {
+  const inStock = variants.filter((v) => v.availability?.available !== false);
+  const pool = inStock.length > 0 ? inStock : variants;
+  const discounted = pool.filter((v) => variantSavingsMinorUnits(v) > 0);
+
+  if (discounted.length === 0) return pool[0];
+
+  return discounted.reduce((best, candidate) =>
+    variantSavingsMinorUnits(candidate) > variantSavingsMinorUnits(best)
+      ? candidate
+      : best
+  );
+}
+
+export interface ConvertShopifyOptions {
+  /**
+   * Describe the in-stock variant with the deepest markdown instead of the
+   * catalog's featured variant. Off by default so search and trending keep
+   * showing the featured offer; the deals feed opts in so its price and
+   * strikethrough always describe the discounted variant.
+   */
+  preferMarkdown?: boolean;
+}
+
+/**
  * Convert Shopify Global Catalog products to the unified format
  * used across the app.
+ *
+ * Discounts come from the per-variant `list_price` (the merchant's own "was"
+ * price), never from the spread between `price_range.max` and
+ * `price_range.min` — that spread only reflects different offers across
+ * merchants, so presenting it as savings would fake a discount.
  */
 export function convertShopifyToUnified(
-  products: ShopifyProduct[]
+  products: ShopifyProduct[],
+  options: ConvertShopifyOptions = {}
 ): UnifiedProduct[] {
   return products.map((product) => {
-    // Prefer the first variant's price, fall back to the price range min
-    const firstVariant = product.variants?.[0];
+    const variants = product.variants ?? [];
+
+    // Deals describe a marked-down in-stock variant; everything else describes
+    // the catalog's featured (first) variant, as before.
+    const variant = options.preferMarkdown
+      ? pickDealVariant(variants)
+      : variants[0];
+
     const priceRaw =
-      firstVariant?.price?.amount ?? product.price_range?.min?.amount ?? 0;
+      variant?.price?.amount ?? product.price_range?.min?.amount ?? 0;
 
     // Image: prefer first media image
     const imageUrl =
@@ -684,32 +746,31 @@ export function convertShopifyToUnified(
 
     // Product page URL (for "View on Shopify")
     const productUrl =
-      firstVariant?.url ?? product.url ?? '';
+      variant?.url ?? product.url ?? '';
 
     // Direct checkout URL (for "Add to Cart") — adds variant directly to cart
-    const checkoutUrl = firstVariant?.checkout_url;
+    const checkoutUrl = variant?.checkout_url;
 
-    // Original (max) price if there's a range
-    const maxAmount = product.price_range?.max?.amount;
-    const minAmount = product.price_range?.min?.amount;
+    // Original price, only when *this* variant is actually marked down.
+    const listPriceAmount = variant?.list_price?.amount;
     const originalPrice =
-      maxAmount && minAmount && maxAmount > minAmount
-        ? maxAmount / 100
+      listPriceAmount !== undefined && listPriceAmount > priceRaw
+        ? listPriceAmount / 100
         : undefined;
 
     // Availability: true if any variant is available
-    const availableOnline = product.variants?.some(
-      (v) => v.availability?.available !== false
-    ) ?? true;
+    const availableOnline = product.variants
+      ? product.variants.some((v) => v.availability?.available !== false)
+      : true;
 
-    // Seller name (from first variant)
-    const sellerName = firstVariant?.seller?.name;
+    // Seller name (from the described variant)
+    const sellerName = variant?.seller?.name;
 
     // Seller domain for Cart MCP calls (e.g. "lulu-and-georgia.myshopify.com")
-    const sellerDomain = firstVariant?.seller?.domain;
+    const sellerDomain = variant?.seller?.domain;
 
     // Variant GID for Cart MCP calls
-    const variantId = firstVariant?.id;
+    const variantId = variant?.id;
 
     // Leaf category from the taxonomy path, when present
     const category = product.categories?.length
@@ -731,7 +792,7 @@ export function convertShopifyToUnified(
       variantId,
       source: 'shopify' as const,
       category,
-      condition: normalizeCondition(firstVariant?.condition?.[0]) ?? 'new',
+      condition: normalizeCondition(variant?.condition?.[0]) ?? 'new',
       availableOnline,
       shortDescription:
         product.description?.plain ??

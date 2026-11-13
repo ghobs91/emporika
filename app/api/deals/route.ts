@@ -4,6 +4,7 @@ import { bestBuyAPI } from '@/lib/bestbuy';
 import { targetAPI } from '@/lib/target';
 import { ebayAPI } from '@/lib/ebay';
 import { costcoAPI } from '@/lib/costco';
+import { searchShopifyProducts, convertShopifyToUnified } from '@/lib/shopify';
 import {
   normalizeWalmartProduct,
   normalizeBestBuyTrendingProduct,
@@ -13,16 +14,21 @@ import {
   UnifiedProduct,
 } from '@/types/unified';
 import { categorizeProduct } from '@/lib/categorize-product';
+import type { ProductCategory } from '@/types/categories';
+import type { ShopifySearchResponse } from '@/types/shopify';
 
 /**
- * Deals feed for the "Deals for you" carousel.
+ * Deals feed for the "Deals for you" carousel and the full `/deals` page.
  *
  * Unlike /api/trending (which fetches one random query per retailer), this
- * fans out across several Walmart/Target/eBay/Costco categories so a single
- * category can't dominate, keeps only genuine markdowns (list price above the
- * current price), dedupes near-identical titles, and enforces per-source and
- * per-category caps before interleaving. The result is a mixed, page-wide set
- * of deals rather than a wall of one retailer's toys.
+ * fans out across several Walmart/Target/eBay/Costco/Shopify categories so a
+ * single category can't dominate, keeps only genuine markdowns (list price
+ * above the current price), dedupes near-identical titles, and enforces
+ * per-source and per-category caps before interleaving. The result is a mixed,
+ * page-wide set of deals rather than a wall of one retailer's toys.
+ *
+ * Each deal carries its deterministic category and its savings, so the client
+ * can group into sections without re-scoring products itself.
  */
 
 export const runtime = 'nodejs';
@@ -33,9 +39,9 @@ export const dynamic = 'force-dynamic';
 // out tiny cosmetics-aisle markdowns and list-price noise.
 const MIN_SAVINGS = 5;
 const MIN_DISCOUNT_PCT = 0.15;
-const TARGET_COUNT = 24;
-const MAX_PER_SOURCE = 6;
-const MAX_PER_CATEGORY = 5;
+const TARGET_COUNT = 36;
+const MAX_PER_SOURCE = 8;
+const MAX_PER_CATEGORY = 10;
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
 // Broad, category-spanning query sets. Rotated by hour so the feed varies
@@ -47,14 +53,30 @@ const WALMART_QUERIES = [
 const TARGET_QUERIES = ['home decor', 'electronics', 'clothing', 'sports', 'toys', 'kitchen'];
 const EBAY_QUERIES = ['electronics', 'home', 'fashion', 'sporting goods', 'toys'];
 const COSTCO_QUERIES = ['electronics', 'home', 'appliances', 'furniture', 'outdoor'];
+// The Shopify Global Catalog has no on-sale filter and returns no
+// product-level `list_price_range`, so markdowns only surface by searching
+// broadly and reading each variant's `list_price` (see convertShopifyToUnified).
+const SHOPIFY_QUERIES = ['headphones', 'home & kitchen', 'shoes', 'fitness gear', 'toys'];
+
+/** One deal as served to clients: the product plus why it qualified. */
+export interface DealItem {
+  product: UnifiedProduct;
+  /** Deterministic category, from lib/categorize-product. */
+  category: ProductCategory;
+  /** Absolute savings in major currency units (dollars). */
+  savings: number;
+  /** Savings as a fraction of the original price, 0–1. */
+  discountPct: number;
+}
 
 interface Deal {
   product: UnifiedProduct;
+  category: ProductCategory;
   savings: number;
   pct: number;
 }
 
-let cache: { at: number; deals: UnifiedProduct[] } | null = null;
+let cache: { at: number; deals: DealItem[] } | null = null;
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return Promise.race([
@@ -110,6 +132,7 @@ async function fetchCandidates(): Promise<UnifiedProduct[]> {
   const targetQueries = rotate(TARGET_QUERIES, hour).slice(0, 2);
   const ebayQueries = rotate(EBAY_QUERIES, hour).slice(0, 2);
   const costcoQueries = rotate(COSTCO_QUERIES, hour).slice(0, 2);
+  const shopifyQueries = rotate(SHOPIFY_QUERIES, hour).slice(0, 3);
 
   const jobs: Array<Promise<UnifiedProduct[]>> = [
     ...walmartQueries.map((query) =>
@@ -138,6 +161,25 @@ async function fetchCandidates(): Promise<UnifiedProduct[]> {
         (response.response?.docs || []).map(normalizeCostcoProduct)
       )
     ),
+    // Shopify Global Catalog (UCP). Markdowns come from each variant's
+    // `list_price`; products without a genuine list price produce no
+    // `originalPrice` and are dropped by selectDeals' savings check.
+    ...shopifyQueries.map((query) =>
+      withTimeout(
+        searchShopifyProducts({
+          query,
+          context: { address_country: 'US' },
+          filters: { available: true },
+          pagination: { limit: 24 },
+        }),
+        15000
+      ).then((response) =>
+        convertShopifyToUnified(
+          (response as ShopifySearchResponse | null)?.products ?? [],
+          { preferMarkdown: true }
+        )
+      )
+    ),
   ];
 
   const settled = await Promise.allSettled(jobs);
@@ -149,7 +191,7 @@ async function fetchCandidates(): Promise<UnifiedProduct[]> {
   return products;
 }
 
-function selectDeals(products: UnifiedProduct[]): UnifiedProduct[] {
+function selectDeals(products: UnifiedProduct[]): Deal[] {
   const seenIds = new Set<string>();
   const seenTitles = new Set<string>();
   const deals: Deal[] = [];
@@ -169,7 +211,12 @@ function selectDeals(products: UnifiedProduct[]): UnifiedProduct[] {
     if (key && seenTitles.has(key)) continue;
     if (key) seenTitles.add(key);
 
-    deals.push({ product, savings, pct });
+    deals.push({
+      product,
+      category: categorizeProduct(product),
+      savings,
+      pct,
+    });
   }
 
   deals.sort((a, b) => b.savings - a.savings || b.pct - a.pct);
@@ -181,7 +228,7 @@ function selectDeals(products: UnifiedProduct[]): UnifiedProduct[] {
   for (const deal of deals) {
     if (selected.length >= TARGET_COUNT) break;
     const source = deal.product.source;
-    const category = categorizeProduct(deal.product);
+    const category = deal.category;
     if ((perSource[source] ?? 0) >= MAX_PER_SOURCE) continue;
     if ((perCategory[category] ?? 0) >= MAX_PER_CATEGORY) continue;
     selected.push(deal);
@@ -204,7 +251,17 @@ function selectDeals(products: UnifiedProduct[]): UnifiedProduct[] {
     }
   }
 
-  return interleaveBySource(selected).map((deal) => deal.product);
+  return interleaveBySource(selected);
+}
+
+/** Strip internal bookkeeping down to the public deal shape. */
+function toDealItem(deal: Deal): DealItem {
+  return {
+    product: deal.product,
+    category: deal.category,
+    savings: Math.round(deal.savings * 100) / 100,
+    discountPct: Math.round(deal.pct * 10000) / 10000,
+  };
 }
 
 export async function GET() {
@@ -214,7 +271,7 @@ export async function GET() {
 
   try {
     const candidates = await fetchCandidates();
-    const deals = selectDeals(candidates);
+    const deals = selectDeals(candidates).map(toDealItem);
     cache = { at: Date.now(), deals };
     return NextResponse.json({ deals, count: deals.length });
   } catch (error) {
