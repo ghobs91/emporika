@@ -13,14 +13,9 @@ import ThemeToggle from '@/components/ThemeToggle';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import ShoeSizeFilter from '@/components/ShoeSizeFilter';
 import ClothingSizeFilter from '@/components/ClothingSizeFilter';
-import CartDrawer from '@/components/CartDrawer';
-import EmbeddedCheckoutModal from '@/components/EmbeddedCheckoutModal';
-import Sidebar from '@/components/Sidebar';
 import CategoryPillRail from '@/components/CategoryPillRail';
 import DealsCarousel from '@/components/DealsCarousel';
 import CartSummarySection from '@/components/CartSummarySection';
-import { CartProvider } from '@/context/CartContext';
-import { EmbeddedCheckoutProvider } from '@/context/EmbeddedCheckoutContext';
 import { UnifiedProduct, RetailerSource, ProviderStatus } from '@/types/unified';
 import { ShoppingBag, SlidersHorizontal } from 'lucide-react';
 import { useTargetStore } from '@/hooks/useTargetStore';
@@ -433,13 +428,7 @@ export default function EmporikaApp() {
   );
 
   return (
-    <CartProvider>
-    <EmbeddedCheckoutProvider>
-    <div className="min-h-screen flex bg-white dark:bg-[#131313] transition-colors duration-300">
-      {/* Left icon sidebar (desktop lg+ only) */}
-      <Sidebar />
-
-      <div className="flex-1 min-w-0 flex flex-col">
+    <>
       {/* Header */}
       <header className="sticky top-0 z-50 bg-gradient-to-b from-white/90 to-white/60 dark:from-[#131313]/90 dark:to-[#131313]/70 backdrop-blur-xl backdrop-saturate-150 border-b border-white/50 dark:border-white/10 shadow-sm shadow-black/5 dark:shadow-black/40 transition-all duration-300">
         <div className={`container mx-auto px-6 transition-all duration-300 ${
@@ -766,15 +755,6 @@ export default function EmporikaApp() {
           onClose={() => setSelectedProduct(null)}
         />
       )}
-
-      {/* Cart Drawer */}
-      <CartDrawer />
-
-      {/* Embedded checkout (ECP) */}
-      <EmbeddedCheckoutModal />
-      </div>
-    </div>
-    </EmbeddedCheckoutProvider>
-    </CartProvider>
+    </>
   );
 }

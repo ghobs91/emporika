@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { ArrowLeft, ShoppingBag, Sparkles } from 'lucide-react';
-import { CartProvider } from '@/context/CartContext';
 import ProductGrid from '@/components/ProductGrid';
 import { UnifiedProduct, RetailerSource } from '@/types/unified';
 import { getRetailerInfo } from '@/lib/retailer';
@@ -108,7 +107,7 @@ export default function ExploreClient() {
   const showCategoryRail = Boolean(source || category || merchant);
 
   return (
-    <CartProvider>
+    <>
       <div className="min-h-screen bg-white dark:bg-[#131313]">
         <header className="sticky top-0 z-40 border-b border-gray-200 dark:border-[#2b2b2b] bg-white/80 dark:bg-[#131313]/80 backdrop-blur-xl">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
@@ -170,6 +169,6 @@ export default function ExploreClient() {
           )}
         </main>
       </div>
-    </CartProvider>
+    </>
   );
 }

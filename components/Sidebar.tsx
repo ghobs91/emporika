@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
-import { Home, LayoutGrid, ShoppingCart, Heart, User, ShoppingBag } from 'lucide-react';
+import { Home, LayoutGrid, ShoppingCart, Heart, User, ShoppingBag, BadgePercent } from 'lucide-react';
 
 const buttonBase =
   'relative w-12 h-12 rounded-2xl flex items-center justify-center transition-colors duration-200';
@@ -38,14 +39,28 @@ function CartBadge({ count }: { count: number }) {
  */
 export default function Sidebar() {
   const { itemCount, setIsOpen } = useCart();
+  const pathname = usePathname();
+  const router = useRouter();
 
-  const scrollToCategories = () => {
-    document.getElementById('trending-feed')?.scrollIntoView({ behavior: 'smooth' });
+  // The rail is shared by `/` and `/search/results`, so active state has to come
+  // from the route rather than being hardcoded on Home.
+  const isHome = pathname === '/';
+  const isDeals = pathname === '/deals';
+
+  // The categories rail lives on the home feed, so from any other route the
+  // button has to navigate first instead of silently scrolling nothing.
+  const goToCategories = () => {
+    if (isHome) {
+      document.getElementById('trending-feed')?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      router.push('/#trending-feed');
+    }
   };
 
   const dockItems: DockItem[] = [
-    { key: 'home', label: 'Home', icon: <Home size={22} />, active: true, href: '/' },
-    { key: 'categories', label: 'Categories', icon: <LayoutGrid size={22} />, onClick: scrollToCategories },
+    { key: 'home', label: 'Home', icon: <Home size={22} />, active: isHome, href: '/' },
+    { key: 'deals', label: 'Deals', icon: <BadgePercent size={22} />, active: isDeals, href: '/deals' },
+    { key: 'categories', label: 'Categories', icon: <LayoutGrid size={22} />, onClick: goToCategories },
     { key: 'cart', label: 'Cart', icon: <ShoppingCart size={22} />, badge: itemCount, onClick: () => setIsOpen(true) },
     { key: 'favorites', label: 'Favorites — coming soon', icon: <Heart size={22} />, disabled: true },
     { key: 'account', label: 'Account — coming soon', icon: <User size={22} />, disabled: true },
@@ -67,15 +82,26 @@ export default function Sidebar() {
           <ShoppingBag size={26} className="text-blue-500 dark:text-blue-400" />
         </Link>
 
-        {/* Home — active */}
+        {/* Home */}
         <Link
           href="/"
           title="Home"
           aria-label="Home"
-          aria-current="page"
-          className={`${buttonBase} ${activeClass}`}
+          aria-current={isHome ? 'page' : undefined}
+          className={`${buttonBase} ${isHome ? activeClass : idleClass}`}
         >
           <Home size={22} />
+        </Link>
+
+        {/* Deals */}
+        <Link
+          href="/deals"
+          title="Deals"
+          aria-label="Deals"
+          aria-current={isDeals ? 'page' : undefined}
+          className={`${buttonBase} ${isDeals ? activeClass : idleClass}`}
+        >
+          <BadgePercent size={22} />
         </Link>
 
         {/* Categories */}
@@ -83,7 +109,7 @@ export default function Sidebar() {
           type="button"
           title="Categories"
           aria-label="Browse categories"
-          onClick={scrollToCategories}
+          onClick={goToCategories}
           className={`${buttonBase} ${idleClass}`}
         >
           <LayoutGrid size={22} />

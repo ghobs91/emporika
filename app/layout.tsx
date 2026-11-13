@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import AppShell from "@/components/AppShell";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -70,7 +71,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        {/* Persistent nav rail, cart, and checkout chrome live in the shell so
+            they survive navigation between routes. */}
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );
