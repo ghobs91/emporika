@@ -39,18 +39,22 @@ function scoreOffer(
 
     switch (criterion) {
       case 'price': {
-        if (offer.price) {
+        // A provider can hand back a price object with no usable amount (e.g.
+        // an unavailable Best Buy listing). Treat that as missing rather than
+        // crashing the whole response on `.toFixed`.
+        const amount = offer.price?.amount;
+        if (typeof amount === 'number' && Number.isFinite(amount)) {
           // Landed cost = item price + cheapest known shipping. Bounded
           // inverse curve (no cliff at $1000 like a linear scale has):
           // $50 → 0.80, $200 → 0.50, $1000 → 0.17, $5000 → 0.04.
           const shipping = offer.fulfillment?.shippingCost?.amount ?? 0;
-          const landed = offer.price.amount + shipping;
+          const landed = amount + shipping;
           const normalized = 1 / (1 + landed / 200);
           raw = normalized;
           reason =
             shipping > 0
-              ? `Landed ${offer.price.currency} ${landed.toFixed(2)} (incl. ${shipping.toFixed(2)} shipping)`
-              : `Listed price: ${offer.price.currency} ${offer.price.amount.toFixed(2)}`;
+              ? `Landed ${offer.price!.currency} ${landed.toFixed(2)} (incl. ${shipping.toFixed(2)} shipping)`
+              : `Listed price: ${offer.price!.currency} ${amount.toFixed(2)}`;
         } else {
           // Missing price: penalize
           raw = -0.5;
@@ -326,8 +330,9 @@ function scoreProduct(
 
 /** Landed cost (price + known shipping), Infinity when price is unknown. */
 function landedAmount(offer: NormalizedOffer): number {
-  if (!offer.price) return Infinity;
-  return offer.price.amount + (offer.fulfillment?.shippingCost?.amount ?? 0);
+  const amount = offer.price?.amount;
+  if (typeof amount !== 'number' || !Number.isFinite(amount)) return Infinity;
+  return amount + (offer.fulfillment?.shippingCost?.amount ?? 0);
 }
 
 export function rankProducts(

@@ -219,3 +219,42 @@ describe('toWireResults', () => {
     expect(ranked[0].bestOffer?.scoreBreakdown?.length).toBeGreaterThan(0);
   });
 });
+
+describe('Ranking robustness against malformed provider data', () => {
+  // Some retailer payloads return a price object with no usable amount
+  // (unavailable Best Buy listings were observed to do this). Ranking must
+  // penalise it, not throw — a throw takes down the entire search response.
+  const malformed = makeOffer({
+    price: { currency: 'USD' } as unknown as NormalizedOffer['price'],
+  });
+
+  it('does not throw on a price object without an amount', () => {
+    expect(() => rankProducts([makeProduct([malformed])], basePlan)).not.toThrow();
+  });
+
+  it('scores a missing amount below a real price', () => {
+    const broken = rankProducts([makeProduct([makeOffer({
+      offerId: 'broken',
+      price: { currency: 'USD' } as unknown as NormalizedOffer['price'],
+    })])], basePlan);
+    const priced = rankProducts([makeProduct([makeOffer({
+      offerId: 'priced',
+      price: { amount: 20, currency: 'USD' },
+    })])], basePlan);
+
+    expect(broken[0].productScore).toBeLessThan(priced[0].productScore);
+    expect(broken[0].bestOffer?.reasonsToChoose.join(' ')).not.toContain('NaN');
+  });
+
+  it('does not treat a malformed price as the lowest delivered offer', () => {
+    const result = rankProducts([
+      makeProduct([
+        makeOffer({ offerId: 'a', price: { currency: 'USD' } as unknown as NormalizedOffer['price'] }),
+        makeOffer({ offerId: 'b', price: { amount: 40, currency: 'USD' } }),
+      ]),
+    ], basePlan);
+
+    // The real-price offer must win; an unknown price is not "cheapest".
+    expect(result[0].bestOffer?.offer.offerId).toBe('b');
+  });
+});

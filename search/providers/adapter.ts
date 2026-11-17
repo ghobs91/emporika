@@ -25,7 +25,14 @@ function nowISO(): string {
   return new Date().toISOString();
 }
 
-function toMoney(amount: number, currency = 'USD'): Money {
+/**
+ * Build a money value, or nothing when the provider did not supply a usable
+ * number. Some retailer payloads (notably Best Buy `salePrice`) omit the price
+ * on unavailable items; emitting `{ amount: undefined }` used to reach the
+ * ranker and throw, taking down the whole search response.
+ */
+function toMoney(amount: number, currency = 'USD'): Money | undefined {
+  if (typeof amount !== 'number' || !Number.isFinite(amount)) return undefined;
   return { amount, currency };
 }
 
