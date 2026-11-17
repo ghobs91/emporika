@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
-import { Home, LayoutGrid, ShoppingCart, Heart, User, ShoppingBag, BadgePercent } from 'lucide-react';
+import { Home, LayoutGrid, ShoppingCart, Heart, User, ShoppingBag, BadgePercent, Gift } from 'lucide-react';
 
 const buttonBase =
   'relative w-12 h-12 rounded-2xl flex items-center justify-center transition-colors duration-200';
@@ -46,6 +46,7 @@ export default function Sidebar() {
   // from the route rather than being hardcoded on Home.
   const isHome = pathname === '/';
   const isDeals = pathname === '/deals';
+  const isGift = pathname === '/gift';
 
   // The categories rail lives on the home feed, so from any other route the
   // button has to navigate first instead of silently scrolling nothing.
@@ -60,6 +61,7 @@ export default function Sidebar() {
   const dockItems: DockItem[] = [
     { key: 'home', label: 'Home', icon: <Home size={22} />, active: isHome, href: '/' },
     { key: 'deals', label: 'Deals', icon: <BadgePercent size={22} />, active: isDeals, href: '/deals' },
+    { key: 'gift', label: 'Gift Genie', icon: <Gift size={22} />, active: isGift, href: '/gift' },
     { key: 'categories', label: 'Categories', icon: <LayoutGrid size={22} />, onClick: goToCategories },
     { key: 'cart', label: 'Cart', icon: <ShoppingCart size={22} />, badge: itemCount, onClick: () => setIsOpen(true) },
     { key: 'favorites', label: 'Favorites — coming soon', icon: <Heart size={22} />, disabled: true },
@@ -102,6 +104,17 @@ export default function Sidebar() {
           className={`${buttonBase} ${isDeals ? activeClass : idleClass}`}
         >
           <BadgePercent size={22} />
+        </Link>
+
+        {/* Gift Genie */}
+        <Link
+          href="/gift"
+          title="Gift Genie"
+          aria-label="Gift Genie"
+          aria-current={isGift ? 'page' : undefined}
+          className={`${buttonBase} ${isGift ? activeClass : idleClass}`}
+        >
+          <Gift size={22} />
         </Link>
 
         {/* Categories */}

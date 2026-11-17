@@ -60,7 +60,7 @@ type Telemetry = ReturnType<typeof createTelemetry>;
 
 interface PreparedSearch {
   plan: SearchPlan;
-  plannerSource: 'webllm' | 'fallback' | 'none';
+  plannerSource: 'webllm' | 'fallback' | 'none' | 'gift';
   eligibleProviders: ProviderId[];
   queryVariants: SearchPlan['searches'];
 }
@@ -94,7 +94,7 @@ function prepareSearch(
 
   const planStart = performance.now();
   let plan: SearchPlan;
-  let plannerSource: 'webllm' | 'fallback' | 'none' = 'fallback';
+  let plannerSource: 'webllm' | 'fallback' | 'none' | 'gift' = 'fallback';
 
   if (request.candidatePlan) {
     const validation = validatePlan(request.candidatePlan);
@@ -102,7 +102,7 @@ function prepareSearch(
       // A model-generated plan has no knowledge of the deterministic category
       // disambiguation rules; merge them in (existing values win).
       plan = withCategoryIntent(validation.plan, request.query);
-      plannerSource = 'webllm';
+      plannerSource = request.candidatePlanSource ?? 'webllm';
     } else {
       // Candidate plan failed validation — use fallback
       telemetry.log('plan_validation_failed', {

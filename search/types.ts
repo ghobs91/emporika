@@ -382,6 +382,12 @@ export interface SearchRequest {
   preferences?: ShopperPreferences;
   candidatePlan?: SearchPlan;
   /**
+   * Who produced `candidatePlan`. Server-internal: the gift feature builds
+   * plans deterministically and must not be reported as model-planned.
+   * Defaults to 'webllm' for backward compatibility with the browser client.
+   */
+  candidatePlanSource?: 'webllm' | 'gift';
+  /**
    * Listings collected in the user's own browser (Back Market) and
    * uploaded for this request. Merged as pre-supplied provider results and
    * then ranked by the same server-side pipeline as every other provider.
@@ -396,7 +402,7 @@ export interface SearchRequest {
 }
 
 export interface SearchMetadata {
-  plannerSource: 'webllm' | 'fallback' | 'none';
+  plannerSource: 'webllm' | 'fallback' | 'none' | 'gift';
   plannerModelId?: string;
   planConfidence?: number;
   /** True when this response was served from the result cache (timingMs reflects the original computation). */
