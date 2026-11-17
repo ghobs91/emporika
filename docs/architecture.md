@@ -21,6 +21,7 @@ WebLLM is progressive enhancement: the deterministic planner in `search/planner.
 | Entity resolution | `search/entity-resolution.ts` | Title-similarity merging across retailers (thresholds: >90% medium, >75% low; never merges differing models/generations/variants) |
 | Filtering | `search/filter.ts` | Deterministic hard constraints (price, condition, availability, brands, features) |
 | Ranker | `search/ranker.ts` | Deterministic weighted criteria scoring with stable tie-breakers |
+| Gift Genie | `search/gift/` (`index-data.ts`, `brief.ts`, `plan.ts`, `orchestrator.ts`) | Compiles a saved recipient (gender, age, interests) against a checked-in gift index into several real searches, then interleaves the results. No model in the request path — see `docs/gift-genie.md` |
 | Retailer clients | `lib/bestbuy.ts`, `lib/ebay.ts`, `lib/target.ts`, `lib/walmart.ts`, `lib/costco.ts`, `lib/shopify.ts` | API access, auth, and request signing (server-side only) |
 | WebLLM adapters | `lib/webllm/` (`types.ts`, `client.ts`, `mock-adapter.ts`, `real-adapter.ts`, `prompts.ts`, `worker.ts`) | Browser-local query planning; mock adapter is active by default |
 | Costco cookie cache | `lib/costco-cookie-cache.ts`, `lib/costco-cookie-fetcher.ts` | In-memory session cookie cache (2h TTL, dev-mode global) |
@@ -32,6 +33,7 @@ WebLLM is progressive enhancement: the deterministic planner in `search/planner.
 ### Pages
 
 - `app/page.tsx` — main search UI
+- `app/gift/page.tsx` — Gift Genie (saved gift recipients + gift ideas)
 - `app/layout.tsx` — root layout
 - `app/offline/page.tsx` — PWA offline page
 
@@ -40,6 +42,7 @@ WebLLM is progressive enhancement: the deterministic planner in `search/planner.
 | Route | Method | Purpose |
 |-------|--------|---------|
 | `/api/search` | GET / POST | Simple (GET) and intelligent (POST) search |
+| `/api/gift/ideas` | POST | Deterministic gift search for one saved recipient (no LLM) |
 | `/api/trending` | — | Trending products feed |
 | `/api/target/nearest-store` | — | Nearest Target store lookup |
 | `/api/shopify/cart` | — | Shopify cart operations |
@@ -78,6 +81,8 @@ sequenceDiagram
 ## State management and persistence
 
 - **Cart**: client-side React state in `context/CartContext.tsx`; no server persistence observed.
+- **Gift recipients**: `localStorage` key `emporika-gift-recipients:v1` via `lib/gift-recipients.ts`; each entry is re-validated on read and dropped if stale. Recipients are never persisted server-side.
+- **Learned preferences**: `localStorage` key `emporika-learned-profile` via `lib/learning.ts` (brand weights only).
 - **Costco cookies**: in-memory cache (module singleton + dev-mode `global.__costcoCookieCache`); not persisted across server restarts — hence the refresh cron.
 - **Everything else**: stateless request-scoped processing. No database, no cache service.
 

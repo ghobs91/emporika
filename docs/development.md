@@ -34,14 +34,30 @@ npm run start    # serve production build
 ## Quality checks
 
 ```bash
-npm test            # Vitest, Node environment — 33 tests, 4 files (all passing as of 2026-08-20)
+npm test            # Vitest, Node environment — 344 tests, 30 files (all passing as of 2026-08-21)
 npm run test:watch  # watch mode
 npm run test:ui     # Vitest UI
 npx tsc --noEmit    # type check (strict mode) — currently passes
-npm run lint        # ESLint — currently FAILS with 231 errors / 3,822 pre-existing warnings; do not add new ones
+npm run lint        # ESLint — pre-existing backlog; do not add new errors
+npx next build      # production build — currently succeeds
 ```
 
 Do not fix the pre-existing lint backlog unless asked; it is large and mostly `no-explicit-any`/warning class.
+
+### Gift index checks
+
+The gift index (`search/gift/index-data.ts`) is data, so it has its own gates in
+addition to the unit tests. See `docs/gift-genie.md`.
+
+```bash
+# Index invariants: unique ids, no duplicate queries, bracket coverage,
+# age gating, neutral fallbacks per bracket.
+npx vitest run tests/search/gift-*.test.ts
+
+# Every index query must return real listings. Exits non-zero if any does not,
+# and rewrites docs/gift-index-evidence.json with what the retailers returned.
+npx tsx --env-file=.env.local scripts/probe-gift-index.ts --all --concurrency 2
+```
 
 ## Costco cookie maintenance
 

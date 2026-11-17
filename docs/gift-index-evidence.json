@@ -1,0 +1,4146 @@
+{
+  "generatedAt": "2026-11-17T21:17:27.121Z",
+  "indexVersion": "1.0.0",
+  "mode": "all-intents",
+  "providers": [
+    "walmart",
+    "bestbuy",
+    "ebay",
+    "shopify"
+  ],
+  "durationMs": 111971,
+  "summary": {
+    "probed": 165,
+    "withResults": 165,
+    "empty": 0,
+    "interestsCovered": 35,
+    "interestsTotal": 35
+  },
+  "results": [
+    {
+      "intentId": "coffee/espresso-machine",
+      "interestId": "coffee",
+      "interestLabel": "Coffee",
+      "query": "espresso machine",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 27,
+        "max": 269
+      },
+      "sampleTitles": [
+        "Casabrews 20 Bar Espresso Machine, 49 oz Water Tank, Coffee Maker with Milk Frother, Slive",
+        "Chefman Craftbrew Espresso Machine W/ Steam Wand and Touch Controls - Stainless Steel",
+        "CASABREWS 3700 Essential 20-Bar Espresso Machine and Coffee Maker, Stainless Steel"
+      ]
+    },
+    {
+      "intentId": "coffee/burr-grinder",
+      "interestId": "coffee",
+      "interestLabel": "Coffee",
+      "query": "coffee grinder",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 12,
+        "max": 77.95
+      },
+      "sampleTitles": [
+        "Manual Coffee Grinder 32oz Glass Jar Ceramic Burr Stainless Steel Hand Grinder",
+        "Mini Manual Coffee Grinder Set with Conical Ceramic Burrs, Manual Adjustable",
+        "Mainstays Black Electric Coffee Grinder"
+      ]
+    },
+    {
+      "intentId": "coffee/pour-over",
+      "interestId": "coffee",
+      "interestLabel": "Coffee",
+      "query": "pour over coffee maker",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 8.65,
+        "max": 54
+      },
+      "sampleTitles": [
+        "Hario V60 Ceramic Pour Over Coffee Maker",
+        "Portable Pour Over Coffee Maker 1-2 Cup, Stainless Steel Portable Coffee Filt...",
+        "Pour over Coffee Maker Portable Coffee Maker Foldable Reusable Pour over Coffees"
+      ]
+    },
+    {
+      "intentId": "coffee/travel-mug",
+      "interestId": "coffee",
+      "interestLabel": "Coffee",
+      "query": "insulated coffee mug",
+      "bracket": "adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 8.09,
+        "max": 22.76
+      },
+      "sampleTitles": [
+        "500ml Insulated Coffee Mug 304 Stainless Steel Travel Cup with Handle & Flip Lid",
+        "Leakproof Insulated Coffee Mug 304 Stainless Steel with Handle",
+        "Insulated Coffee Mug 12 oz 380ml Orange BPA free Stainless Steel"
+      ]
+    },
+    {
+      "intentId": "tea/variable-kettle",
+      "interestId": "tea",
+      "interestLabel": "Tea",
+      "query": "electric kettle",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5.9,
+        "max": 32.14
+      },
+      "sampleTitles": [
+        "2L Stainless Steel Electric Kettle Fast Boil Hot Water Heater Tea Coffee Pot",
+        "316 Stainless Steel Electric Kettle",
+        "Electric Kettle Hot Water Boiler, Stainless Steel Material Tea Kettle 2 Liter"
+      ]
+    },
+    {
+      "intentId": "tea/sampler",
+      "interestId": "tea",
+      "interestLabel": "Tea",
+      "query": "loose leaf tea sampler",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 10.95,
+        "max": 36.99
+      },
+      "sampleTitles": [
+        "Tiesta Tea Top Seller Loose Leaf Tea Sampler, 8 Pack 6.4 oz Non-GMO",
+        "Herbal Loose Leaf Tea Sampler 9 Exotic Tea Blends Beautifully Packaged Delicious",
+        "Herbal Loose Leaf Tea Sampler | 9 Exotic Tea Blends"
+      ]
+    },
+    {
+      "intentId": "tea/cast-iron-pot",
+      "interestId": "tea",
+      "interestLabel": "Tea",
+      "query": "cast iron teapot",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 18,
+        "max": 45.99
+      },
+      "sampleTitles": [
+        "Primula Green Cast Iron Teapot 28 oz / 0.8L With Loose Leaf Tea Infuser NIB",
+        "34oz Enameled Cast Iron Teapot Japanese Kettle Stainless Infuser Black Gold",
+        "Japanese Style Black Matte Cast Iron Teapot w/ Lid Handle & Mesh Infuser"
+      ]
+    },
+    {
+      "intentId": "tea/infuser",
+      "interestId": "tea",
+      "interestLabel": "Tea",
+      "query": "tea infuser",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 2.5,
+        "max": 12.76
+      },
+      "sampleTitles": [
+        "2-Pack Stainless Steel Tea Infuser Ball Fine Mesh Strainer w Chain Hook for Tea",
+        "Stainless Steel Tea Infuser Loose Leaf Tea Spice Strainer Seasoning Filter Ball",
+        "304 Stainless Steel Tea Infuser Ball with Chain Hook for Loose Leaf Tea"
+      ]
+    },
+    {
+      "intentId": "cooking/chef-knife",
+      "interestId": "cooking",
+      "interestLabel": "Cooking",
+      "query": "chef knife",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 15.99,
+        "max": 54.99
+      },
+      "sampleTitles": [
+        "Chef Knife, 8 Inch, High Carbon Stainless Steel, Kitchen Knife, German Steel",
+        "5 Pcs Kitchen Cook Knives Set Japanese Damascus Style Stainless Steel Chef Knife",
+        "12”Handmade Damascus Chef Knife Hand Forged Japanese Bunka Kitchen Knife X680"
+      ]
+    },
+    {
+      "intentId": "cooking/cast-iron-skillet",
+      "interestId": "cooking",
+      "interestLabel": "Cooking",
+      "query": "cast iron skillet",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 8.39,
+        "max": 69.99
+      },
+      "sampleTitles": [
+        "Lodge Seasoned Cast Iron Skillet 6.5 Inches",
+        "Lodge Classic Cast Iron Skillets",
+        "Lodge Magnolia Branded 6.5 inch Cast Iron Skillet"
+      ]
+    },
+    {
+      "intentId": "cooking/cutting-board",
+      "interestId": "cooking",
+      "interestLabel": "Cooking",
+      "query": "cutting board",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 6.99,
+        "max": 31.48
+      },
+      "sampleTitles": [
+        "12.6\"× 17.7\"Bamboo Cutting Board, Natural Bamboo Chopping Board for Kitchen Food",
+        "Titanium Cutting Board 100% Pure Non-Stick Double-Sided 11x15.5\" in for Kitchen",
+        "1/3pcs Book Cutting Board Set with Stand, Solid Acacia Cutting Boards"
+      ]
+    },
+    {
+      "intentId": "cooking/kitchen-scale",
+      "interestId": "cooking",
+      "interestLabel": "Cooking",
+      "query": "kitchen scale",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5,
+        "max": 39.99
+      },
+      "sampleTitles": [
+        "OXO 5Lb Food Scale with Pull Out Display: Kitchen Scale Backlit Electronic",
+        "Digital Kitchen Scale 3000g x 0.1g Food Jewelry Gold Grain Gram Baking - 4\"x4\"",
+        "Mini Spoon Scale Digital Kitchen Scale Electronic LCD Food Scale 0.1–500g"
+      ]
+    },
+    {
+      "intentId": "baking/stand-mixer",
+      "interestId": "baking",
+      "interestLabel": "Baking",
+      "query": "stand mixer",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 18.15,
+        "max": 71.52
+      },
+      "sampleTitles": [
+        "KitchenAid Artisan Series 5-Quart Tilt-Head Stand Mixer - KSM150PS",
+        "KitchenAid Artisan KSM150PSAQ Stand Mixer",
+        "KitchenAid Artisan KSM150PSIB 5-Quart Stand Mixer - Ink Blue"
+      ]
+    },
+    {
+      "intentId": "baking/sheet-pan-set",
+      "interestId": "baking",
+      "interestLabel": "Baking",
+      "query": "baking sheet set",
+      "bracket": "young_adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 16.99,
+        "max": 39.95
+      },
+      "sampleTitles": [
+        "Nordic Ware Naturals 3-Piece Baking Sheet Set – Commercial-Grade Aluminum Sheet",
+        "Baking Sheet Set of 2, Baking Pans Tray Cookie Sheet Stainless Steel, Non Toxic",
+        "Eatex Baking Sheet Set, 2 Piece Baking Pans Set, Cookie Sheets for Baking"
+      ]
+    },
+    {
+      "intentId": "baking/sourdough-kit",
+      "interestId": "baking",
+      "interestLabel": "Baking",
+      "query": "sourdough starter kit",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 10,
+        "max": 37.07
+      },
+      "sampleTitles": [
+        "Sourdough Starter Jar, 24 oz Sourdough Starter Kit with Date",
+        "40Oz/1200Ml Sourdough Starter Kit with Thermometer Strips and Covers",
+        "Sourdough Starter Kit & Sourdough Starter Jar 31.8 oz Reusable Jar"
+      ]
+    },
+    {
+      "intentId": "baking/piping-set",
+      "interestId": "baking",
+      "interestLabel": "Baking",
+      "query": "piping tip set",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 3.49,
+        "max": 45.99
+      },
+      "sampleTitles": [
+        "Vintage Ateco Cake Decorating Piping Tip Set NOS Unused Case Instructions",
+        "Wilton Biscuit/Cookie Piping Tip Set with Silicone Stand, 7 Piece in Turquoise for Baking ",
+        "Stainless Steel Tulip Piping Tip Set Reusable Flower Nozzles for Cake Cupcake"
+      ]
+    },
+    {
+      "intentId": "grilling/meat-thermometer",
+      "interestId": "grilling",
+      "interestLabel": "Grilling & BBQ",
+      "query": "meat thermometer",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 3.26,
+        "max": 45
+      },
+      "sampleTitles": [
+        "ThermoPro TempSpike 500 Ft Truly Wireless Bluetooth Meat Thermometer",
+        "ThermoPro TP01HW LCD Grill/Meat Thermometer",
+        "NEW MEATER Meater+ Plus Smart Wireless Meat Thermometer 1000°F Long Range BBQ"
+      ]
+    },
+    {
+      "intentId": "grilling/tool-set",
+      "interestId": "grilling",
+      "interestLabel": "Grilling & BBQ",
+      "query": "grill tool set",
+      "bracket": "adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 11.54,
+        "max": 52.72
+      },
+      "sampleTitles": [
+        "Weber 3pc Precision Grill Tool Set Black",
+        "Grill Zone 00325TV 3pc Stainless Steel Grill Tool Set Rosewood Handles New",
+        "Weber Spatual & Tongs Grill Tool Set - 3401326"
+      ]
+    },
+    {
+      "intentId": "grilling/pellet-grill",
+      "interestId": "grilling",
+      "interestLabel": "Grilling & BBQ",
+      "query": "pellet grill",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 11.9,
+        "max": 79.46
+      },
+      "sampleTitles": [
+        "Traeger Timberline 850 Pellet Grill",
+        "Traeger Pro Series 575 Wood Pellet Grill - Black",
+        "Traeger Pro 780 Pellet Grill in Matte Black"
+      ]
+    },
+    {
+      "intentId": "grilling/rubs",
+      "interestId": "grilling",
+      "interestLabel": "Grilling & BBQ",
+      "query": "bbq rub gift set",
+      "bracket": "adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 12,
+        "max": 67.49
+      },
+      "sampleTitles": [
+        "BBQ Rub Gift Set 3 BBQ Seasoning Grill Rub Gifts for Dad Men",
+        "BBQ Rub Gift Set for Dads - 3 Bold Seasonings & Grilling Tools -  Delight",
+        "Kinder's The Essentials Seasoning Pack 8 Bottles BBQ Rub Gift Set Blend NEW"
+      ]
+    },
+    {
+      "intentId": "wine_spirits/glass-set",
+      "interestId": "wine_spirits",
+      "interestLabel": "Wine & spirits",
+      "query": "wine glass set",
+      "bracket": "mature_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 6.99,
+        "max": 64.99
+      },
+      "sampleTitles": [
+        "Riedel Grape Pinot Noir Nebbiolo Crystal 2-Piece Wine Glass Set made in Germany ",
+        "4 Pack Clear Stemless Wine Glass Set Glassware for Wine And Cold Beverages 17 oz",
+        "Stemless Jumbo Wine Glass Set, By Big Betty, Set of 2, Clear"
+      ]
+    },
+    {
+      "intentId": "wine_spirits/cocktail-shaker",
+      "interestId": "wine_spirits",
+      "interestLabel": "Wine & spirits",
+      "query": "cocktail shaker set",
+      "bracket": "mature_adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 9.99,
+        "max": 31.34
+      },
+      "sampleTitles": [
+        "Ohtomber 24OZ Cocktail Shaker Set - Bar Martini Drink Silver",
+        "Cocktail Shaker Set 3 Piece Stainless Steel Bar Drink Mixer Premium Silver 16 Oz",
+        "(5 Pc) Boston Cocktail Shaker Set w/ HD Strainer, High End Japanese Jigger & ..."
+      ]
+    },
+    {
+      "intentId": "wine_spirits/decanter",
+      "interestId": "wine_spirits",
+      "interestLabel": "Wine & spirits",
+      "query": "wine decanter",
+      "bracket": "mature_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 7.99,
+        "max": 39.6
+      },
+      "sampleTitles": [
+        "Wine Aerator Pourer Spout Red Wine Decanter No Drip Sediment Filter Aerator",
+        "Decanter Drying Stand Steel Wine Decanter Holder for Kitchen Home Countertop",
+        "Crackle Glass Wine Decanter Carafe Clear Glass Contemporary Angled Top Long Neck"
+      ]
+    },
+    {
+      "intentId": "wine_spirits/stoppers",
+      "interestId": "wine_spirits",
+      "interestLabel": "Wine & spirits",
+      "query": "wine bottle stopper set",
+      "bracket": "mature_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 3.99,
+        "max": 67.13
+      },
+      "sampleTitles": [
+        "WINE BOTTLE STOPPER SET OF 3 IN CHROME, Stainless Steel, New, Geometric",
+        "Wine Bottle Stopper Set (2/4/6-Pack) Hand-Press Airtight Rubber Sealers for Wine, Beer, Ch",
+        "Gold-Tone Crystal Embellished Wine Bottle Stopper Set of 2"
+      ]
+    },
+    {
+      "intentId": "home_decor/table-lamp",
+      "interestId": "home_decor",
+      "interestLabel": "Home decor",
+      "query": "table lamp",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 9.05,
+        "max": 33.99
+      },
+      "sampleTitles": [
+        "LED Desk Lamp Touch Sensor Reading Foldable Table Lamp Eye Caring Reading Light",
+        "Rechargeable Cordless Table Lamp Portable Touch Sensor Dimmable LED Desk Lamps",
+        "Small Plug-In Bedside Table Lamp, Touch Dimming, Natural Oak Finish, 1 Pack"
+      ]
+    },
+    {
+      "intentId": "home_decor/throw-blanket",
+      "interestId": "home_decor",
+      "interestLabel": "Home decor",
+      "query": "throw blanket",
+      "bracket": "adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5,
+        "max": 19.99
+      },
+      "sampleTitles": [
+        " Plush Textured Throw Blanket Soft Cozy Blanket Multiple Colors & Sizes",
+        "Mainstays Fleece Throw Blanket NEW, 50X 60 Inches, BLACK, Brand New",
+        "Woven Throw Blanket Neutral/Green/Blue - Threshold"
+      ]
+    },
+    {
+      "intentId": "home_decor/frame-set",
+      "interestId": "home_decor",
+      "interestLabel": "Home decor",
+      "query": "picture frame set",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 6.99,
+        "max": 19.9
+      },
+      "sampleTitles": [
+        "8x10 Picture Frame Set of 2, Photo Frame with HD Plexiglass, Display Pictures",
+        "4X6 Picture Frame Set of 2 Photo Frames for 4X6 Pictures Wall Gallery Black 4X6",
+        "3x5 Picture Frame Set of 2Black Photo Frame for 3x5 Without MatThin Border Fra"
+      ]
+    },
+    {
+      "intentId": "home_decor/round-mirror",
+      "interestId": "home_decor",
+      "interestLabel": "Home decor",
+      "query": "round wall mirror",
+      "bracket": "adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 11.99,
+        "max": 96.99
+      },
+      "sampleTitles": [
+        "Round Wall Mirror Door Mirror PVC Plastic Frame (Black, 8.66 inch)",
+        "12 inch Glass Round Wall Mirror, Decorative Circle Mirror for Wall",
+        "Full Length Round Wall Mirror Acrylic 8x8 Silver 4 Pack Door Mount Kids Bedroom"
+      ]
+    },
+    {
+      "intentId": "candles_scents/scented-candle",
+      "interestId": "candles_scents",
+      "interestLabel": "Candles & scents",
+      "query": "scented candle",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 6.49,
+        "max": 49.99
+      },
+      "sampleTitles": [
+        "Nest MOROCCAN AMBER Scented Candle 0.95oz LOT OF 2",
+        "Diptyque Baies Scented Candle 6.5oz / 190g Brand New Sealed",
+        "Diptyque Feu de Bois Scented Candle 190g / 6.5 oz New In Box Free Shipping"
+      ]
+    },
+    {
+      "intentId": "candles_scents/gift-set",
+      "interestId": "candles_scents",
+      "interestLabel": "Candles & scents",
+      "query": "candle gift set",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 8,
+        "max": 35.99
+      },
+      "sampleTitles": [
+        "Yankee Candle Fall 4pc 1.3 OZ Jar Mini Candle Gift Set",
+        "Yankee Candle Holiday 6 Pack Scented Jar Candle Gift Set 4.3 oz Each NEW",
+        "3 Pack Scented Candle Gift Set,Lavender Thyme,Apple Cinnamon & Balsam"
+      ]
+    },
+    {
+      "intentId": "candles_scents/diffuser",
+      "interestId": "candles_scents",
+      "interestLabel": "Candles & scents",
+      "query": "reed diffuser",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5.68,
+        "max": 59.97
+      },
+      "sampleTitles": [
+        "Nest Fragrances Sugar Cookie Reed Diffuser - 5.9 fl oz New",
+        "Nest New York Reed Diffuser 5.9 oz Something Tropical",
+        "Nest New York Reed Diffuser Refill 5 fl oz Amalfi Lemon & Mint"
+      ]
+    },
+    {
+      "intentId": "gardening/tool-set",
+      "interestId": "gardening",
+      "interestLabel": "Gardening",
+      "query": "gardening tool set",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 10.99,
+        "max": 63.76
+      },
+      "sampleTitles": [
+        "3pcs Mini Gardening Tool Set Wood Handle Shovel Rake Planting Kit Tools",
+        "5Piece Ergonomic Gardening Tool Set with Floral Print & Carrying Case",
+        "WORKPRO 5PCS Garden Tool Set, Aluminum Heavy Duty Gardening Tool Set"
+      ]
+    },
+    {
+      "intentId": "gardening/planters",
+      "interestId": "gardening",
+      "interestLabel": "Gardening",
+      "query": "ceramic plant pots",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 12.99,
+        "max": 44.88
+      },
+      "sampleTitles": [
+        "Orchid Pot with Holes Ceramic Plant Pots Outdoor Indoor Flower Pots for9009",
+        "Deecoo 3 Piece Ceramic Plant Pots Indoor Pots Set with Drainage Holes, 5.7/4.7/3",
+        "Small Ceramic plant pots"
+      ]
+    },
+    {
+      "intentId": "gardening/seed-kit",
+      "interestId": "gardening",
+      "interestLabel": "Gardening",
+      "query": "seed starter kit",
+      "bracket": "young_adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 6.99,
+        "max": 29.99
+      },
+      "sampleTitles": [
+        "NEW Jiffy Peat Strips Seed Starter Kit 50 Biodegradable Pots Easy Plant Growth",
+        "Jiffy 72 Cell Greenhouse Seed Starter Kit with 36mm Peat Pellets",
+        "3 Pack Seed Starter Tray Germination Kit, Seed Starter Kit with Adjustable Humid"
+      ]
+    },
+    {
+      "intentId": "gardening/gloves",
+      "interestId": "gardening",
+      "interestLabel": "Gardening",
+      "query": "garden gloves",
+      "bracket": "young_adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5.99,
+        "max": 35.99
+      },
+      "sampleTitles": [
+        "Garden Gloves with Claws Digging Planting Work Gloves Gardening Yard Safe Gloves",
+        "Women Garden Gloves 3 Pair, MicroFoam Nylon Latex Coated Grip, Gardening",
+        "Women's Garden Gloves 3-Pair, Soft Cotton Jersey, PVC Dot Grip, Green/Red/Blue"
+      ]
+    },
+    {
+      "intentId": "organization/label-maker",
+      "interestId": "organization",
+      "interestLabel": "Organization",
+      "query": "label maker",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 8.88,
+        "max": 34.12
+      },
+      "sampleTitles": [
+        "DYMO Embossing Label Maker with 6 DYMO Label Tapes | Organizer Xpress, Pro Label",
+        "E975 Embossing Label Maker with 5 DYMO Label Tapes | Organizer Xpress, Pro Label",
+        "Compatible DYMO Embossing Label Maker with 5 DYMO Label Tapes | Organizer Xpress"
+      ]
+    },
+    {
+      "intentId": "organization/storage-bins",
+      "interestId": "organization",
+      "interestLabel": "Organization",
+      "query": "storage bins",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 9.99,
+        "max": 89.99
+      },
+      "sampleTitles": [
+        "IRIS 12 Gal. Plastic Storage Bins with Lids, Latching Totes, Heavy Duty Containe",
+        "Sterilite Set of 4,12 Quart Small Clear Plastic Storage Bins Snap On Lids,White.",
+        "8 Pack Plastic Storage Bins with Lids Stackable Organizer Boxes Black White"
+      ]
+    },
+    {
+      "intentId": "organization/desk-organizer",
+      "interestId": "organization",
+      "interestLabel": "Organization",
+      "query": "desk organizer",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5.99,
+        "max": 42
+      },
+      "sampleTitles": [
+        "Small Desk Organizer",
+        "Desk Organizer, 360° Rotating Pen Holder with 5 Compartments, White",
+        "Double Layer Desk Organizer with Drawer"
+      ]
+    },
+    {
+      "intentId": "organization/shredder",
+      "interestId": "organization",
+      "interestLabel": "Organization",
+      "query": "paper shredder",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 14.49,
+        "max": 80.19
+      },
+      "sampleTitles": [
+        "5-Sheet Cross Cut Paper Shredder,P-4 Security Level, 2.38 Gal Bin,Shreds Credit Cards, Sta",
+        "Mini Document Shredder HAND CRANK SHREDDER Small Hand Operated Paper Shredder",
+        "Bonsaii 8-Sheet Strip Cut Paper Shredder for Home, Shred CDs & Credit Cards"
+      ]
+    },
+    {
+      "intentId": "tech_gadgets/charging-stand",
+      "interestId": "tech_gadgets",
+      "interestLabel": "Tech gadgets",
+      "query": "wireless charging stand",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 4.89,
+        "max": 119
+      },
+      "sampleTitles": [
+        "Fast Wireless Charging Stand Dock, Wireless Charger for iPhone Samsung Galaxy",
+        "Fast Wireless Charging Stand Dock Compatible with Samsung Galaxy iPhone Mobile",
+        "InfinityLab InstantStation Wireless Charging Stand – 15W Qi-Certified, USB-C & USB-A"
+      ]
+    },
+    {
+      "intentId": "tech_gadgets/power-bank",
+      "interestId": "tech_gadgets",
+      "interestLabel": "Tech gadgets",
+      "query": "portable power bank",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5.98,
+        "max": 42.99
+      },
+      "sampleTitles": [
+        "Portable Power Bank Dual USB Battery Charger for Mobile Cell Phone LCD 10000mAh",
+        "900000mAh Portable Power Bank 3 USB External Battery Charger For Cell Phone",
+        "Portable Power Bank 20000mAh Fast Charging Battery with 4 Built in Cables Red US"
+      ]
+    },
+    {
+      "intentId": "tech_gadgets/tracker",
+      "interestId": "tech_gadgets",
+      "interestLabel": "Tech gadgets",
+      "query": "bluetooth tracker",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 4.99,
+        "max": 69.95
+      },
+      "sampleTitles": [
+        "Tile Mate Bluetooth Tracker Black 1 Pack Key Finder SOS iOS Android Life360",
+        "Samsung Galaxy SmartTag2 Bluetooth Tracker GPS  | White | NEW | SEALED",
+        "Samsung SmartTag2 Wireless Bluetooth Tracker (White) (1 Pack)"
+      ]
+    },
+    {
+      "intentId": "tech_gadgets/usb-hub",
+      "interestId": "tech_gadgets",
+      "interestLabel": "Tech gadgets",
+      "query": "usb c hub",
+      "bracket": "adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 2.99,
+        "max": 39.99
+      },
+      "sampleTitles": [
+        "Anker 7-in-1 USB C Hub MultiPort Adapter 4K@60Hz USB C to HDMI Splitter 100W PD",
+        "Anker USB C Hub, 5-in-1 USB Hub for Laptops, 4K HDMI Multiport Adapter with 90W Max Power ",
+        "ACEMAGIC 8-in-1 USB C Hub Adapter: 4K HDMI, USB 3.0, PD Charging Docking Station"
+      ]
+    },
+    {
+      "intentId": "audio/earbuds",
+      "interestId": "audio",
+      "interestLabel": "Audio",
+      "query": "wireless earbuds",
+      "bracket": "young_adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5.79,
+        "max": 37.99
+      },
+      "sampleTitles": [
+        "Bluetooth Wireless Earbuds Headset Headphones Compatible with iPhone and Samsung",
+        "Mini TWS Wireless Earbuds Headset Bluetooth Earphones for iPhone Samsung Android",
+        "Wireless Bluetooth 5.3 Headset TWS Earphones Earbuds Stereo Headphones Ear Hook"
+      ]
+    },
+    {
+      "intentId": "audio/bluetooth-speaker",
+      "interestId": "audio",
+      "interestLabel": "Audio",
+      "query": "bluetooth speaker",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 4.77,
+        "max": 33.99
+      },
+      "sampleTitles": [
+        "Mini Portable Bluetooth Speaker Rechargeable Wireless Stereo Bass USB/TF/FM Lot",
+        "NEW Wireless Induction Speaker 5-in-1 Bluetooth Speaker With Phone Stand USA",
+        "Bluetooth Speaker Wireless Portable Waterproof Outdoor Loud Stereo Bass USB FM"
+      ]
+    },
+    {
+      "intentId": "audio/headphones",
+      "interestId": "audio",
+      "interestLabel": "Audio",
+      "query": "headphones",
+      "bracket": "young_adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 3.13,
+        "max": 75
+      },
+      "sampleTitles": [
+        "HIFI Super Bass Wired Earphones 3.5mm In-Ear Stereo Earbuds Headset Headphones",
+        "Headphones Wired Earphone White Headphones Earbuds 3.5mm Jack for Android iOS US",
+        "Waterproof Bluetooth 5.0 Earbuds Stereo Sport Wireless Headphones in Ear Headset"
+      ]
+    },
+    {
+      "intentId": "gaming/headset",
+      "interestId": "gaming",
+      "interestLabel": "Gaming",
+      "query": "gaming headset",
+      "bracket": "young_adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 8.99,
+        "max": 60
+      },
+      "sampleTitles": [
+        "Razer - Kraken Kitty V3 X Wired Over-the-Ear Gaming Headset for PC, Mac, Play...",
+        "Razer BlackShark V3 X HyperSpeed Gaming Headset",
+        "Stereo Wired Gaming Headsets Headphones with Mic for PS4 Playstation 4 PC Laptop"
+      ]
+    },
+    {
+      "intentId": "gaming/controller",
+      "interestId": "gaming",
+      "interestLabel": "Gaming",
+      "query": "wireless controller",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 11.99,
+        "max": 59.99
+      },
+      "sampleTitles": [
+        "Wireless Controller Bluetooth Gamepad Compatible for PlayStation4 PS4",
+        "Wireless Controller Bluetooth Gamepad compatible to PlayStation4 PS4 Multi-color",
+        "Transparent Wireless Controller for PlayStation 2 PS2 USB PC COMPATIBLE"
+      ]
+    },
+    {
+      "intentId": "gaming/mouse",
+      "interestId": "gaming",
+      "interestLabel": "Gaming",
+      "query": "gaming mouse",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5.27,
+        "max": 69.99
+      },
+      "sampleTitles": [
+        "Razer DeathAdder Essential Gaming Mouse - Classic Black (New)",
+        "Ergonomic Gaming Mouse Wired USB Optical RGB Backlit 1600 DPI for PC Laptop",
+        "Razer Cobra HyperSpeed Wireless Gaming Mouse 26000 DPI 9-Button Black"
+      ]
+    },
+    {
+      "intentId": "gaming/gift-card",
+      "interestId": "gaming",
+      "interestLabel": "Gaming",
+      "query": "gaming gift card",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 2.5,
+        "max": 70
+      },
+      "sampleTitles": [
+        "Roblox Prepaid Gaming Gift Card - 40 Coins (2,000 Robux Total)",
+        "120 Keyword Counters Tokens For Magic The Gathering MTG CCG Card Gaming Gift DND",
+        "62 Dice Counters For Magic The Gathering MTG CCG Card Gaming Gift RARE"
+      ]
+    },
+    {
+      "intentId": "photography/instant-camera",
+      "interestId": "photography",
+      "interestLabel": "Photography",
+      "query": "instant camera",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 19.99,
+        "max": 119
+      },
+      "sampleTitles": [
+        "Fujifilm Instax Mini EVO Hybrid Instant Camera Black Bundle - 20 Fuji Film",
+        "Fujifilm instax Mini SE Instant Camera with 10 Mini Film, Pink Exp 03/28",
+        "Fujifilm instax Mini SE Instant Camera w/Bonus 10 pack Mini Film -Various Colors"
+      ]
+    },
+    {
+      "intentId": "photography/photo-printer",
+      "interestId": "photography",
+      "interestLabel": "Photography",
+      "query": "photo printer",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 7.99,
+        "max": 99
+      },
+      "sampleTitles": [
+        "VRETTI Mini Pocket Thermal Printer Wireless Bluetooth Photo Printer",
+        "Canon IVY 2 Mini Photo Printer Color Mobile Zink New Sealed",
+        "Canon Selphy CP1500 Photo Printer Bundle (Black) with KP-108 Paper (108 Sheets) 3 Color In"
+      ]
+    },
+    {
+      "intentId": "photography/strap",
+      "interestId": "photography",
+      "interestLabel": "Photography",
+      "query": "camera strap",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 4.99,
+        "max": 49.9
+      },
+      "sampleTitles": [
+        "4x Quick Release Camera Strap Anchors - Red or Black - Compatible with",
+        "Camera Strap Camera Belt Adjustable Cotton Leather Camera Shoulder Neck Strap...",
+        "4-Pack Camera Strap Connectors for Quick Release Buckle System - Black"
+      ]
+    },
+    {
+      "intentId": "photography/cleaning-kit",
+      "interestId": "photography",
+      "interestLabel": "Photography",
+      "query": "camera lens cleaning kit",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 8.4,
+        "max": 35.9
+      },
+      "sampleTitles": [
+        "Vintage Camera Lens Cleaning Kit For Nikon Made In Korea ",
+        "25-in-1 Camera Lens Cleaning Kit VS-A2E",
+        "Camera Lens Cleaning Kit DSLR Mirrorless Lens Paper Air Blower Pen Swabs Cloth"
+      ]
+    },
+    {
+      "intentId": "smart_home/smart-bulb",
+      "interestId": "smart_home",
+      "interestLabel": "Smart home",
+      "query": "smart bulb",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 6.79,
+        "max": 48.99
+      },
+      "sampleTitles": [
+        "Govee Smart A19 Light Bulbs | 4 Pack | Govee Smart Bulbs Wi‑Fi & Bluetooth",
+        "Bulb Color, BR30 Wi-Fi Smart Bulb, E26 Base, 75W Equivalent 950 Lumens, 16 Mi...",
+        "Sengled Alexa Light Bulb, WiFi Light Bulbs, Smart Bulbs (4PK)"
+      ]
+    },
+    {
+      "intentId": "smart_home/smart-plug",
+      "interestId": "smart_home",
+      "interestLabel": "Smart home",
+      "query": "smart plug",
+      "bracket": "adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 7.99,
+        "max": 31.5
+      },
+      "sampleTitles": [
+        "TP-Link Kasa 4-Pack Smart Plug Ultra Mini 15A - EP10P2 - White - *NEW IN BOX*",
+        "Kasa (4-PACK) Smart Plug Ultra Mini 15A EP10P4 Smart Home Wi-Fi Outlet *NEW*",
+        "Kasa Smart Plug Mini 15A, Smart Home Wi-Fi Outlet Works with Alexa, Google Home"
+      ]
+    },
+    {
+      "intentId": "smart_home/video-doorbell",
+      "interestId": "smart_home",
+      "interestLabel": "Smart home",
+      "query": "video doorbell",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5.4,
+        "max": 79.99
+      },
+      "sampleTitles": [
+        "Ring Video Doorbell 1080p HD Camera WI-FI Night Vision Motion Detection Wireless",
+        "Arlo Video Doorbell - White/Black",
+        "Ring Doorbell Wired Video Doorbell Wi‑Fi Alexa 2‑Way Talk Night Vision Black"
+      ]
+    },
+    {
+      "intentId": "smart_home/smart-thermostat",
+      "interestId": "smart_home",
+      "interestLabel": "Smart home",
+      "query": "smart thermostat",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 20.27,
+        "max": 165
+      },
+      "sampleTitles": [
+        "Amazon Smart Thermostat White S6ED3R Honeywell Home Technology Works with Alexa",
+        "New Google Nest Smart Thermostat, Charcoal - GA02081-US",
+        "NIB GOOGLE NEST G4CVZ PROGRAMMABLE WI-FI SMART THERMOSTAT SEALED."
+      ]
+    },
+    {
+      "intentId": "beauty_skincare/skincare-set",
+      "interestId": "beauty_skincare",
+      "interestLabel": "Beauty & skincare",
+      "query": "skincare gift set",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 12,
+        "max": 33
+      },
+      "sampleTitles": [
+        "Face Mask and Skincare Gift Set",
+        "The History of Whoo Radiant White 7-Piece Special Set – Korean Skincare Gift Set",
+        "Le Mercerie Celebrate Your Radiance 4pc Skincare Gift Set Viral Dollar Tree New"
+      ]
+    },
+    {
+      "intentId": "beauty_skincare/beard-kit",
+      "interestId": "beauty_skincare",
+      "interestLabel": "Beauty & skincare",
+      "query": "beard grooming kit",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 11.98,
+        "max": 33.99
+      },
+      "sampleTitles": [
+        "Rechargeable Electric Men hair Clipper Trimmer Beard Razor Haircut Grooming Kit",
+        "Mens Beard Grooming Kit Boar Bristle Brush Wood Comb Scissors Christmas Gift Set",
+        "Beard Grooming Kit Gift Set - Brush, Comb, Oil & Balm Included  - Ships Fast"
+      ]
+    },
+    {
+      "intentId": "beauty_skincare/hair-tool",
+      "interestId": "beauty_skincare",
+      "interestLabel": "Beauty & skincare",
+      "query": "hair styling tool",
+      "bracket": "adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 4.99,
+        "max": 71
+      },
+      "sampleTitles": [
+        "Round Volumizing Brush for Dyson Airwrap - Hair Styling Tool, Perfect Curls & Vo",
+        "Silicone Haircut Band Curved Fade Trimming Guide DIY Hair Styling Tool",
+        "Hair Styling Tool Set 3 Pcs French Braid Topsy Tail Loop Rat Tail Comb Metal"
+      ]
+    },
+    {
+      "intentId": "beauty_skincare/electric-shaver",
+      "interestId": "beauty_skincare",
+      "interestLabel": "Beauty & skincare",
+      "query": "electric shaver",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 8.9,
+        "max": 53.18
+      },
+      "sampleTitles": [
+        "Philips Norelco OneBlade 360 Face Rechargeable Electric Shaver Trimmer QP2724/70",
+        "Mens USB Electric Shaver Trimmer Razor Rechargeable Hair Beard Shaving Machine",
+        "Men's Razor Rotary Waterproof Electric Shaver Pop-Up Trimmer Wet Dry Cordless US"
+      ]
+    },
+    {
+      "intentId": "beauty_skincare/fragrance",
+      "interestId": "beauty_skincare",
+      "interestLabel": "Beauty & skincare",
+      "query": "perfume gift set",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 20.59,
+        "max": 67.5
+      },
+      "sampleTitles": [
+        "4-Piece Floral Perfume Gift Set for Women, Fresh Fragrance Collection",
+        "Kylie Jenner Cosmic Eau de Parfum 2 Piece Mini Perfume Gift Set NEW",
+        "3pcs Perfume Gift Sets - Walk on Air by Kate Spade Vial  .03 oz for Women"
+      ]
+    },
+    {
+      "intentId": "fashion_accessories/crossbody-bag",
+      "interestId": "fashion_accessories",
+      "interestLabel": "Fashion accessories",
+      "query": "crossbody bag",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 7.49,
+        "max": 75
+      },
+      "sampleTitles": [
+        "Men’s Leather Crossbody Bag Shoulder Sling Travel Casual Messenger Chest Pack US",
+        "Women Small Crossbody Bag Multifunction Shoulder Bag Phone Casual Messenger Bag",
+        "Women’s Soft Leather Crossbody Bag, 2026 Retro Multi-pocket Shoulder Handbag"
+      ]
+    },
+    {
+      "intentId": "fashion_accessories/sunglasses",
+      "interestId": "fashion_accessories",
+      "interestLabel": "Fashion accessories",
+      "query": "sunglasses",
+      "bracket": "adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 0.99,
+        "max": 53
+      },
+      "sampleTitles": [
+        "NEW Oakley Radar EV Path OO9208 Polished White PRIZM Silver Mirror Sunglasses",
+        "Retro Oakley Minute Gen1 Minute1.0 Sunglasses Sliver Frame Ruby Lenses",
+        "Vintage Oakley 90s Plate sunglasses Polarized Black Lens Y2K GorpCore Hypev"
+      ]
+    },
+    {
+      "intentId": "fashion_accessories/wallet",
+      "interestId": "fashion_accessories",
+      "interestLabel": "Fashion accessories",
+      "query": "leather wallet",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 3.92,
+        "max": 129.99
+      },
+      "sampleTitles": [
+        "Mens RFID Blocking Leather Wallet Credit Card ID Holder Zipper Purse Waterproof",
+        "Men's Slim Minimalist Leather Wallet RFID Blocking Front Pocket Card Holder",
+        "Fashion Men Short Leather Wallet Card Holder With Coin Pocket"
+      ]
+    },
+    {
+      "intentId": "fashion_accessories/scarf",
+      "interestId": "fashion_accessories",
+      "interestLabel": "Fashion accessories",
+      "query": "scarf",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5.49,
+        "max": 31.55
+      },
+      "sampleTitles": [
+        "Mens Womens Winter Warm SCOTLAND Made 100% CASHMERE Scarf Scarves Plaid Wool",
+        "Winter Unisex 100% Cashmere Plaid Scotland Made Solid Striped Scarves Wool Scarf",
+        "Wholesale Lot Women Men Winter 100% CASHMERE Scarf Solid  Plaid Wool SCOTLAND"
+      ]
+    },
+    {
+      "intentId": "fashion_accessories/beanie",
+      "interestId": "fashion_accessories",
+      "interestLabel": "Fashion accessories",
+      "query": "beanie hat",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 3.8,
+        "max": 25.99
+      },
+      "sampleTitles": [
+        "Beanie Hat Cap Plain Knit Ski Skull Cuff Winter Warm Slouchy Men Women CF Unisex",
+        "Military Tactical Skull Cap Winter Warm Fleece Windproof Ski Beanie Hats USA Lot",
+        "Mini Short Fisherman Beanie Hat Ribbed Docker Winter Warm Knitted Skull Cap cuff"
+      ]
+    },
+    {
+      "intentId": "jewelry/earrings",
+      "interestId": "jewelry",
+      "interestLabel": "Jewelry",
+      "query": "earrings",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 2.78,
+        "max": 26.99
+      },
+      "sampleTitles": [
+        "14K Yellow Gold Round Ball Bead Sleeper Studs Earrings Push-back  3mm-8mm",
+        "2025 Xmas 925 Silver Crystal Christmas Tree Earrings Drop Dangle Women Jewelry",
+        "1 Pair 35MM Genuine 925 Sterling Silver Round Hoop Earrings for Women"
+      ]
+    },
+    {
+      "intentId": "jewelry/necklace",
+      "interestId": "jewelry",
+      "interestLabel": "Jewelry",
+      "query": "necklace",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 1.99,
+        "max": 30.25
+      },
+      "sampleTitles": [
+        "Kendra Scott Initial Pendant Necklace: Gold 14K Gold Over Brass Lobster Claw",
+        "Kendra Scott Elisa Silver Plated Pendant Necklace",
+        "🍟 Kendra Scott 14K Gold plated Pendant Necklace Christmas Tree new holiday"
+      ]
+    },
+    {
+      "intentId": "jewelry/bracelet",
+      "interestId": "jewelry",
+      "interestLabel": "Jewelry",
+      "query": "bracelet",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 2.49,
+        "max": 34.99
+      },
+      "sampleTitles": [
+        "Amethyst Beaded Bracelet 6mm Purple Crystal Healing Gemstone Copper Jewelry",
+        "NEW Pandora Sterling Silver Barrel Clasp Snake Chain Bracelet Size 5 1/2\" 12.1g",
+        "Hematite Bracelet Natural Black Adjustable Healing Men Women Reiki"
+      ]
+    },
+    {
+      "intentId": "jewelry/box",
+      "interestId": "jewelry",
+      "interestLabel": "Jewelry",
+      "query": "jewelry box",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 10,
+        "max": 49.99
+      },
+      "sampleTitles": [
+        "Easy Spirit Travel Jewelry Box Black Faux Leather Zip-Around Mirror Velvet Lined",
+        "SONGMICS 2-Layer Jewelry Box Jewelry Organizer with Handle Removable Jewelry Tray Jewelry ",
+        "Large 3 Layer PU Leather Jewelry Box Organizer Storage Case Drawer Lock Womens"
+      ]
+    },
+    {
+      "intentId": "watches/wristwatch",
+      "interestId": "watches",
+      "interestLabel": "Watches",
+      "query": "wristwatch",
+      "bracket": "adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 4.87,
+        "max": 122
+      },
+      "sampleTitles": [
+        "WCHMQ76 - Men’s Casio Analog Wristwatch",
+        "Waterproof Digital Sports Watch Men Military Tactical LED Backlight Wristwatch",
+        "Men Watch Stainless Steel Quartz Luminous Classic Business Wristwatch Waterproof"
+      ]
+    },
+    {
+      "intentId": "watches/fitness-watch",
+      "interestId": "watches",
+      "interestLabel": "Watches",
+      "query": "fitness watch",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 6.99,
+        "max": 59.99
+      },
+      "sampleTitles": [
+        "Smart Watch for Men Women 1.85\" HD Touchscreen Fitness Watch with Bluetooth Call",
+        "Willful Smart Watch for Women Men Heart Rate Blood Oxygen Monitor Fitness Watch",
+        "🔥2025 Smart Watch For Men/Women, Waterproof Fitness Watch Bluetooth iOS Samsung"
+      ]
+    },
+    {
+      "intentId": "watches/band",
+      "interestId": "watches",
+      "interestLabel": "Watches",
+      "query": "watch band",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 1.49,
+        "max": 39.69
+      },
+      "sampleTitles": [
+        "Gucci Apple Watch Band Designer Wrist Strap Canvas",
+        "Leather Watch Strap 12mm to 24mm Genuine Replacement Soft Bracelet Watch Band",
+        "Share Casio Silicone Watch Band Waterproof Replacement Strap 12mm-20mm."
+      ]
+    },
+    {
+      "intentId": "camping/lantern",
+      "interestId": "camping",
+      "interestLabel": "Camping",
+      "query": "camping lantern",
+      "bracket": "young_adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 6.9,
+        "max": 28.88
+      },
+      "sampleTitles": [
+        "Portable USB Rechargeable LED Camping Lantern Camping Tent Light Lamp Flashlight",
+        "500-Lumen Mini LED Camping Lantern with Carabiner Carry Handle",
+        "Solar Portable Rechargeable LED Camping Lantern Flashlight Lamp USB Power Bank"
+      ]
+    },
+    {
+      "intentId": "camping/sleeping-bag",
+      "interestId": "camping",
+      "interestLabel": "Camping",
+      "query": "sleeping bag",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 3.99,
+        "max": 44.99
+      },
+      "sampleTitles": [
+        "3 Pack Sierra Madre Emergency Sleeping Bag 84\"X36\" Waterproof Sierramadre",
+        "Emergency Survival Sleeping Bag Waterproof Thermal Mylar Camping Rescue Sack",
+        "2X Emergency Sleeping Bags Thermal Blanket Waterproof Outdoor Survival Camping"
+      ]
+    },
+    {
+      "intentId": "camping/stove",
+      "interestId": "camping",
+      "interestLabel": "Camping",
+      "query": "camping stove",
+      "bracket": "young_adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 12,
+        "max": 79.94
+      },
+      "sampleTitles": [
+        "Coleman Peak One Butane Camping Stove",
+        "2 Portable Camping Stoves Backpacking Stove with Piezo Ignition Adjustable Valve",
+        "Car Camping Stove"
+      ]
+    },
+    {
+      "intentId": "camping/chair",
+      "interestId": "camping",
+      "interestLabel": "Camping",
+      "query": "camping chair",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5,
+        "max": 62.99
+      },
+      "sampleTitles": [
+        "Portable Camping Chair Lightweight With Bag Black And Red",
+        "Small Folding Stool Mini Portable Outdoor Camping Chair Foldable Hiking",
+        "Folding Camping Chairs Portable Outdoor Lawn Chairs with out Carrying Bag"
+      ]
+    },
+    {
+      "intentId": "hiking/daypack",
+      "interestId": "hiking",
+      "interestLabel": "Hiking",
+      "query": "hiking daypack",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 8.99,
+        "max": 150
+      },
+      "sampleTitles": [
+        "REI Traverse Backpack 25L Black Hydration Compatible Hiking Daypack",
+        "Osprey Daylite 13L Lightweight Hiking Daypack Backpack Black NEW No Tags",
+        "Foldable Compact Backpack Lightweight Packable Outdoor Travel Hiking Daypack Bag"
+      ]
+    },
+    {
+      "intentId": "hiking/water-bottle",
+      "interestId": "hiking",
+      "interestLabel": "Hiking",
+      "query": "insulated water bottle",
+      "bracket": "young_adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 10.99,
+        "max": 49.99
+      },
+      "sampleTitles": [
+        "Owala 24 oz Insulated water bottle multicolor New",
+        "Owala 24 fl oz Stainless Steel Special Edition FreeSip Insulated Water Bottle",
+        "Owala Stainless Steel FreeSip Insulated Water Bottle"
+      ]
+    },
+    {
+      "intentId": "hiking/headlamp",
+      "interestId": "hiking",
+      "interestLabel": "Hiking",
+      "query": "headlamp",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 4.4,
+        "max": 36.95
+      },
+      "sampleTitles": [
+        "Headlamp 5x LED Super Bright Lumen Rechargeable Head Light Flashlight Torch Lamp",
+        "XPE+COB LED Powerful Headlamp USB Rechargeable Camping Head Light Adjustable",
+        "COB LED Headlamp USB Rechargeable Headlight Torch Work Light Bar Head Band Lamp"
+      ]
+    },
+    {
+      "intentId": "hiking/trekking-poles",
+      "interestId": "hiking",
+      "interestLabel": "Hiking",
+      "query": "trekking poles",
+      "bracket": "young_adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 7,
+        "max": 110
+      },
+      "sampleTitles": [
+        "2x Trekking Poles Nordic Walking Hiking Sticks Anti-shock Adjustable Alpenstock",
+        "US Lightweight Hiking Trekking Poles Walking Stick Anti Shock Adjustable Camping",
+        "ALLWAYS Trekking Poles 2 Pack Anti-Shock Hiking Walking Sticks Built-in Compass"
+      ]
+    },
+    {
+      "intentId": "cycling/lights",
+      "interestId": "cycling",
+      "interestLabel": "Cycling",
+      "query": "bike lights",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 2.06,
+        "max": 70.5
+      },
+      "sampleTitles": [
+        "2x Mountain Bike Lights USB Rechargeable Bicycle LED Torch Front Rear + Lamp Set",
+        "USB Rechargeable Bike Lights Set - Waterproof and Lightweight for Night Riding",
+        "Rechargeable Bike Lights"
+      ]
+    },
+    {
+      "intentId": "cycling/helmet",
+      "interestId": "cycling",
+      "interestLabel": "Cycling",
+      "query": "bike helmet",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 14.99,
+        "max": 59.99
+      },
+      "sampleTitles": [
+        "Bell Granite MIPS Adult Bike Helmet - Black",
+        "Bell Huxley Adult Bike Helmet - White",
+        "Giro Register MIPS Bike Helmet Matte Titanium Universal Adult 54-61cm"
+      ]
+    },
+    {
+      "intentId": "cycling/multitool",
+      "interestId": "cycling",
+      "interestLabel": "Cycling",
+      "query": "bike multitool",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 6.08,
+        "max": 49.95
+      },
+      "sampleTitles": [
+        "HAUTMEC 14 in 1 Bike Multitool, Mini Bike Repair Tool Kit for Road and Mountain Bikes, Lig",
+        "HAUTMEC 7 IN 1 Bike Multitool with Hex Wrenches, Screwdrivers, Ruler, Joint Levers for Bik",
+        "HAUTMEC 9 in 1 Bike Multitool, Mini Bike Repair Tool Kit for Road and Mountain Bikes, Ligh"
+      ]
+    },
+    {
+      "intentId": "cycling/gloves",
+      "interestId": "cycling",
+      "interestLabel": "Cycling",
+      "query": "cycling gloves",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5,
+        "max": 22.09
+      },
+      "sampleTitles": [
+        "Cycling Gloves Half Finger Padded Bicycle Summer Road Bike Gloves for Men Women",
+        "Winter Warm Cycling Gloves Waterproof Windproof Touch Screen Anti-Slip Gloves US",
+        "Half Finger Anti-Slip Cycling Gloves Durable Breathable for Biking Sports Hiking"
+      ]
+    },
+    {
+      "intentId": "fishing/rod",
+      "interestId": "fishing",
+      "interestLabel": "Fishing",
+      "query": "fishing rod",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 7.19,
+        "max": 60.3
+      },
+      "sampleTitles": [
+        "Ugly Stik 7’ Complete Saltwater Fishing Rod Reel Spinning Combo Sporting Fishing",
+        "Telescopic Fishing Rod and Reel Set with Baits and Hooks for Travel",
+        "5 FT 6 INFiberglass Spinning Fishing Rod Reel Combo 2 Piece Adult Orange"
+      ]
+    },
+    {
+      "intentId": "fishing/tackle-box",
+      "interestId": "fishing",
+      "interestLabel": "Fishing",
+      "query": "tackle box",
+      "bracket": "young_adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5.97,
+        "max": 39.99
+      },
+      "sampleTitles": [
+        "Clear Plano StowAway Tackle Box: Waterproof & Lightweight 5-9 Compartment Design",
+        "KastKing Tackle Box 2/4 Packs Utility Tray Plastic 3600 & 3700 Tackle Storage US",
+        "KastKing HyperSeal Waterproof Tackle Box 3600+3700 Tray W/Adjust Divider Storage"
+      ]
+    },
+    {
+      "intentId": "fishing/lure-kit",
+      "interestId": "fishing",
+      "interestLabel": "Fishing",
+      "query": "fishing lure kit",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 10,
+        "max": 35
+      },
+      "sampleTitles": [
+        "85pcs Complete Tackle Box Set Fishing Lure Kit | Soft Plastic Worms, Crankbaits",
+        "104pcs Fishing Lure Kit Set Includes Hard Crank Bait with Treble Hooks,Soft Plas",
+        "Durable 8-Piece Fishing Lure Kit - Ideal for Bass, Trout & Salmon Fishing"
+      ]
+    },
+    {
+      "intentId": "fishing/pliers",
+      "interestId": "fishing",
+      "interestLabel": "Fishing",
+      "query": "fishing pliers",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 4.06,
+        "max": 29.99
+      },
+      "sampleTitles": [
+        "Kastking Cutthroat 7\" Fishing Pliers - Orange Split Ring Nose Fresh + Salt water",
+        "Multipurpose Outdoor Stainless Steel Fishing Pliers Fishing Line Cutter Scissors",
+        "Fishing Pliers Scissors Line Cutter Split Ring Hook Remover Tool Multifunction"
+      ]
+    },
+    {
+      "intentId": "fitness/adjustable-dumbbells",
+      "interestId": "fitness",
+      "interestLabel": "Fitness",
+      "query": "adjustable dumbbells",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 39.95,
+        "max": 339.15
+      },
+      "sampleTitles": [
+        "Sportneer Adjustable Dumbbells Pro 5LB",
+        "5 in 1 Adjustable Dumbbells Set, 35/45/70/90lbs Free Weights Set w Upgraded Nut",
+        "📢LAST CALL: Adjustable Dumbbells – 16 Weight Levels in One Compact Set"
+      ]
+    },
+    {
+      "intentId": "fitness/resistance-bands",
+      "interestId": "fitness",
+      "interestLabel": "Fitness",
+      "query": "resistance bands",
+      "bracket": "adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 3.75,
+        "max": 14.99
+      },
+      "sampleTitles": [
+        "Exercise Latex Resistance Bands Stretch Training Rope Yoga Green Color 3.9ft",
+        "1-5pcs Resistance Bands Exercise Loop Workout Fitness Gym Strength Training Yoga",
+        "Yoga Stretch Resistance Bands Exercise Pilates Yoga Aerobic GYM Home Workout"
+      ]
+    },
+    {
+      "intentId": "fitness/tracker",
+      "interestId": "fitness",
+      "interestLabel": "Fitness",
+      "query": "fitness tracker",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 14.99,
+        "max": 79.99
+      },
+      "sampleTitles": [
+        "Fitbit Inspire 2 Health and Fitness Tracker with Heart Rate HRM, 24/7",
+        "Fitbit Inspire 3 Heart Rate Monitor Health & Fitness Tracker | Lilac Bliss Open",
+        "Fitbit Inspire Fitness Tracker Black 9-in Adjustable Band FB412BKBK -- Used"
+      ]
+    },
+    {
+      "intentId": "fitness/foam-roller",
+      "interestId": "fitness",
+      "interestLabel": "Fitness",
+      "query": "foam roller",
+      "bracket": "adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 4.01,
+        "max": 39.99
+      },
+      "sampleTitles": [
+        "Amazon Basics High-Density Foam Roller 18in for Gym Training & Recovery, Black",
+        "TriggerPoint GRID STK Hand Held Foam Roller Orange",
+        "TriggerPoint Grid Foam Roller - Black | New"
+      ]
+    },
+    {
+      "intentId": "running/socks",
+      "interestId": "running",
+      "interestLabel": "Running",
+      "query": "running socks",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5,
+        "max": 27.98
+      },
+      "sampleTitles": [
+        "Balega Enduro Quarter Running Socks - Midgray",
+        "Balega Silver No Show Running Socks, Cobalt",
+        "Balega Blister Resist Quarter Length Running Socks"
+      ]
+    },
+    {
+      "intentId": "running/watch",
+      "interestId": "running",
+      "interestLabel": "Running",
+      "query": "running watch",
+      "bracket": "young_adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 29.9,
+        "max": 290
+      },
+      "sampleTitles": [
+        "Garmin Forerunner 55, GPS Running Watch with Daily Suggested Workouts, Up to 2 weeks of Ba",
+        "Garmin Forerunner 645 GPS - Running Watch - Black - 010-01863-00",
+        "Garmin Forerunner 45 GPS Sports Running Watch Heart Rate Monitor Large - Black"
+      ]
+    },
+    {
+      "intentId": "running/belt",
+      "interestId": "running",
+      "interestLabel": "Running",
+      "query": "running belt",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 4.98,
+        "max": 44.99
+      },
+      "sampleTitles": [
+        "Waterproof Running Belt Waist Pouch Bum Bag Jogging Fanny Pack Sports Phone Case",
+        "Entchin Slim Running Belt for Women Men, Runners Fanny Pack Phone Holder, Running Waist Ba",
+        "NWT Nathan Trail Mix Plus Adjustable Hydration Running Belt (Black / Lime Green)"
+      ]
+    },
+    {
+      "intentId": "running/shoes",
+      "interestId": "running",
+      "interestLabel": "Running",
+      "query": "running shoes",
+      "bracket": "young_adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 14.5,
+        "max": 40
+      },
+      "sampleTitles": [
+        "Hoka Bondi 9 Men's Shoes Running Shoes Clifton 9-10 Sneaker Low Top Variant styl",
+        "Running Shoes Sneakers Casual Men's Outdoor Athletic Jogging Sports Tennis Gym",
+        "adidas women Runfalcon 5 Wide Running Shoes"
+      ]
+    },
+    {
+      "intentId": "yoga/mat",
+      "interestId": "yoga",
+      "interestLabel": "Yoga",
+      "query": "yoga mat",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 8.81,
+        "max": 25.31
+      },
+      "sampleTitles": [
+        "Thick Gym Exercise Mat Yoga Mat Pilates Workout Pad Non Slip Home Class Fitness",
+        "15mm Thick Yoga Mat Economic Home Gym Pilates Floor Exercise Fitness Knee Pad US",
+        "Yoga Mat with Carrying Strap Extra Thick High Density Exercise Gym Pad Non Slip"
+      ]
+    },
+    {
+      "intentId": "yoga/blocks",
+      "interestId": "yoga",
+      "interestLabel": "Yoga",
+      "query": "yoga blocks",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 2.99,
+        "max": 28.95
+      },
+      "sampleTitles": [
+        "Yoga Blocks EVA Foam Exercise Brick Lightweight Odor Resistant for Home Gym",
+        "Yoga Blocks EVA Foam Exercise Bricks Lightweight Odor Resistant",
+        "Yoga Blocks Foam Brick for Gym Pilates Stretching Exercise Fitness Support"
+      ]
+    },
+    {
+      "intentId": "yoga/bolster",
+      "interestId": "yoga",
+      "interestLabel": "Yoga",
+      "query": "yoga bolster",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 24.99,
+        "max": 55.99
+      },
+      "sampleTitles": [
+        "Manduka eQua Rectangular Yoga Bolster Cover - Thunder",
+        "Giantex Yoga Bolster Meditation And Support Light Blue",
+        "Hapo Yoga Bolster Pillow Waist Hips Neck Support Slow Rebound Foam Cushion"
+      ]
+    },
+    {
+      "intentId": "crafts_diy/craft-kit",
+      "interestId": "crafts_diy",
+      "interestLabel": "Crafts & DIY",
+      "query": "craft kit",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5.79,
+        "max": 38.95
+      },
+      "sampleTitles": [
+        "50 Pcs DIY Origami Paper Animal Craft Kit Cats Dogs Dinosaurs Folding Art",
+        "Smart Lab Tiny Art 41 Piece Kids' Craft Kit STEAM Activity Set Ages 8+",
+        "Make Shoppe Create Your Own Origami Flowers Kids' Craft Kit, Makes 10"
+      ]
+    },
+    {
+      "intentId": "crafts_diy/knitting-kit",
+      "interestId": "crafts_diy",
+      "interestLabel": "Crafts & DIY",
+      "query": "knitting kit",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 15,
+        "max": 42.89
+      },
+      "sampleTitles": [
+        "Katech Knitting Kit for Beginner, Dishcloth Kniting Starter Small, Colorful A",
+        "Mini Basket Knitting Kit | FREE Beginner Workshop Included",
+        "NEW Vintage Yankee Knitter Designs Christmas Stocking Knitting KIT"
+      ]
+    },
+    {
+      "intentId": "crafts_diy/sewing-machine",
+      "interestId": "crafts_diy",
+      "interestLabel": "Crafts & DIY",
+      "query": "sewing machine",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 6.5,
+        "max": 36.98
+      },
+      "sampleTitles": [
+        "Handheld Sewing Machine Portable Mini Cordless Stitch Tool With 12 Sewing Thread",
+        "Mini Portable Smart Electric Tailor Stitch Hand-held Sewing Machine Home Travel",
+        "1Set Handheld Mini Sewing Machine Stitch Electric Compact Tool w/ Accessories"
+      ]
+    },
+    {
+      "intentId": "crafts_diy/crochet-hooks",
+      "interestId": "crafts_diy",
+      "interestLabel": "Crafts & DIY",
+      "query": "crochet hooks set",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 1.59,
+        "max": 18
+      },
+      "sampleTitles": [
+        "Crochet Hooks Set Clover Amour Steel Pastel 9 Pcs Ergonomic Easy Grip Bright",
+        "14 Pcs Crochet Hooks Set Clover Amour Steel Pastel Ergonomic Easy Grip Bright",
+        "8Pcs Soft Pottery Crochet Hooks Set White Floral Style DIY Crafts Knitting Yarn"
+      ]
+    },
+    {
+      "intentId": "art_supplies/colored-pencils",
+      "interestId": "art_supplies",
+      "interestLabel": "Art supplies",
+      "query": "colored pencils",
+      "bracket": "young_adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 1.3,
+        "max": 49
+      },
+      "sampleTitles": [
+        "Prismacolor Scholar Colored Pencils 12 Count Set Assorted Colors New ",
+        "Prismacolor Neon Colored Pencils Set, 6 1 Count (Pack of 6), Multicolor",
+        "Prismacolor Col-Erase Erasable Colored Pencils, Adult Coloring, 24 Pack"
+      ]
+    },
+    {
+      "intentId": "art_supplies/sketchbook",
+      "interestId": "art_supplies",
+      "interestLabel": "Art supplies",
+      "query": "sketchbook",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 4.24,
+        "max": 15.3
+      },
+      "sampleTitles": [
+        "Strathmore 400 Series Sketch Pad, 5.5x8.5 inch, 100 Sheets - Artist Sketchbook f",
+        "Moleskine Art Plus Sketchbook, Large, Plain, Black, Hard Cover (5 x 8.25)",
+        "Sketch Book: Sketchbook For Artist Drawing Blank Paper Pad 8.5\" x 11\" Notebook"
+      ]
+    },
+    {
+      "intentId": "art_supplies/watercolor-set",
+      "interestId": "art_supplies",
+      "interestLabel": "Art supplies",
+      "query": "watercolor set",
+      "bracket": "young_adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 9,
+        "max": 56.65
+      },
+      "sampleTitles": [
+        "12-Color Multicolor Watercolor Set Paint Box with Water Brush & Sponge",
+        "Color Shifting - Daniel Smith Watercolor Set of 9",
+        "Mini Watercolor Paint Set, Pocket Watercolor Set with 24 Colors Paint, Portable"
+      ]
+    },
+    {
+      "intentId": "art_supplies/fineliner-set",
+      "interestId": "art_supplies",
+      "interestLabel": "Art supplies",
+      "query": "fineliner pen set",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5.99,
+        "max": 120
+      },
+      "sampleTitles": [
+        "Sakura Pigma Micron ECO Fineliner Pen Set, Black, Precision Tip, 5 Count",
+        "Yardlio Fineliner Pen Set, 6 Pack Pens for Journaling & Drawing",
+        "Dyvicl Journal Planner Pens Colored Pens, 24 Colors 0.4mm Fineliner Pen Set Fine"
+      ]
+    },
+    {
+      "intentId": "reading/book-light",
+      "interestId": "reading",
+      "interestLabel": "Reading",
+      "query": "book light",
+      "bracket": "teen",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 3.6,
+        "max": 37.98
+      },
+      "sampleTitles": [
+        "Glocusent USB Rechargeable Book Light for Reading  Portable Clip-on LED Pink",
+        "Glocusent Book Lights for Reading at Night, Rechargeable Book Light Clip on - 3",
+        "Glocusent Upgraded Led Neck Reading Light Book Light For Reading In Bed"
+      ]
+    },
+    {
+      "intentId": "reading/ereader",
+      "interestId": "reading",
+      "interestLabel": "Reading",
+      "query": "e reader",
+      "bracket": "teen",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 35.1,
+        "max": 169.99
+      },
+      "sampleTitles": [
+        "Kobo Libra Colour eReader, 7” Color E Ink, Waterproof, Black",
+        "Kobo Clara BW eReader, 6” Touchscreen, Waterproof, 16GB, Black",
+        "Kobo Libra Colour | eReader | 7” Glare-Free Colour E Ink Kaleido™ 3 Display | Dark Mode Op"
+      ]
+    },
+    {
+      "intentId": "reading/book-sleeve",
+      "interestId": "reading",
+      "interestLabel": "Reading",
+      "query": "book sleeve",
+      "bracket": "teen",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 9,
+        "max": 20.62
+      },
+      "sampleTitles": [
+        "Kynzalloy Book Sleeve for Paperbacks – Padded 9x12in, White-butterfiy",
+        "Floral Book Sleeve 11 x 8.7 Inch Zipper Washable Fabric Organizer Pocket for",
+        "Book Sleeve with Zipper - Black Cat Books Cover Protector"
+      ]
+    },
+    {
+      "intentId": "reading/bookends",
+      "interestId": "reading",
+      "interestLabel": "Reading",
+      "query": "bookends",
+      "bracket": "teen",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5.99,
+        "max": 38.39
+      },
+      "sampleTitles": [
+        "Dragon Book Ends, Heavy Duty Metal Bookends for Shelves",
+        "Bookends Stainless Steel Metal Folding 3.78 Inch Silver 2 Pieces Desk Organizers",
+        "Book Ends,Bulk 1 Pair Bookends Folding Book Ends Metal Bookend (1 Pair)"
+      ]
+    },
+    {
+      "intentId": "music/vinyl",
+      "interestId": "music",
+      "interestLabel": "Music",
+      "query": "vinyl record",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 16.78,
+        "max": 232.95
+      },
+      "sampleTitles": [
+        "1991 by Azealia Banks (Vinyl Record, 2012)",
+        "100 Clear Plastic LP Outer Sleeves 3 Mil. HIGH QUALITY Vinyl Record Album Covers",
+        "Frank Sinatra - The Best Of  - Colored Vinyl Record - Limited Edition [LP] \"12"
+      ]
+    },
+    {
+      "intentId": "music/turntable",
+      "interestId": "music",
+      "interestLabel": "Music",
+      "query": "record player turntable",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 21.99,
+        "max": 166.98
+      },
+      "sampleTitles": [
+        "Vinyl Record Player Turntable with Built-in Bluetooth Receiver & 2 Stereo Speakers, 3 Spee",
+        "Wockoder KD-2008BL 3-Speed Vinyl Record Player Turntable Crimson Brown NEW",
+        "ClearClick Classic Retro Record Player Turntable with 2 Bookshelf Speakers"
+      ]
+    },
+    {
+      "intentId": "music/ukulele",
+      "interestId": "music",
+      "interestLabel": "Music",
+      "query": "ukulele",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 12.82,
+        "max": 99
+      },
+      "sampleTitles": [
+        "Hola! Heavy Duty SOPRANO (up to 21.5 Inch) Ukulele Gig Bag with 15mm Padding",
+        "Strong Wind Soprano Ukulele 21 Inch Basswood Black for Beginners Four Strings",
+        "21\" Basswood 4-String Ukulele DIY Kit - Build Your Own Musical Instrument Access"
+      ]
+    },
+    {
+      "intentId": "music/picks",
+      "interestId": "music",
+      "interestLabel": "Music",
+      "query": "guitar picks",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 0.99,
+        "max": 11.95
+      },
+      "sampleTitles": [
+        "Fender 351 Premium Celluloid Guitar Picks - HEAVY, BLUE MOTO - 12-Pack (1 Dozen)",
+        "Fender 351 Premium Celluloid Guitar Picks - MEDIUM, RED MOTO - 12-Pack (1 Dozen)",
+        "Dunlop Max Grip Jazz III Carbon Fiber Guitar Picks  6 Pack"
+      ]
+    },
+    {
+      "intentId": "board_games/board-game",
+      "interestId": "board_games",
+      "interestLabel": "Board games",
+      "query": "board game",
+      "bracket": "young_adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 3.99,
+        "max": 24.99
+      },
+      "sampleTitles": [
+        "Splendor Board Game Space Cowboys Asmodee Marc Andre Strategy Game 2024 NEW",
+        "Disney Jungle Cruise Adventure Game – Family Board Game by Ravensburger",
+        "💥Yahtzee💥 Classic Board Game - Shake, Score, and SHOUT!🎲"
+      ]
+    },
+    {
+      "intentId": "board_games/party-game",
+      "interestId": "board_games",
+      "interestLabel": "Board games",
+      "query": "party game",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 0.99,
+        "max": 26.99
+      },
+      "sampleTitles": [
+        "Hasbro Gaming Truth or Drink Party Game by Cut I As Seen on TikTok Ages 21",
+        "Disney Princess Enchanted Cupcake Party Game Individual Parts Villains UPick NEW",
+        "Hasbro Gaming Catch Phrase Electronic Game – Birthday Gift for Word Game Lovers, Portable "
+      ]
+    },
+    {
+      "intentId": "board_games/card-game",
+      "interestId": "board_games",
+      "interestLabel": "Board games",
+      "query": "card game",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 0.01,
+        "max": 20.44
+      },
+      "sampleTitles": [
+        "Exploding Kittens Original Edition Card Game BRAND NEW SEALED Family Fun",
+        "Mattel Games Blink Card Game in Tin",
+        "Mattel Formula 1 Uno Card Game"
+      ]
+    },
+    {
+      "intentId": "board_games/puzzle",
+      "interestId": "board_games",
+      "interestLabel": "Board games",
+      "query": "jigsaw puzzle",
+      "bracket": "young_adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 6.21,
+        "max": 19.49
+      },
+      "sampleTitles": [
+        "Ravensburger 1000 pc Herd it's Nearly Christmas Jigsaw Puzzle",
+        "Village Jigsaw Puzzle for Adults 300 Pieces 20.5 x 15 Inch",
+        "500 Pieces Jigsaw Puzzle for Adults Dogs' Dinner Party Funny Animal Puzzle"
+      ]
+    },
+    {
+      "intentId": "pets/toy-bundle",
+      "interestId": "pets",
+      "interestLabel": "Pets",
+      "query": "dog toy bundle",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 10.99,
+        "max": 53
+      },
+      "sampleTitles": [
+        "KONG Squeezz Ball Assorted Colors Dog Toy Bundle 3 Count for Fetch Fun, 2.5\"",
+        "KONG Dog Toy Bundle Lot of 4 - Extreme Bone, 2x Rings & Gyro Dispenser NEW",
+        "NEW Dog Toy Bundle Santa RopePlush,  Paw Print Frisbee, Chew Roller"
+      ]
+    },
+    {
+      "intentId": "pets/bed",
+      "interestId": "pets",
+      "interestLabel": "Pets",
+      "query": "pet bed",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 8.49,
+        "max": 79.96
+      },
+      "sampleTitles": [
+        "Soft Plush Donut Pet Bed for Cats and Small Dogs Washable Round Calming Bed",
+        "20in Calming Donut Cat Bed Washable Round Fluffy Pet Bed for Dogs Cats",
+        "Cat Bed Round Plush Fluffy Hooded Cat Bed Cave Soothing Pet Beds Small 16in*16in"
+      ]
+    },
+    {
+      "intentId": "pets/grooming-brush",
+      "interestId": "pets",
+      "interestLabel": "Pets",
+      "query": "pet grooming brush",
+      "bracket": "young_adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 3.88,
+        "max": 29.99
+      },
+      "sampleTitles": [
+        "2 Pack Pet Grooming Brushes Dog & Cat Deshedding Brush for Long & Short Hair Gre",
+        "Self-Cleaning Pet Grooming Brush Dogs and Cats Slicker Deshedding Tool free ship",
+        "Pet Grooming Brush Comb Rake for Dogs Daily Use Tool for Cats & Dags"
+      ]
+    },
+    {
+      "intentId": "pets/treat-maker",
+      "interestId": "pets",
+      "interestLabel": "Pets",
+      "query": "cat toy set",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 1.88,
+        "max": 113.99
+      },
+      "sampleTitles": [
+        "Brightly Colored 35 Piece Cat Toy Set - Fun & Exercise for Indoor Cats",
+        "21PCS Cat Toy Set Interactive Kitten Balls Mice Bells Indoor Play Toys Bulk Pack",
+        "10Pcs Cat Toy Set Pink Toys for Indoor Kitten Cute Wand Gift Pet"
+      ]
+    },
+    {
+      "intentId": "toys_play/building-blocks",
+      "interestId": "toys_play",
+      "interestLabel": "Toys & play",
+      "query": "building blocks",
+      "bracket": "child",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5.99,
+        "max": 36.99
+      },
+      "sampleTitles": [
+        "Animal Building Blocks Set 493 Pieces Creative Toy Gift for Boys Girls Age 8-14",
+        "200Pcs STEM Building Blocks Construction Toy Set Educational Kids Learning Kit",
+        "101Pcs Magnetic Building Blocks Birthday Gifts for Kids Magnet Sensory Toys"
+      ]
+    },
+    {
+      "intentId": "toys_play/magnetic-tiles",
+      "interestId": "toys_play",
+      "interestLabel": "Toys & play",
+      "query": "magnetic building tiles",
+      "bracket": "child",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 14.03,
+        "max": 95.02
+      },
+      "sampleTitles": [
+        "PicassoTiles 30pc Nano Magnetic Building Tiles Construction Set",
+        "PicassoTiles 50pc Nano Magnetic Building Tiles Construction Travel Set",
+        "Magnetic Building Tiles Blocks Set Kids Educational Construction Toy Gift"
+      ]
+    },
+    {
+      "intentId": "toys_play/plush",
+      "interestId": "toys_play",
+      "interestLabel": "Toys & play",
+      "query": "stuffed animal plush",
+      "bracket": "child",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 7.32,
+        "max": 92.8
+      },
+      "sampleTitles": [
+        "10'' Teddy Bear Stuffed Animal Plush Toy Valentine's Day Christmas Birthday Gift",
+        "Reuben The Rat | 7 Inch Stuffed Animal Plush | By TigerHart Toys",
+        "Kitten Cat 5 Inch Stuffed Animal Plush Toys Toddler Doll Kids Gifts C"
+      ]
+    },
+    {
+      "intentId": "toys_play/craft-kit",
+      "interestId": "toys_play",
+      "interestLabel": "Toys & play",
+      "query": "kids craft kit",
+      "bracket": "child",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5.99,
+        "max": 80.5
+      },
+      "sampleTitles": [
+        "Create Your Own Flower Bouquet Flower Kit, Kids Craft Kit, Ages 4+",
+        "Izomila Bouquets Machine Fabric Flower Bouquets Kids Craft Kit",
+        "Lulu Jr. IlluStory Make Your Own Book Kids Craft Kit Create & Print Hardcover"
+      ]
+    },
+    {
+      "intentId": "travel/carry-on",
+      "interestId": "travel",
+      "interestLabel": "Travel",
+      "query": "carry on luggage",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 19.99,
+        "max": 199.25
+      },
+      "sampleTitles": [
+        "2 Piece Carry On Luggage Airline-Approved,Lightweight 20\" Suitcase with 14\" Case",
+        "Carry On Luggage Travel Hardside Trolley Suitcase Set 20\"+14\" Airline Approved",
+        "20 Inch Carry On Luggage + 14 in Makeup Bag Airline Approved  Suitcase w/Wheels"
+      ]
+    },
+    {
+      "intentId": "travel/packing-cubes",
+      "interestId": "travel",
+      "interestLabel": "Travel",
+      "query": "packing cubes",
+      "bracket": "adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5,
+        "max": 72.07
+      },
+      "sampleTitles": [
+        "Set of 7 packing cubes Suitcase Luggage Organizer Bags Blue",
+        "BAGSMART Compression Packing Cubes for Travel, Nylon Luggage Organizer Bags",
+        "Insider Packing Cubes (Set of 4) in Coast Blue"
+      ]
+    },
+    {
+      "intentId": "travel/adapter",
+      "interestId": "travel",
+      "interestLabel": "Travel",
+      "query": "universal travel adapter",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 6.99,
+        "max": 48.39
+      },
+      "sampleTitles": [
+        "45W 6 in 1 Universal Travel Adapter - 2 USB-A + 3 USB-C - Max. 45W (9A) - White (UP-45KU-W",
+        "Universal Travel Adapter Converter International USB Wall Charger AC Power Plug",
+        "EPICKA TA-105 Max 75W GaN Universal Travel Adapter 3 USB-C 2 USB-A New"
+      ]
+    },
+    {
+      "intentId": "travel/neck-pillow",
+      "interestId": "travel",
+      "interestLabel": "Travel",
+      "query": "travel neck pillow",
+      "bracket": "adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 8.41,
+        "max": 59.99
+      },
+      "sampleTitles": [
+        "Cabeau Evolution S3 Memory Foam Travel Neck Pillow with Seat Strap, One Size",
+        "Miami Carry On Microbeads Travel Neck Pillow - Beanie Neck Pillow",
+        "BookishBunny Memory Foam U Shape Travel Neck Pillow Airplane Cushion Multi Color"
+      ]
+    },
+    {
+      "intentId": "tools_diy/drill",
+      "interestId": "tools_diy",
+      "interestLabel": "Tools & DIY",
+      "query": "cordless drill",
+      "bracket": "mature_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 25.99,
+        "max": 200
+      },
+      "sampleTitles": [
+        "DEWALT 20V MAX XR Cordless Drill Combo Kit, 4 - Tool DCK494P2",
+        "36 V Cordless Drill Driver Kit 2x 3.0Ah Batteries Charger Bits Case Blue",
+        "Drill Set 20V Cordless Drill Driver With Lithium-ion Battery , Fast Charger"
+      ]
+    },
+    {
+      "intentId": "tools_diy/tool-set",
+      "interestId": "tools_diy",
+      "interestLabel": "Tools & DIY",
+      "query": "tool set",
+      "bracket": "mature_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 14.98,
+        "max": 109
+      },
+      "sampleTitles": [
+        "DeWALT 50-Piece 1/4-in. Drive Mechanics Tool Set (DWMT81610)",
+        "38pcs Mini Mechanics Tool Set Socket Ratchet Screwdriver Wrench Repair Tool Kit",
+        "46PCS Auto Mechanic Tool Set Socket Wrench Ratchet Repair Kit Stainless Steel"
+      ]
+    },
+    {
+      "intentId": "tools_diy/multitool",
+      "interestId": "tools_diy",
+      "interestLabel": "Tools & DIY",
+      "query": "multitool",
+      "bracket": "mature_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 9.5,
+        "max": 49.95
+      },
+      "sampleTitles": [
+        "Gerber Hatchet Keychain Multitool 3 In 1 Bottle Opener Flathead Package Opener",
+        "Ozark Trail 7-in-1 Stainless Steel Multitool Knife with Screwdriver",
+        "14 in 1 Mini Multitool Pliers Pocket Knife Multi Tool Keychain EDC Camping Black"
+      ]
+    },
+    {
+      "intentId": "tools_diy/stud-finder",
+      "interestId": "tools_diy",
+      "interestLabel": "Tools & DIY",
+      "query": "stud finder",
+      "bracket": "mature_adult",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 4.68,
+        "max": 44.19
+      },
+      "sampleTitles": [
+        "Franklin Sensors ProSensor M70 Stud Finder with 7-Sensors, Wood & Metal Stud",
+        "Zircon StudSensor Electronic Edge Finding Wall Stud Finder",
+        "Zircon 75375 Magnetic Stud Finder - 3.37 in. L x 1.3 in. W 1/4 in. 1 Piece"
+      ]
+    },
+    {
+      "intentId": "universal/infant/sensory-toys",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "baby sensory toys",
+      "bracket": "infant",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 6.99,
+        "max": 36.99
+      },
+      "sampleTitles": [
+        "Baby Sensory Toys For 0-6 6-12 Months Food Grade Teething Toy Gift For Boys Girl",
+        "iPlay iLearn Baby Sensory Toys for 6 Months and Up Baby Gadget Pink Cube",
+        "Baby Sensory Toys"
+      ]
+    },
+    {
+      "intentId": "universal/infant/cotton-blanket",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "organic cotton baby blanket",
+      "bracket": "infant",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 9.99,
+        "max": 58
+      },
+      "sampleTitles": [
+        "100% Organic Cotton Baby Blanket Knitted Blanket for Crib High Density, 47x32 in",
+        "Cotton by the Sea Infant Toddler Organic Cotton Baby Blanket 42x34 Inch Blue",
+        "Anne Geddes Organic Cotton Baby Blanket NEW Coccoon Begin 2-ply soft Pale Green"
+      ]
+    },
+    {
+      "intentId": "universal/infant/milestone-frame",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "baby milestone photo frame",
+      "bracket": "infant",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5,
+        "max": 54.99
+      },
+      "sampleTitles": [
+        "My First Year Baby Milestone Photo Frame Display Board, 1-12 Months, wooden",
+        "Tiny Ideas My First Year Baby Milestone Photo Frame",
+        "Better Homes and Gardens Silver Baby Milestone Photo Frame Birth to 1 Year"
+      ]
+    },
+    {
+      "intentId": "universal/toddler/stacking-blocks",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "wooden stacking blocks",
+      "bracket": "toddler",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5.99,
+        "max": 48
+      },
+      "sampleTitles": [
+        "Extra Large Wooden Stacking Blocks 40 pcs",
+        "Educational Wooden Stacking Blocks - Non-Toxic Montessori Puzzle for Kids",
+        "Halloween Wooden Stacking Blocks Toy for Kids Balance Game Educational Birthday"
+      ]
+    },
+    {
+      "intentId": "universal/toddler/board-books",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "board books",
+      "bracket": "toddler",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 3.98,
+        "max": 54
+      },
+      "sampleTitles": [
+        "New 4 Board Books For Babies & Children Daycare Preschool Sesame Street",
+        "Wild Animals: 3 Chunky Board Books (Baby Block Books)",
+        "Usborne Thats Not My Elephant Touchy-feely Board Books"
+      ]
+    },
+    {
+      "intentId": "universal/toddler/shape-sorter",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "toddler shape sorter",
+      "bracket": "toddler",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 4.25,
+        "max": 59.33
+      },
+      "sampleTitles": [
+        "Toddler Shape Sorter Bath Toy, 20 Foam Pieces, Stacking & Color Sorting",
+        "Montessori Toys for 2 Year Old|Wood Lock and Key Toddler Shape Sorter Toys",
+        "HCBY Toddler Shape Sorter Toy, 6 Sensory Shape Blocks Baby Toy, Montessori Fine Motor Skil"
+      ]
+    },
+    {
+      "intentId": "universal/child/building-tiles",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "magnetic building tiles",
+      "bracket": "child",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 11.54,
+        "max": 95.02
+      },
+      "sampleTitles": [
+        "Magnetic Building Tiles Blocks Set Kids Educational Construction Toy Gift",
+        "Dinosaur Race Track Magnetic Building Tiles for Kids - STEM Educational Construc",
+        "40pc Nano Magnetic Building Tiles Construction Travel Set"
+      ]
+    },
+    {
+      "intentId": "universal/child/art-set",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "kids art set",
+      "bracket": "child",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 2.99,
+        "max": 34.34
+      },
+      "sampleTitles": [
+        "NEW Creatology 100-PIECE Kids Art Set Markers Paints Crayons Pencils",
+        "46-Piece Kids Art Set Drawing Coloring & Painting Storage Case - Free shipping",
+        "237-Piece Kids Art Set Double-Sided Easel Watercolors Pastels Black Ages 4-8"
+      ]
+    },
+    {
+      "intentId": "universal/child/book-set",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "childrens book set",
+      "bracket": "child",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 9.19,
+        "max": 37.79
+      },
+      "sampleTitles": [
+        "A Wonderful Day With Mabel Maclay Childrens Book Set 5 Books sealed Plush Doll",
+        "Lot 16 Childrens Kids Books Early Readers Beginning Scholastic Learn to Read",
+        "Peppa Pig Childrens Books Phonics Learn to Read Gift Set Lot 12"
+      ]
+    },
+    {
+      "intentId": "universal/tween/stem-kit",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "stem building kit",
+      "bracket": "tween",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 6.98,
+        "max": 84.99
+      },
+      "sampleTitles": [
+        "Wood Robotic Mechanical Hand STEM Building Kit DIY Science Toy Ages 8-14 Gift",
+        "Magnetic Tile Race Track Dinosaur Cars 2 Piece STEM Building Kit PTE10 for Kids",
+        "Metal Mechanics 3 in 1 Vehicles STEM Building Kit"
+      ]
+    },
+    {
+      "intentId": "universal/tween/journal-set",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "journal set",
+      "bracket": "tween",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 7,
+        "max": 59.99
+      },
+      "sampleTitles": [
+        "6 X 4 Hardcover Pastel Journal Set Of Six, Individually Wrapped, Brand New!!",
+        "4 Pack A5 Kraft Paper Lined Notebooks 60 Pages Travel Journal Set",
+        "FRINGE STUDIO SPIRAL JOURNAL SET SWALLOW BIRD DOGWOOD + KEYCHAIN 220 LINED PAGES"
+      ]
+    },
+    {
+      "intentId": "universal/tween/water-bottle",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "insulated water bottle",
+      "bracket": "tween",
+      "status": "partial_results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 10.99,
+        "max": 27.7
+      },
+      "sampleTitles": [
+        "16oz Stainless Steel Insulated Water Bottle with Straw Lid Leakproof Travel Gym",
+        "Insulated Water Bottle, Water Bottle with Straw Lid, 18 oz Triple Insulated S",
+        "32oz Stainless Steel Insulated Water Bottle Wide Mouth Double Wall Vacuum"
+      ]
+    },
+    {
+      "intentId": "universal/teen/instant-camera",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "instant camera",
+      "bracket": "teen",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 19.99,
+        "max": 164.95
+      },
+      "sampleTitles": [
+        "Vivitar Instaprint Instant Camera - 12MP 16x Zoom 2.0\" Screen (Black)",
+        "Fujifilm instax Mini SE Instant Camera with 10 Mini Film, Pink Exp 03/28",
+        "Fujifilm instax Mini SE Instant Camera w/Bonus 10 pack Mini Film -Various Colors"
+      ]
+    },
+    {
+      "intentId": "universal/teen/wireless-earbuds",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "wireless earbuds",
+      "bracket": "teen",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5.79,
+        "max": 37.99
+      },
+      "sampleTitles": [
+        "Wireless Bluetooth 5.3 Headset TWS Earphones Earbuds Stereo Headphones Ear Hook",
+        "Invisible Sleep Wireless Earbuds Bluetooth 5.3 Headset TWS Waterproof Earphone",
+        "Over-Ear Headphones Wireless Earbuds 60hrs Playback IPX7 Waterproof Earphones"
+      ]
+    },
+    {
+      "intentId": "universal/teen/led-strip-lights",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "led strip lights",
+      "bracket": "teen",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 6.55,
+        "max": 29.99
+      },
+      "sampleTitles": [
+        "5V USB LED Strip Lights TV Back Light 5050 RGB Colour Changing with 24Key Remote",
+        "32ft LED Strip Lights SMD 5050 RGB 300 LEDs w/ Remote Controll Bedroom Indoor",
+        "100FT RGB Led Strip Lights Waterproof Flexible with 44 Keys Remote 12V US Power"
+      ]
+    },
+    {
+      "intentId": "universal/young_adult/water-bottle",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "insulated water bottle",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 10.99,
+        "max": 33.24
+      },
+      "sampleTitles": [
+        "16oz Stainless Steel Insulated Water Bottle with Straw Lid Leakproof Travel Gym",
+        "Insulated Water Bottle, Water Bottle with Straw Lid, 18 oz Triple Insulated S",
+        "32oz Insulated Water Bottle with Straw Lid,Black"
+      ]
+    },
+    {
+      "intentId": "universal/young_adult/weighted-blanket",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "weighted blanket",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 16,
+        "max": 48.95
+      },
+      "sampleTitles": [
+        "Temperature Balancing Weighted Blanket - Tranquility",
+        "Quility Weighted Blanket Cover Cotton Blue Zip Solid 41\" x 60\"",
+        "EXQ Home Weighted Blanket Cover 48x72 Queen Size Premium Soft for Weighted Bl..."
+      ]
+    },
+    {
+      "intentId": "universal/young_adult/desk-lamp",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "desk lamp",
+      "bracket": "young_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 7.65,
+        "max": 21.99
+      },
+      "sampleTitles": [
+        "Mainstays LED Desk Lamp with Catch-All Base & AC Outlet, Matte Black",
+        "LED Desk Lamp Touch Sensor Reading Foldable Table Lamp Eye Caring Reading Light",
+        "Eye-Caring LED Desk Lamp Adjustable Swing Arm Lamp with Clamp Reading Desk Light"
+      ]
+    },
+    {
+      "intentId": "universal/adult/electric-kettle",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "electric kettle",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5.9,
+        "max": 32.14
+      },
+      "sampleTitles": [
+        "2L Stainless Steel Electric Kettle Fast Boil Hot Water Heater Tea Coffee Pot",
+        "316 Stainless Steel Electric Kettle",
+        "Electric Kettle Hot Water Boiler, Stainless Steel Material Tea Kettle 2 Liter"
+      ]
+    },
+    {
+      "intentId": "universal/adult/weighted-blanket",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "weighted blanket",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 16,
+        "max": 48.95
+      },
+      "sampleTitles": [
+        "Temperature Balancing Weighted Blanket - Tranquility",
+        "Quility Weighted Blanket Cover Cotton Blue Zip Solid 41\" x 60\"",
+        "EXQ Home Weighted Blanket Cover 48x72 Queen Size Premium Soft for Weighted Bl..."
+      ]
+    },
+    {
+      "intentId": "universal/adult/scented-candle",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "scented candle",
+      "bracket": "adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 4.97,
+        "max": 49.99
+      },
+      "sampleTitles": [
+        "Mainstays Lilac Breeze scented single-Wick Large Glass Jar Candle 20 oz- 2 Pack",
+        "Home Made Eucalyptus Scented Candle",
+        "Vanilla Scented Candle"
+      ]
+    },
+    {
+      "intentId": "universal/mature_adult/chef-knife",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "chef knife",
+      "bracket": "mature_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 9.37,
+        "max": 59.99
+      },
+      "sampleTitles": [
+        "Chef Knife, 8 Inch, High Carbon Stainless Steel, Kitchen Knife, German Steel",
+        "Zyliss Utility Chef Knife",
+        "5 Pcs Kitchen Cook Knives Set Japanese Damascus Style Stainless Steel Chef Knife"
+      ]
+    },
+    {
+      "intentId": "universal/mature_adult/serving-platter",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "serving platter",
+      "bracket": "mature_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 4.5,
+        "max": 35.99
+      },
+      "sampleTitles": [
+        "Close-out Le Regalo 12\" Stoneware Serving Platter Blue White Rectangular Tray",
+        "Rectangle White Serving Tray (2-Pack) - 17.5\" Disposable Serving Platter for App",
+        "Arrow 00176 Serving Platter 20\" x 15 1/2\", White Plastic, Lot of 2, FREE SHIP"
+      ]
+    },
+    {
+      "intentId": "universal/mature_adult/throw-blanket",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "throw blanket",
+      "bracket": "mature_adult",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 5,
+        "max": 19.99
+      },
+      "sampleTitles": [
+        " Plush Textured Throw Blanket Soft Cozy Blanket Multiple Colors & Sizes",
+        "Mainstays Fleece Throw Blanket NEW, 50X 60 Inches, BLACK, Brand New",
+        "Woven Throw Blanket Neutral/Green/Blue - Threshold"
+      ]
+    },
+    {
+      "intentId": "universal/senior/large-print-puzzle",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "large print puzzle",
+      "bracket": "senior",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 4,
+        "max": 29.99
+      },
+      "sampleTitles": [
+        "Find & Circle Large Print Puzzle Book by Kappa - All Easy -To-Read Puzzles",
+        "Large Print Word Search (Large Print Puzzle Books)",
+        "Take A Break Word Search Large Print Puzzle Book 71 Themed Puzzles New"
+      ]
+    },
+    {
+      "intentId": "universal/senior/magnifier-light",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "reading magnifier with light",
+      "bracket": "senior",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 4.75,
+        "max": 22.96
+      },
+      "sampleTitles": [
+        "A5 Full Page Magnifying Glass with LED Light 3X Large Sheet Reading Magnifier",
+        "3 LED Light 45X Handheld Magnifier Reading Magnifying Glass Lens Jewelry Loupe🎁",
+        "Book Magnifier with LED Lights for Reading"
+      ]
+    },
+    {
+      "intentId": "universal/senior/heated-throw",
+      "interestId": null,
+      "interestLabel": "Everyone",
+      "query": "heated throw blanket",
+      "bracket": "senior",
+      "status": "results",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "providersUnavailable": [],
+      "priceRange": {
+        "min": 32,
+        "max": 130
+      },
+      "sampleTitles": [
+        "HOMLYNS Heated Throw Blanket 50x60 Gray Removable Cover 5 Heat Settings - New",
+        "Sunbeam Heated Throw Blanket, Super Soft Microplush with Faux Shearling,",
+        "Thick Tufted Sherpa Heated Throw Blanket 10 Heat Levels Timer Washable Certified"
+      ]
+    }
+  ]
+}
