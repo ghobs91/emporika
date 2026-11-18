@@ -176,6 +176,112 @@ sequence.
 - **Search is still server-side.** Retailer credentials cannot be shipped to a
   browser, so queries must transit this app's server. Only queries do.
 
+
+## Trend intelligence (static, free, weekly)
+
+Up-to-date trends arrive as a **static file**, not an API call:
+
+```
+publication feeds ──▶ scripts/fetch-trends.ts ──▶ public/data/trends.json ──▶ browser
+   (free RSS)          (GitHub Actions, weekly)      (5 KB, static)        (matching is local)
+```
+
+### Ingestion
+
+`.github/workflows/update-trends.yml` runs every Monday at 06:17 UTC (and on
+`workflow_dispatch`), executes `scripts/fetch-trends.ts`, and commits the
+manifest back if it changed. It needs only the default `GITHUB_TOKEN`; there
+are no API keys and no paid services. A step fails the job if the manifest comes
+out empty, so a broken run cannot overwrite a good file with nothing.
+
+Eleven free feeds are configured (Vogue, GQ, Allure, Bon Appétit, Apartment
+Therapy, The Verge, Engadget, Wired, Gizmodo, Outside, Lifehacker, Teen Vogue,
+Popular Mechanics). Each fetch is independently recorded in the manifest's
+`sources` array with `status: "ok" | "failed"`, because publishers rate-limit
+and block CI runners intermittently — a partial manifest beats a failed build.
+Last local run: **13/13 feeds ok, 280 headlines → 65 terms across 4 cohorts**.
+
+Extraction (`scripts/trend-extract.ts`, pure and unit-tested):
+
+1. strip listicle scaffolding ("The 12 Best …");
+2. find phrases whose head word is in an explicit product-noun vocabulary,
+   mapped to exactly one category (`keyboard` can never be read as `board`);
+3. allow only whitelisted modifiers ("sculptural", "cast iron", "cashmere") —
+   without this, headlines contribute "should watch" and "herby sheet";
+4. keep the stronger phrasing when one term contains another;
+5. attribute terms to cohorts by explicit demographic language when a headline
+   has it ("gifts for women in their 30s"), otherwise to the publication's
+   declared audience.
+
+That last rule is a **feed prior, not a measurement**, and the manifest says so
+in `methodology.attribution` plus per-run counts. A decade bucket is only created
+when a publication actually says "in their 30s" — the pipeline does not spray a
+gendered feed across five decades to look richer.
+
+### Client
+
+`lib/gift/trends.ts` loads `/data/trends.json` on boot, caches it in
+`localStorage` (key `emporika-trends:v1`) and falls back to that copy when
+offline. A manifest older than 30 days is ignored rather than trusted.
+
+`cohortChain(gender, bracket)` maps a recipient to ordered fallbacks — a woman of
+34 reads `women-30s → women → unisex` — and `answerFromManifest` answers
+questions from the manifest alone:
+
+| Question | Answer (current manifest) |
+|---|---|
+| "what is trending for men right now" | `men: watch, jacket, jean, sneaker` |
+| "what tech gifts are trending" | `women: mouse, tv, camera, reader` |
+| "what jewelry is popular for women in their 30s" | `women (no jewelry trends this week): jean, sweater, skirt, blush` |
+
+That third line is the important one: rather than invent a jewelry answer it
+says the category was empty this week. Category words are matched with word
+boundaries, so "what" does not match the alias "hat".
+
+### Ranking
+
+Trend alignment is one more bounded term in the client ranker
+(`RANK_WEIGHTS.trend = 0.12`, with relevance 0.30, budget 0.24, semantic 0.20,
+affinity 0.14). A product whose *title* matches a cohort trend term scores
+fully; a product from a *search* that matches counts at 70%, because the listing
+may not be the trending thing. It is a boost, never a filter.
+
+### UI
+
+- A **"Trending"** pill sits in the `SEARCHED FOR` header with the strongest
+  matched term, the count of trend-boosted items, and the manifest's freshness
+  ("updated today" / "12d ago").
+- Cards whose title aligns with a trend term carry that term as a chip.
+- The **Ask trends** box answers natural-language questions inline, shows
+  whether it used the embedding model or keyword overlap, and offers
+  "Boost these in the next search", which feeds the matched terms into the
+  semantic query.
+
+### Verification
+
+| Check | Observed |
+|---|---|
+| Manifest served | `GET /data/trends.json` → 200, 5,472 bytes |
+| Fetched on boot | exactly one request, `source: network` |
+| Ask trends | answered from the manifest in <1s (keyword path, model not loaded) |
+| Boost → search | context filled with 6 terms; 59 ideas, **18 trend-boosted** |
+| Pill | `Trending · watch 18 · updated today` |
+| Card chips | `cast iron skillet`, `electric stove` |
+| Privacy | order payload still contains no recipient fields |
+| Model weights persisted | `caches.keys()` → `transformers-cache` with 6 entries after first load |
+
+### Limits
+
+- **Trends are topic-level, not demographic truth.** The feeds describe what
+  publishers are writing about; cohort attribution is explicit-language-first
+  and feed-prior otherwise.
+- **Thin categories happen.** If no publication covered jewelry this week,
+  there is no jewelry bucket — by design.
+- **Cron is only as reliable as GitHub Actions.** A missed run just leaves the
+  previous manifest in place (and the UI shows its age).
+- **The manifest is public.** It contains no user data; the browser does the
+  matching.
+
 ## Files
 
 | File | Role |
@@ -195,3 +301,8 @@ sequence.
 | `components/GiftGenie.tsx` | UI: profile editor, semantic opt-in, filters, save/dismiss |
 | `scripts/probe-*.ts` | Retailer probes for the index and brand catalog |
 | `scripts/build-gift-momentum.ts` | Regenerates the measured momentum table |
+| `scripts/fetch-trends.ts`, `scripts/trend-extract.ts` | Weekly trend ingestion + pure extraction |
+| `public/data/trends.json` | Committed trend manifest (static, no API) |
+| `lib/gift/trends.ts` | Manifest loading, cohort mapping, answers, affinity |
+| `components/GiftGenieResults.tsx` | Results grid, trend pill, trend answer card |
+| `.github/workflows/update-trends.yml` | Cron job that rebuilds and commits the manifest |

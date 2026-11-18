@@ -63,6 +63,10 @@ npx tsx --env-file=.env.local scripts/probe-gift-index.ts --concurrency 3
 # appears in the listings. Writes docs/gift-brand-evidence.json.
 npx tsx --env-file=.env.local scripts/probe-brand-catalog.ts --concurrency 3
 
+# Rebuild the static trend manifest from free publication feeds (what the
+# weekly GitHub Actions job runs). Writes public/data/trends.json.
+npx tsx scripts/fetch-trends.ts --verbose
+
 # Re-sample the measured momentum signal from Walmart bestseller ordering and
 # regenerate search/gift/momentum-data.ts. This table goes stale; re-run it
 # whenever the index changes and commit the result.

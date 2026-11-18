@@ -22,7 +22,8 @@ WebLLM is progressive enhancement: the deterministic planner in `search/planner.
 | Filtering | `search/filter.ts` | Deterministic hard constraints (price, condition, availability, brands, features) |
 | Ranker | `search/ranker.ts` | Deterministic weighted criteria scoring with stable tie-breakers |
 | Gift Genie (index) | `search/gift/` (`index-data.ts`, `brands.ts`, `brief.ts`, `plan.ts`, `orchestrator.ts`, `request.ts`) | Trait matrix (age / gender / age×gender / interest / brand) compiled **in the browser** into search intents; the server only runs those searches |
-| Gift Genie (client) | `lib/gift/` (`rank.ts`, `semantic.ts`, `product-type.ts`, `budget.ts`, `dedupe.ts`, `ledger.ts`) | Local ranking, semantic matching, type filtering, dedupe, bundling and behavioural learning. No profile data leaves the device — see `docs/gift-genie.md` |
+| Gift Genie (client) | `lib/gift/` (`rank.ts`, `semantic.ts`, `product-type.ts`, `budget.ts`, `dedupe.ts`, `ledger.ts`, `trends.ts`) | Local ranking, semantic matching, type filtering, dedupe, bundling, behavioural learning and trend matching. No profile data leaves the device — see `docs/gift-genie.md` |
+| Trend manifest | `scripts/fetch-trends.ts` → `public/data/trends.json` | Weekly GitHub Actions job scrapes free publication feeds into a static file the browser fetches. No API keys, no runtime cost |
 | Retailer clients | `lib/bestbuy.ts`, `lib/ebay.ts`, `lib/target.ts`, `lib/walmart.ts`, `lib/costco.ts`, `lib/shopify.ts` | API access, auth, and request signing (server-side only) |
 | WebLLM adapters | `lib/webllm/` (`types.ts`, `client.ts`, `mock-adapter.ts`, `real-adapter.ts`, `prompts.ts`, `worker.ts`) | Browser-local query planning; mock adapter is active by default |
 | Costco cookie cache | `lib/costco-cookie-cache.ts`, `lib/costco-cookie-fetcher.ts` | In-memory session cookie cache (2h TTL, dev-mode global) |
@@ -86,6 +87,7 @@ sequenceDiagram
 - **Gift interaction ledger**: `localStorage` key `emporika-gift-ledger:v1` via `lib/gift/ledger.ts`; per-recipient counts per action, 30-day half-life decay, capped at 60 rows per recipient.
 - **Learned preferences**: `localStorage` key `emporika-learned-profile` via `lib/learning.ts` (brand weights only).
 - **Costco cookies**: in-memory cache (module singleton + dev-mode `global.__costcoCookieCache`); not persisted across server restarts — hence the refresh cron.
+- **Trend manifest**: `public/data/trends.json`, committed weekly by `.github/workflows/update-trends.yml`; the browser caches it in `localStorage` under `emporika-trends:v1` and falls back to that copy offline.
 - **Everything else**: stateless request-scoped processing. No database, no cache service.
 
 ## External service integrations
