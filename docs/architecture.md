@@ -21,7 +21,8 @@ WebLLM is progressive enhancement: the deterministic planner in `search/planner.
 | Entity resolution | `search/entity-resolution.ts` | Title-similarity merging across retailers (thresholds: >90% medium, >75% low; never merges differing models/generations/variants) |
 | Filtering | `search/filter.ts` | Deterministic hard constraints (price, condition, availability, brands, features) |
 | Ranker | `search/ranker.ts` | Deterministic weighted criteria scoring with stable tie-breakers |
-| Gift Genie | `search/gift/` (`index-data.ts`, `brands.ts`, `brief.ts`, `plan.ts`, `orchestrator.ts`) | Trait matrix (age / gender / age×gender / interest / brand) compiled into several real searches, then provider-aware interleaved. Each layer can stand alone; no model in the request path — see `docs/gift-genie.md` |
+| Gift Genie (index) | `search/gift/` (`index-data.ts`, `brands.ts`, `brief.ts`, `plan.ts`, `orchestrator.ts`, `request.ts`) | Trait matrix (age / gender / age×gender / interest / brand) compiled **in the browser** into search intents; the server only runs those searches |
+| Gift Genie (client) | `lib/gift/` (`rank.ts`, `semantic.ts`, `product-type.ts`, `budget.ts`, `dedupe.ts`, `ledger.ts`) | Local ranking, semantic matching, type filtering, dedupe, bundling and behavioural learning. No profile data leaves the device — see `docs/gift-genie.md` |
 | Retailer clients | `lib/bestbuy.ts`, `lib/ebay.ts`, `lib/target.ts`, `lib/walmart.ts`, `lib/costco.ts`, `lib/shopify.ts` | API access, auth, and request signing (server-side only) |
 | WebLLM adapters | `lib/webllm/` (`types.ts`, `client.ts`, `mock-adapter.ts`, `real-adapter.ts`, `prompts.ts`, `worker.ts`) | Browser-local query planning; mock adapter is active by default |
 | Costco cookie cache | `lib/costco-cookie-cache.ts`, `lib/costco-cookie-fetcher.ts` | In-memory session cookie cache (2h TTL, dev-mode global) |
@@ -42,7 +43,7 @@ WebLLM is progressive enhancement: the deterministic planner in `search/planner.
 | Route | Method | Purpose |
 |-------|--------|---------|
 | `/api/search` | GET / POST | Simple (GET) and intelligent (POST) search |
-| `/api/gift/ideas` | POST | Deterministic gift search for one saved recipient (no LLM) |
+| `/api/gift/ideas` | POST | Runs browser-compiled gift searches. Accepts intents only — never a recipient profile |
 | `/api/trending` | — | Trending products feed |
 | `/api/target/nearest-store` | — | Nearest Target store lookup |
 | `/api/shopify/cart` | — | Shopify cart operations |
@@ -81,7 +82,8 @@ sequenceDiagram
 ## State management and persistence
 
 - **Cart**: client-side React state in `context/CartContext.tsx`; no server persistence observed.
-- **Gift recipients**: `localStorage` key `emporika-gift-recipients:v1` via `lib/gift-recipients.ts`; each entry is re-validated on read and dropped if stale. Recipients are never persisted server-side.
+- **Gift recipients**: `localStorage` key `emporika-gift-recipients:v1` via `lib/gift-recipients.ts`; each entry is re-validated on read and dropped if stale. Recipients are never sent to the server — the browser compiles them into search intents.
+- **Gift interaction ledger**: `localStorage` key `emporika-gift-ledger:v1` via `lib/gift/ledger.ts`; per-recipient counts per action, 30-day half-life decay, capped at 60 rows per recipient.
 - **Learned preferences**: `localStorage` key `emporika-learned-profile` via `lib/learning.ts` (brand weights only).
 - **Costco cookies**: in-memory cache (module singleton + dev-mode `global.__costcoCookieCache`); not persisted across server restarts — hence the refresh cron.
 - **Everything else**: stateless request-scoped processing. No database, no cache service.

@@ -1,257 +1,197 @@
-# Gift Genie — the recipient matrix and the gift index
+# Gift Genie — local-first gift intelligence
 
 Gift Genie lets a shopper save the people they buy gifts for and get "gift
-ideas" for one of them on demand. It is intentionally **not** an LLM feature:
-a recipient's gender, age and interests are compiled against a checked-in
-index into concrete retailer searches, and the results run through the normal
-search pipeline.
+ideas" for one of them on demand. Since v3 the *judgement* — matching a profile
+to searches, ranking products, filtering noise, learning from feedback — runs
+in the browser, and no recipient profile is transmitted.
 
-## Why an index instead of inference
+## The privacy boundary
 
-The alternative — ask a model "what should I buy a 34-year-old man who likes
-coffee?" on every request — needs a model in the request path, costs a call
-per gift request, produces different answers for identical input, and cannot
-be unit-tested. The index inverts all four: no model, no inference cost,
-identical input → identical brief, and the whole thing is covered by
-`tests/search/gift-*.test.ts`.
+This is the part that matters, so it is stated precisely rather than as a
+slogan.
 
-## What "popular lately" means here — read this before trusting a number
+| Data | Where it lives | Leaves the device? |
+|---|---|---|
+| Recipient profile (name, gender, age, interests, budget, excluded retailers) | `localStorage` + React state | **No** |
+| Compiled search intents (which queries to run) | Built in the browser | Only the query text, a label, a price ceiling and brand/category hints |
+| Interaction ledger (saved / clicked / dismissed) | `localStorage` | **No** |
+| Ranking, type filtering, dedupe, bundling, affinity | Browser | **No** |
+| Embedding model + vectors | Browser (WASM/WebGPU) | **No** |
+| Product listings | Retailer APIs via this app's server | n/a — that is the search |
 
-The index is a **matrix of traits → gift intents**. Its provenance is split in
-two, because only one half can be measured:
+Two consequences worth spelling out:
 
-| Part | How it is established |
+- **Age-bracket title exclusions are applied client-side.** Sending strings
+  like `small parts` or `alcohol` alongside a query would let anyone reading the
+  request infer the recipient is a toddler. They stay in the browser, filtered
+  against product titles after the results arrive.
+- **The query text necessarily reveals a topic.** A search for `sourdough
+  starter kit` tells the server someone wants to buy baking gear. That is
+  unavoidable while retailer APIs are server-side (their credentials cannot
+  ship to a browser), and it is a very different disclosure from "Priya is a
+  34-year-old woman who likes coffee."
+
+Verified by intercepting the real request in a browser: the POST body to
+`/api/gift/ideas` contains `intents`, `excludedProviders`, `maxResults` and
+nothing else. `Priya`, `"woman"`, `34` and the age-exclusion strings do not
+appear in it.
+
+## Architecture
+
+```
+browser                                             server
+──────────────────────────────────────────────      ────────────────────
+profile → buildGiftBrief() → intent requests  ───▶  buildPlanFromRequest()
+   │            (local, deterministic)              → federated search
+   │                                                     │
+   ├── semantic expansion (embeddings)                   │
+   │                                                     ▼
+   └───────────────────── products ◀──────────────── ranked results
+                            │
+   product-type tagging → budget fit → semantic → affinity
+   → dedupe → rank → bundles → grid
+```
+
+`/api/gift/ideas` accepts only `{ intents, excludedProviders, maxResults }`
+(`search/gift/request.ts`). It has no recipient concept.
+
+## The five intelligence layers
+
+### 1. Semantic search (Transformers.js)
+
+`lib/gift/semantic.ts` loads `Xenova/all-MiniLM-L6-v2` (384-dim, q8) on demand —
+**never automatically**, because it is a ~23 MB download. WebGPU is used when
+available, WASM otherwise.
+
+`lib/gift/corpus.ts` flattens the whole index (age, gender, age×gender,
+interest and brand entries) into embeddable texts, cached per session.
+`lib/gift/semantic-search.ts` does two jobs:
+
+- **Intent expansion** — free text like *"cozy baking afternoon with fresh
+  bread"* is matched against the corpus; the best two *unselected* intents are
+  added as extra searches. Observed: `Baking · semantic → "sourdough starter
+  kit"` and `Baking · semantic → "baking sheet set"`.
+- **Product relevance** — the same query vector is compared with each product
+  title, contributing 22% of the final rank.
+
+Degradation is explicit: if the model fails, `tokenSimilarity` keeps free-text
+matching working lexically, the UI says so, and ranking treats the semantic
+component as neutral rather than zero.
+
+### 2. Product-type tagging and noise filtering
+
+The index carries an authoring hint (`productType`) for intents whose results
+are inherently one type (pod refills, tea samplers, film). The decisive
+classification is per listing, on the title, in
+`lib/gift/product-type.ts`:
+
+| Type | Example | Default treatment |
+|---|---|---|
+| `main` | "Breville Barista Express" | shown, full weight |
+| `consumable` | "Nespresso coffee pods" | shown, 0.98× |
+| `accessory` | "Silicone case for AirPods" | shown, 0.86× |
+| `replacement_part` | "Replacement gasket, fits Breville" | **hidden** unless the profile is DIY |
+
+Replacement/repair language is matched before consumables, so "replacement
+filter" is not misread as "filter". The escape hatch is `isDiyOrRepairProfile`
+(`tools_diy`, `cycling`, `fishing`, `camping`, `gaming`, `photography`) plus a
+"Show replacement parts" toggle.
+
+### 3. Budget sweet-spot scoring
+
+`lib/gift/budget.ts` scores the price against the ceiling instead of rewarding
+cheapness: **1.0 inside 60–90% of budget**, linear decay outside, and a 1.6×
+faster decay below 25% so a $12 "gift" cannot win a $300 budget. Unknown price
+scores 0.45 (neutral-negative). This is 26% of the final rank, and every card
+shows the reason ("73% of budget — in the 60–90% sweet spot").
+
+### 4. Deduplication and bundling
+
+`lib/gift/dedupe.ts` removes near-duplicates before rendering. Structured
+identity (UPC/EAN/GTIN/MPN) wins outright; otherwise normalized-title Jaccard
+with containment credit at a 0.82 threshold. This is what removes "Milwaukee
+2606-20 Cordless Drill Driver" vs "… - New" arriving from two different
+searches.
+
+`buildBundles` pairs a core gift with a consumable/accessory from a **different
+interest** ("one thing to use, one that gets used up"). It only runs when at
+least two interests are active, never exceeds the budget by more than 15%, and
+falls back to a second gift from the other interest when the searches returned
+nothing consumable.
+
+### 5. Local behavioural ledger
+
+`lib/gift/ledger.ts` records `clicked` (+1), `saved` (+3) and `dismissed` (−4)
+per recipient, keyed by dimension (`interest`, `brand`, `productType`,
+`intent`, `retailer`). Weights decay with a 30-day half-life and are squashed
+through `tanh(score/4)`, so one save is a nudge and five dismissals are a
+statement.
+
+Behaviour is deliberately asymmetric:
+
+- **one** "not for them" removes that card immediately (UI state);
+- a whole **search** or **interest** is hidden only after repeated dismissals
+  (`≤ −0.8`);
+- a **product type** is never hidden by the ledger, only demoted — dismissing
+  one accessory must not hide every accessory.
+
+## Verification (real runs, not mocks)
+
+`npm test` → 414 tests. The behavioural checks below were performed in
+Chromium against the running app with real retailer traffic.
+
+| Check | Observed |
 |---|---|
-| Which traits map to which products/brands | **Editorial.** Curated from general knowledge of current retail, not from survey data or a per-demographic popularity feed (none exists in this repo). |
-| Which of those are *currently selling* | **Measured.** A momentum signal sampled from Walmart's sales-ranked search (`sort=bestseller`) — see *Momentum* below. |
-| Whether those mappings are *buyable* | **Measured.** Every authored query is run against the live retailers; result counts, providers, price ranges and sample titles are recorded. Every brand is probed the same way, including how often the brand name actually appears. |
+| Profile on the wire | request body keys = `intents, excludedProviders, maxResults`; `Priya`/`"woman"`/`34`/`small parts` absent |
+| Client-compiled brief | 6 intents, e.g. `Lodge cast iron skillet`, `gold necklace`, … with `maxPrice: 150` |
+| Budget fit | "73% of budget — in the 60–90% sweet spot", "only 9% — reads as a stocking filler" |
+| Product-type filter | replacement parts hidden by default, accessories demoted and labelled |
+| Dedupe | near-duplicate titles collapsed; count surfaced in the summary line |
+| Bundling | bundle section rendered for a cooking + baking profile |
+| Ledger | save → 4 rows (`saved`); dismiss → ledger updated, card removed, page **not** wiped |
+| Semantic opt-in | model ready in **3.7 s** (WASM), search 14.1 s including embedding 60 products |
+| Semantic expansion | 2 extra searches: `sourdough starter kit`, `baking sheet set` |
+| Semantic ranking | sourdough kits at 56–59% match from a coffee-only profile |
 
-So a row in this index means "this is a well-known gift for someone with this
-trait, and the retailers actually stock it, and shoppers are buying it right
-now" — **not** "this is statistically what people with this trait buy".
-`strength`, `tier` and brand membership remain editorial rankings, not
-probabilities. Anything the probes killed was deleted (see *Evidence*).
+A bug this run caught: the ledger originally stored one `action` + `count` per
+key, so "saved, then dismissed" became two dismissals and hid 59 of 60 cards.
+Rows now keep per-action counts, and there is a regression test for that exact
+sequence.
 
-## The matrix
+## Cost and limitations
 
-```
-                        ┌─────────── recipient traits ───────────┐
-age bracket  ───────────┤                                        │
-gender       ───────────┤   each layer can stand alone            ├──► scored intent pool
-age × gender ───────────┤   combinations outscore single traits   │        │
-interests    ───────────┤                                        │        ▼
-brands       ───────────┘                                        │   allocation
-                                                                 │   (one slot per layer)
-                                                                 │        │
-                                                                 ▼        ▼
-                                                          SearchPlan × N  → federated search
-```
-
-Every intent declares the traits it answers as **facets**:
-
-| Facet | Example | Layer size |
-|---|---|---|
-| `age:<bracket>` | `age:toddler` | 63 age-alone intents (7 per bracket) |
-| `gender:<gender>` | `gender:woman` | 32 gender-alone intents (16 per gender) |
-| `combo:<bracket>:<gender>` | `combo:adult:man` | 24 age × gender intents across 8 cells |
-| `interest:<id>` | `interest:coffee` | 139 interest intents across 35 interests |
-| — (universal) | — | 27 always-appropriate fallbacks |
-| `brand:<slug>` | `brand:nike` | 314 brands → one `"<brand> <noun>"` search each |
-
-That is **285 authored intents + 314 brand intents ≈ 600 distinct searches**,
-versus 166 in the interest-only v1 index. More importantly the *per-recipient
-candidate pool* grew from ~10–15 intents to ~40–60, because every layer now
-contributes.
-
-### Each trait stands on its own
-
-`buildGiftBrief` allocates slots by layer before it allocates by score:
-
-1. **Coverage pass** — one slot per facet layer that applies (age, gender,
-   age×gender, interest, brand). A recipient with no interests still gets a
-   specific list: age intents + gender intents + combination intents + brand
-   intents.
-2. **Fill pass** — remaining slots by score, with at most 2 intents per
-   source and at most ⌈n/3⌉ brand intents.
-3. **Neutral majority** — for a binary-gender recipient, ≥ half the set is
-   neutral-lean. Coverage slots are protected; only fill slots can be swapped.
-
-Combinations outrank single traits because `combinationBonus` grants +0.05 per
-extra facet family an intent answers (+0.10 for a three-trait intent).
-
-### Age + interest without 315 hand-written rows
-
-Each interest declares a `primeAgeBrackets` window (where that interest is
-most active — e.g. coffee peaks at 18–60, toys at 1–12). An intent inside the
-window gets `AGE_AFFINITY_BONUS` (+0.04), so "34 + coffee" outranks "coffee"
-without authoring an age × interest cell for every pair.
-
-### Gender
-
-Gender is treated as a **retail-merchandising layer**, and it is bounded three
-ways:
-
-- it contributes intents only for `woman` and `man`; `nonbinary` and
-  `unspecified` get **no** gender layer at all, and are scored fully neutral;
-- the per-intent `lean` is still only a ±0.04 nudge on a 0–1 score;
-- the selected set must remain at least half neutral for a gendered recipient,
-  and age/interest/brand coverage slots prefer neutral intents so a gendered
-  combination cannot occupy them.
-
-The layer encodes how retailers merchandise aisles. It is not a claim about a
-person, `tests/search/gift-brief.test.ts` asserts gender never changes which
-intents are *available*, and removing the layer is a one-line change
-(`GENDER_SPECS` in `index-data.ts`).
-
-## Momentum: the measured popularity half
-
-`search/gift/momentum-data.ts` is generated, not hand-written. For every index
-query it samples the top of Walmart's sales-ranked search and blends:
-
-| Component | Weight | What it captures |
-|---|---|---|
-| `relevance` | 0.45 | share of the bestseller sample whose title matches the query (a query nobody stocks scores 0) |
-| `reviewDepth` | 0.35 | median review count of the sample, log-scaled — established sellers, not a one-week spike |
-| `established` | 0.20 | share of the sample with ≥50 reviews |
-
-It enters scoring as `MOMENTUM_WEIGHT` × momentum, **max +0.06** — enough to
-reorder close calls, not enough to beat a trait combination (+0.10). It is
-never a filter, so a brand Walmart does not carry is not punished for a signal
-it never had; it simply earns no boost.
-
-The UI marks ideas above `TRENDING_THRESHOLD` (0.82 ≈ the top fifth of the
-sampled distribution) as **Selling now**, and states the sample date, because
-this table goes stale.
-
-Honest limits: it is **Walmart-only** (the one sales-ranked feed this app can
-reach), so it reflects US mass-market demand rather than the recipient; and it
-is a *query-level* signal, not a per-product one.
-
-```bash
-# Refresh the table (re-sample + rewrite search/gift/momentum-data.ts)
-npx tsx --env-file=.env.local scripts/build-gift-momentum.ts --concurrency 4
-```
-
-## Merchant exclusion
-
-A shopper can exclude retailers **per recipient** — "no eBay for my dad" is
-stored with the profile, not re-entered every time.
-
-- `GiftRecipient.excludedProviders` (persisted in `localStorage`), plus an
-  optional per-request `excludedProviders` on `POST /api/gift/ideas`.
-- Merged into `ShopperPreferences.excludedProviders`, which the existing
-  `resolveEligibleProviders` already honours, so excluded retailers are never
-  searched — not merely hidden from the results.
-- Over and above the explicit exclusion, the merge step is **provider-aware**:
-  within each intent it takes the listing whose retailer is least represented
-  so far, so a marketplace with hundreds of near-identical listings cannot
-  crowd out the other retailers.
+- **Model download**: ~23 MB, opt-in, cached by the browser. The index itself
+  adds ~32 KB gzipped to the client bundle (139 KB source).
+- **WASM latency**: embedding 60 product titles took ~10 s in headless Chromium.
+  WebGPU is preferred when present; ranking itself is microseconds.
+- **Heuristic classifiers**: product type is title-based. A poetic listing with
+  no accessory language will be classified `main`. The index hint only covers
+  intents where the whole result set is consumable.
+- **Semantic weight is 22%.** It reorders and adds searches; it does not
+  override the retailer ranker or the budget signal.
+- **Bundling is a heuristic**, not an optimisation: highest-ranked core plus the
+  first complementary partner from another interest.
+- **The ledger is per browser.** Clearing site data forgets everything; there is
+  no sync by design.
+- **Search is still server-side.** Retailer credentials cannot be shipped to a
+  browser, so queries must transit this app's server. Only queries do.
 
 ## Files
 
 | File | Role |
 |---|---|
-| `search/gift/types.ts` | Domain types, facets, tier prices, ids |
-| `search/gift/taxonomy.ts` | Client-safe metadata: interest labels, bracket labels, `ageBracketForAge` |
-| `search/gift/index-data.ts` | Age / gender / combo / universal / interest layers + prime age windows |
-| `search/gift/brands.ts` | 314-brand catalog: product nouns, tiers, ages, leans, interests |
-| `search/gift/brief.ts` | Facet scoring, combination bonus, allocation |
-| `search/gift/plan.ts` | One intent → a `SearchPlan` the core pipeline accepts |
-| `search/gift/orchestrator.ts` | Fan out over intents, provider-aware interleave, per-intent status |
-| `search/gift/schema.ts` | Index validation + re-exported recipient schemas |
-| `search/gift/recipient-schema.ts` | Zod schemas safe to import in the browser (no index data) |
-| `app/api/gift/ideas/route.ts` | `POST /api/gift/ideas` |
-| `app/gift/page.tsx`, `components/GiftGenie.tsx` | The UI |
-| `lib/gift-recipients.ts`, `hooks/useGiftRecipients.ts` | Browser-local recipient storage |
-| `scripts/probe-gift-index.ts` | Verifies every authored intent against the real retailers |
-| `scripts/probe-brand-catalog.ts` | Verifies every brand, including brand-name presence |
-| `search/gift/momentum.ts`, `momentum-data.ts` | Measured purchase-popularity signal (generated) |
-| `scripts/build-gift-momentum.ts` | Re-samples that signal from Walmart's bestseller ordering |
-
-## Evidence
-
-```bash
-npx tsx --env-file=.env.local scripts/probe-gift-index.ts --concurrency 3
-npx tsx --env-file=.env.local scripts/probe-brand-catalog.ts --concurrency 3
-```
-
-Last run (index v2.0.0):
-
-**Authored layers — `docs/gift-index-evidence.json`**
-
-| Result | Value |
-|---|---|
-| Intents probed | 284 of 285 authored (the board-book intent is only offerable under 13, and is probed as the toddler universal) |
-| Intents returning results | **284 / 284**, 20 ranked results each |
-| By layer | universal 27/27, age 63/63, gender 32/32, combo 24/24, interest 138/138 |
-| Providers answering | walmart, bestbuy, ebay, shopify — all 284 |
-| Outcome split | 192 `results`, 92 `partial_results` |
-| Duration | 122s |
-
-**Brand catalog — `docs/gift-brand-evidence.json`**
-
-| Result | Value |
-|---|---|
-| Brands probed | 314 |
-| Brands returning listings | **314 / 314** |
-| Brands whose listings barely mention the brand (<20%) | 1 (`warby-parker`, kept: it does appear, just not in most titles) |
-| Duration | 107s |
-
-Three brands that the probe showed *no* real presence for (DTC-only, not
-carried by these retailers) were deleted: `Beardbrand`, `Catbird`, `Article`.
-
-**Momentum — `docs/gift-momentum-evidence.json`**
-
-| Result | Value |
-|---|---|
-| Queries sampled | 536 (every authored + brand query, deduped) |
-| Queries with data | 534 (2 brand queries have no Walmart stock: `gerber multitool`, `yamazaki desk organizer`) |
-| Mean momentum | 0.694 · p50 0.736 · p80 0.819 · max 0.941 |
-| Duration | 153s |
-
-The probes are gates — the intent and brand probes exit non-zero when anything
-returns nothing.
-
-## Extending the matrix
-
-1. **New gift idea**: add a row to the relevant layer in `index-data.ts`
-   (or a brand to `brands.ts`).
-2. **New interest**: add the id to `INTEREST_IDS` (`types.ts`), a label to
-   `taxonomy.ts`, a profile + `primeAgeBrackets` to `index-data.ts`.
-3. **New brand**: one line in `brands.ts`. `ages` is gift-plausibility, not a
-   marketing segment.
-4. Run `npx vitest run tests/search/gift-*.test.ts` — the validator enforces
-   unique ids, facet well-formedness, per-source query uniqueness, age gating,
-   ≥5 age-alone intents per bracket, ≥2 neutral fallbacks per bracket, and that
-   every brand can actually serve its interests.
-5. Run **both** probes and commit the refreshed evidence files.
-6. Re-run `scripts/build-gift-momentum.ts` so new queries have a momentum
-   value instead of silently scoring 0.
-
-## Known limitations
-
-- **Membership and weights are editorial.** See the provenance section. The
-  probes prove stock and relevance-by-title, not demographic popularity.
-- **`strength` is a hand-assigned rank**, not a probability and not learned
-  from shopper behaviour.
-- **Momentum is Walmart-only and query-level.** It is the one sales-ranked
-  feed available, so it measures US mass-market demand, not demand from *this*
-  recipient, and a query that Walmart under-stocks scores low for reasons that
-  have nothing to do with the gift.
-- **Momentum goes stale.** The table is a snapshot; `MOMENTUM_SAMPLED_AT` and
-  the UI's "sampled <date>" line are how you tell how old it is.
-- **Brand queries are one-noun deep.** `"Nike running shoes"` is one search;
-  the catalog does not model per-brand sub-categories, seasonal drops or
-  sizing.
-- **Relevance is still retailer keyword relevance.** Feature terms
-  (`deriveGiftFeatures`) improve it; they do not make eBay marketplace
-  listings reliable. Age-mismatch exclusions ("for kids", "toddler") remove
-  the obvious failures for adult recipients.
-- **Cost scales with intents.** One gift request runs one federated search per
-  selected intent (default 6). There is no batching across intents.
-- **No rate limiting.** `/api/gift/ideas` is unauthenticated and amplifies one
-  request into up to 8 federated searches. It needs the same abuse protection
-  as `/api/search` before it sees uncontrolled traffic.
-- **No price-tier enforcement against real listings.** Tier is a scoring
-  signal plus a hard `maxPrice`; a "$160 hero gift" that sells for $15 is not
-  detected.
+| `search/gift/request.ts` | The client/server contract (no recipient fields) |
+| `search/gift/brief.ts` | Profile → brief (runs in the browser) |
+| `search/gift/plan.ts` | Intent → `SearchPlan` (server) |
+| `search/gift/orchestrator.ts` | Federated fan-out + provider-aware interleave |
+| `search/gift/index-data.ts`, `brands.ts`, `momentum.ts` | The index, brand catalog and measured momentum |
+| `lib/gift/semantic.ts` | Local embedding model (Transformers.js) |
+| `lib/gift/corpus.ts`, `semantic-search.ts` | Corpus + intent/product matching |
+| `lib/gift/product-type.ts` | Main / accessory / consumable / replacement part |
+| `lib/gift/budget.ts` | Budget sweet-spot curve |
+| `lib/gift/dedupe.ts` | Identity + title dedupe |
+| `lib/gift/rank.ts` | The composed client ranker + bundles |
+| `lib/gift/ledger.ts` | Per-recipient interaction ledger |
+| `components/GiftGenie.tsx` | UI: profile editor, semantic opt-in, filters, save/dismiss |
+| `scripts/probe-*.ts` | Retailer probes for the index and brand catalog |
+| `scripts/build-gift-momentum.ts` | Regenerates the measured momentum table |
