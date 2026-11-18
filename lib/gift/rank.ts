@@ -50,6 +50,10 @@ export interface RankOptions {
   allowReplacementParts?: boolean;
   /** Index authoring hints keyed by intent id. */
   productTypeHints?: Record<string, ProductType>;
+  /** Trend affinity per product (canonical id), from the static manifest. */
+  trend?: Map<string, { score: number; term: string; category: string }>;
+  /** Trend affinity per search query, so a whole trending search can lift. */
+  intentTrend?: Map<string, { score: number; term: string; category: string }>;
   /**
    * Age-bracket title exclusions, applied here rather than on the server so the
    * recipient's age never has to be inferred from them in transit.
@@ -62,13 +66,15 @@ export interface RankOptions {
 
 export const RANK_WEIGHTS = {
   /** The retailer ranker's own ordering — still the strongest prior. */
-  relevance: 0.34,
+  relevance: 0.30,
   /** How well the price sits in the budget's sweet spot. */
-  budget: 0.26,
+  budget: 0.24,
   /** Cosine similarity to the shopper's free-text, when available. */
-  semantic: 0.22,
+  semantic: 0.20,
   /** Learned, decayed affinity from this recipient's own interactions. */
-  affinity: 0.18,
+  affinity: 0.14,
+  /** Alignment with the current trend manifest for this cohort. */
+  trend: 0.12,
 } as const;
 
 /** Neutral semantic score: neither rewarded nor punished when disabled. */
@@ -103,6 +109,8 @@ export interface RankedIdea extends IdeaInput {
   semantic: number | null;
   /** −1..1 decayed affinity for this recipient. */
   affinity: number;
+  /** Best matching trend term, when the manifest had one. */
+  trend?: { score: number; term: string; category: string };
   score: number;
   /** Set when the idea is hidden from the main grid. */
   hiddenBy?: 'dismissed' | 'replacement_part' | 'age_excluded';
@@ -169,11 +177,22 @@ export function rankGiftIdeas(input: IdeaInput[], options: RankOptions): RankRes
 
     const ideaAffinity = typeAffinity * 0.45 + intentAffinity * 0.35 + interestAffinity * 0.2;
 
+    // Trend boost: a title that *is* a trending concept counts fully; a product
+    // from a search that is trending counts at 70%, because the listing itself
+    // may not be the trending thing.
+    const productTrend = options.trend?.get(idea.product.product.canonicalId);
+    const intentTrend = options.intentTrend?.get(idea.intentQuery);
+    const intentTrendScore = (intentTrend?.score ?? 0) * 0.7;
+    const trend =
+      (productTrend?.score ?? 0) >= intentTrendScore ? productTrend : intentTrend;
+    const trendScore = Math.max(productTrend?.score ?? 0, intentTrendScore);
+
     const base =
       RANK_WEIGHTS.relevance * relevanceFromPosition(idea.position) +
       RANK_WEIGHTS.budget * fit.score +
       RANK_WEIGHTS.semantic * (semantic ?? SEMANTIC_NEUTRAL) +
-      RANK_WEIGHTS.affinity * ((ideaAffinity + 1) / 2);
+      RANK_WEIGHTS.affinity * ((ideaAffinity + 1) / 2) +
+      RANK_WEIGHTS.trend * trendScore;
 
     let hiddenBy: RankedIdea['hiddenBy'];
     // Suppression is intentionally narrow: one "not for them" hides that idea
@@ -197,6 +216,7 @@ export function rankGiftIdeas(input: IdeaInput[], options: RankOptions): RankRes
       budget: fit,
       semantic,
       affinity: ideaAffinity,
+      trend: trendScore > 0 && trend ? { score: trendScore, term: trend.term, category: trend.category } : undefined,
       score: base * TYPE_MULTIPLIER[type],
       hiddenBy,
     };

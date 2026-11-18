@@ -11,16 +11,14 @@
 //
 // No model calls, no profile uploads, no third-party analytics.
 
-import { useCallback, useMemo, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import {
   Gift, Plus, Sparkles, Trash2, Pencil, Loader2, RefreshCw, AlertCircle, X,
-  BrainCircuit, ThumbsDown, Bookmark, ShieldCheck, SlidersHorizontal,
+  BrainCircuit, ShieldCheck, SlidersHorizontal, TrendingUp,
 } from 'lucide-react';
-import ProductCard from '@/components/ProductCard';
 import ProductModal from '@/components/ProductModal';
-import { RESULTS_GRID_CLASS } from '@/components/ProductGrid';
+import GiftGenieResults, { TrendAnswerCard, type GiftRun, type TrendSurface } from '@/components/GiftGenieResults';
 import { useGiftRecipients, useHydrated } from '@/hooks/useGiftRecipients';
-import { rankedProductToUnified } from '@/lib/ranked-products';
 import {
   AGE_BRACKET_LABELS,
   GENDER_LABELS,
@@ -32,7 +30,7 @@ import { PROVIDER_IDS } from '@/search/gift/recipient-schema';
 import { buildGiftBrief } from '@/search/gift/brief';
 import { briefToIntentRequests } from '@/search/gift/request';
 import type { GiftIntentRequest, GiftSearchResponse } from '@/search/gift/request';
-import type { Gender, GiftBrief, GiftRecipient, InterestGroup, InterestId } from '@/search/gift/types';
+import type { Gender, GiftRecipient, InterestGroup, InterestId } from '@/search/gift/types';
 import { getRetailerInfo } from '@/lib/retailer';
 import type { RetailerSource, UnifiedProduct } from '@/types/unified';
 import {
@@ -50,19 +48,24 @@ import {
   subscribeSemantic,
 } from '@/lib/gift/semantic';
 import { embedProducts, embedQuery, matchCorpus } from '@/lib/gift/semantic-search';
-import { rankGiftIdeas, type Bundle, type RankedIdea, type RankResult } from '@/lib/gift/rank';
-import { isDiyOrRepairProfile, PRODUCT_TYPE_LABELS } from '@/lib/gift/product-type';
+import { rankGiftIdeas, type RankedIdea } from '@/lib/gift/rank';
+import { isDiyOrRepairProfile } from '@/lib/gift/product-type';
+import {
+  cohortChain,
+  cohortLabel,
+  loadTrends,
+  matchTrendsAndCatalog,
+  resolvedCohort,
+  termsForCohorts,
+  trendAffinityForProducts,
+  trendAffinityForQueries,
+  type LoadedTrends,
+  type TrendAnswer,
+} from '@/lib/gift/trends';
 
 const MAX_INTENTS = 6;
 const MAX_RESULTS = 60;
 
-const FAMILY_LABELS: Record<string, string> = {
-  age: 'age',
-  gender: 'gender',
-  combo: 'age + gender',
-  interest: 'interests',
-  brand: 'brands',
-};
 
 interface Draft {
   name: string;
@@ -108,16 +111,11 @@ function parseDraft(draft: Draft) {
   };
 }
 
-interface Run {
-  recipientId: string;
-  brief: GiftBrief;
-  response: GiftSearchResponse;
-  result: RankResult;
-  /** How many extra searches the semantic layer added. */
-  semanticSearches: number;
-  semanticMatching: boolean;
+interface Run extends GiftRun {
   queryVector: Float32Array | null;
   ideaVectors: Map<string, Float32Array> | null;
+  /** Trend context that produced this run's boost. */
+  trendSurface: TrendSurface | null;
 }
 
 export default function GiftGenie() {
@@ -136,6 +134,21 @@ export default function GiftGenie() {
   const [openProduct, setOpenProduct] = useState<UnifiedProduct | null>(null);
   const [saved, setSaved] = useState<Set<string>>(new Set());
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+  const [trends, setTrends] = useState<LoadedTrends | null>(null);
+  const [trendQuestion, setTrendQuestion] = useState('');
+  const [trendAnswer, setTrendAnswer] = useState<{ question: string; answer: TrendAnswer } | null>(null);
+
+  // Load the static trend manifest on boot (cached; offline falls back to the
+  // last copy). Async setState keeps this out of the render path.
+  useEffect(() => {
+    let alive = true;
+    loadTrends().then((loaded) => {
+      if (alive) setTrends(loaded);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const selected = useMemo(
     () => recipients.find((r) => r.id === selectedId) ?? recipients[0] ?? null,
@@ -168,6 +181,53 @@ export default function GiftGenie() {
     },
     [allowParts, context, ledger]
   );
+
+  /** Cohort + strongest term for the UI pill. */
+  const trendSurfaceFor = useCallback(
+    (
+      recipient: GiftRecipient,
+      terms: ReturnType<typeof termsForCohorts>,
+      matched?: Map<string, { score: number; term: string; category: string }>
+    ): TrendSurface | null => {
+      if (!trends) return null;
+      const chain = cohortChain(recipient.gender, ageBracketForAge(recipient.age));
+      const resolved = resolvedCohort(trends.manifest, chain);
+      if (!resolved) return null;
+      // Prefer the term that actually boosted products; fall back to the
+      // cohort's first term so the pill still says something specific.
+      const scored = new Map<string, number>();
+      for (const entry of matched?.values() ?? []) {
+        scored.set(entry.term, Math.max(scored.get(entry.term) ?? 0, entry.score));
+      }
+      const topTerm =
+        [...scored.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] ??
+        terms.find((term) => term.cohort === resolved)?.term ??
+        terms[0]?.term ??
+        null;
+      return {
+        cohortLabel: cohortLabel(resolved),
+        updatedAt: trends.manifest.updatedAt,
+        ageDays: trends.ageDays,
+        topTerm,
+        source: trends.source,
+      };
+    },
+    [trends]
+  );
+
+  const askTrends = useCallback(async () => {
+    if (!selected) return;
+    const question = (trendQuestion || context).trim();
+    if (question.length < 3) {
+      setError('Ask a question first, e.g. "what jewelry is popular for women in their 30s".');
+      return;
+    }
+    const answer = await matchTrendsAndCatalog(question, {
+      gender: selected.gender,
+      ageBracket: ageBracketForAge(selected.age),
+    });
+    setTrendAnswer({ question, answer });
+  }, [context, selected, trendQuestion]);
 
   const requestIdeas = useCallback(
     async (recipient: GiftRecipient) => {
@@ -223,7 +283,32 @@ export default function GiftGenie() {
           return;
         }
 
-        // 4. Rank locally: semantic + budget + learned affinity + dedupe.
+        // 4. Trend affinity: cohort terms from the static manifest, matched
+        //    against both the product titles and the queries that found them.
+        const cohortTerms = trends
+          ? termsForCohorts(
+              trends.manifest,
+              cohortChain(recipient.gender, ageBracketForAge(recipient.age))
+            )
+          : [];
+
+        const [productTrend, intentTrend] = cohortTerms.length
+          ? await Promise.all([
+              trendAffinityForProducts(
+                payload.ideas.map((idea) => ({
+                  canonicalId: idea.product.product.canonicalId,
+                  title: idea.product.product.title,
+                })),
+                cohortTerms
+              ),
+              trendAffinityForQueries(
+                brief.intents.map((entry) => entry.intent.query),
+                cohortTerms
+              ),
+            ])
+          : [new Map(), new Map()];
+
+        // 5. Rank locally: trend + semantic + budget + learned affinity + dedupe.
         const queryVector = matching ? await embedQuery(context) : null;
         const ideaVectors = semantic.status === 'ready'
           ? await embedProducts(payload.ideas.map((idea) => idea.product))
@@ -243,6 +328,7 @@ export default function GiftGenie() {
           semanticMatching: matching,
           queryVector,
           ideaVectors,
+          trendSurface: trendSurfaceFor(recipient, cohortTerms, productTrend),
         };
 
         setRun({
@@ -262,6 +348,8 @@ export default function GiftGenie() {
                 .map((entry) => [entry.intent.id, entry.intent.productType!])
             ),
             exclusions: brief.exclusions,
+            trend: productTrend as Map<string, { score: number; term: string; category: string }>,
+            intentTrend: intentTrend as Map<string, { score: number; term: string; category: string }>,
           }),
         });
         setSaved(new Set());
@@ -272,7 +360,7 @@ export default function GiftGenie() {
         setBusy(false);
       }
     },
-    [allowParts, context, ledger, semantic.status]
+    [allowParts, context, ledger, semantic.status, trendSurfaceFor, trends]
   );
 
   const interact = useCallback(
@@ -569,6 +657,35 @@ export default function GiftGenie() {
                   />
                 </label>
 
+                <div className="flex flex-wrap items-center gap-2">
+                  <input
+                    value={trendQuestion}
+                    onChange={(event) => setTrendQuestion(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') {
+                        event.preventDefault();
+                        void askTrends();
+                      }
+                    }}
+                    placeholder='Ask trends: "what jewelry is popular for women in their 30s?"'
+                    aria-label="Ask a trend question"
+                    className="min-w-0 flex-1 rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-amber-500 dark:border-[#3a3a3a] dark:bg-[#1c1c1c] dark:text-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => void askTrends()}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-amber-600 px-3 py-2 text-xs font-semibold text-white hover:bg-amber-700"
+                  >
+                    <TrendingUp size={13} /> Ask trends
+                  </button>
+                  {trends && (
+                    <span className="text-[11px] text-gray-400 dark:text-gray-500">
+                      manifest {trends.manifest.updatedAt.slice(0, 10)} ({trends.source}
+                      {trends.ageDays > 7 ? `, ${trends.ageDays}d old` : ''})
+                    </span>
+                  )}
+                </div>
+
                 {semantic.status === 'failed' && (
                   <p className="text-xs text-amber-600 dark:text-amber-400">
                     The local model could not load ({semantic.error}). Keyword matching is being
@@ -586,6 +703,20 @@ export default function GiftGenie() {
                 </p>
               )}
 
+              {trendAnswer && (
+                <div className="mb-4">
+                  <TrendAnswerCard
+                    question={trendAnswer.question}
+                    answer={trendAnswer.answer}
+                    onUseInSearch={() => {
+                      const terms = trendAnswer.answer.matches.map((match) => match.term);
+                      setContext((current) => [current, ...terms].filter(Boolean).join(', '));
+                      setTrendAnswer(null);
+                    }}
+                  />
+                </div>
+              )}
+
               {!activeRun && !busy && (
                 <div className="rounded-2xl border border-dashed border-gray-300 p-8 text-center text-sm text-gray-500 dark:border-[#3a3a3a] dark:text-gray-400">
                   Gift Genie will compile this profile into a few searches locally, then rank what
@@ -594,13 +725,16 @@ export default function GiftGenie() {
               )}
 
               {activeRun && (
-                <IdeasResult
-                  run={activeRun}
-                  saved={saved}
-                  dismissed={dismissed}
-                  onOpen={setOpenProduct}
-                  onInteract={interact}
-                />
+                <>
+                  <GiftGenieResults
+                    run={activeRun}
+                    saved={saved}
+                    dismissed={dismissed}
+                    trend={activeRun.trendSurface ?? trendSurfaceFor(selected, [])}
+                    onOpen={setOpenProduct}
+                    onInteract={interact}
+                  />
+                </>
               )}
             </div>
           )}
@@ -615,226 +749,6 @@ export default function GiftGenie() {
           onClose={() => setOpenProduct(null)}
         />
       )}
-    </div>
-  );
-}
-
-// ── Results ────────────────────────────────────────────────────────────
-
-function IdeasResult({
-  run,
-  saved,
-  dismissed,
-  onOpen,
-  onInteract,
-}: {
-  run: Run;
-  saved: Set<string>;
-  dismissed: Set<string>;
-  onOpen: (product: UnifiedProduct) => void;
-  onInteract: (idea: RankedIdea, action: LedgerAction) => void;
-}) {
-  const { brief, response, result } = run;
-  // A single "not for them" removes the card at once; the ledger only hides
-  // whole searches/interests after repeated evidence.
-  const ideas = result.ideas.filter(
-    (idea) => !dismissed.has(idea.product.product.canonicalId)
-  );
-
-  return (
-    <div className="space-y-5">
-      <div className="rounded-2xl border border-gray-200 p-4 dark:border-[#2b2b2b]">
-        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-          Searched for
-        </p>
-        <ul className="mt-2 flex flex-wrap gap-2">
-          {brief.intents.map((entry) => (
-            <li
-              key={entry.intent.id}
-              className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-700 dark:bg-[#242424] dark:text-gray-300"
-            >
-              <span className="font-medium">{entry.interestLabel}</span>
-              <span className="text-gray-400 dark:text-gray-500"> · {entry.intent.query}</span>
-            </li>
-          ))}
-          {run.semanticSearches > 0 && (
-            <li className="rounded-full bg-violet-50 px-3 py-1 text-xs text-violet-700 dark:bg-violet-950/40 dark:text-violet-300">
-              + {run.semanticSearches} semantic {run.semanticSearches === 1 ? 'match' : 'matches'}
-            </li>
-          )}
-        </ul>
-
-        <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
-          Trend data: Walmart bestseller ordering, sampled {response.momentumSampledAt.slice(0, 10)}.
-        </p>
-        <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
-          Budget ceiling ${brief.budget.max.toFixed(0)} (
-          {brief.budget.source === 'recipient' ? 'your limit' : 'typical for this age'}) · layers:{' '}
-          {Object.entries(brief.coverage)
-            .filter(([, count]) => count > 0)
-            .map(([family]) => FAMILY_LABELS[family] ?? family)
-            .join(', ')}
-          {brief.excludedProviders.length > 0
-            ? ` · skipping ${brief.excludedProviders
-                .map((id) => getRetailerInfo(id as RetailerSource).label)
-                .join(', ')}`
-            : ''}
-        </p>
-
-        {brief.droppedInterests.length > 0 && (
-          <ul className="mt-2 space-y-1">
-            {brief.droppedInterests.map((dropped) => (
-              <li key={dropped.id} className="text-xs text-amber-600 dark:text-amber-400">
-                {dropped.reason}
-              </li>
-            ))}
-          </ul>
-        )}
-
-        <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
-          Ranked locally · {result.duplicatesRemoved} duplicate
-          {result.duplicatesRemoved === 1 ? '' : 's'} removed ·{' '}
-          {result.hidden.replacementParts} replacement part
-          {result.hidden.replacementParts === 1 ? '' : 's'} hidden ·{' '}
-          {result.hidden.ageExcluded} age-inappropriate · {result.hidden.dismissed} dismissed
-          earlier
-        </p>
-      </div>
-
-      {response.providersUnavailable.length > 0 && (
-        <ul className="space-y-1">
-          {response.providersUnavailable.map((entry) => (
-            <li key={entry.providerId} className="text-xs text-gray-500 dark:text-gray-400">
-              {getRetailerInfo(entry.providerId as RetailerSource).label}: {entry.detail}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {result.bundles.length > 0 && <Bundles bundles={result.bundles} onOpen={onOpen} />}
-
-      {ideas.length === 0 ? (
-        <div className="rounded-2xl border border-gray-200 p-8 text-center text-sm text-gray-500 dark:border-[#2b2b2b] dark:text-gray-400">
-          Nothing came back once parts and dismissed items were filtered out. Try adding an
-          interest, raising the budget, or toggling replacement parts on.
-        </div>
-      ) : (
-        <>
-          <p className="text-xs text-gray-400 dark:text-gray-500">
-            {ideas.length} ideas from {response.intents.filter((i) => i.resultCount > 0).length}{' '}
-            searches in {(response.timingMs / 1000).toFixed(1)}s
-          </p>
-          <div className={RESULTS_GRID_CLASS}>
-            {ideas.map((idea) => (
-              <IdeaCard
-                key={idea.product.product.canonicalId}
-                idea={idea}
-                saved={saved.has(idea.product.product.canonicalId)}
-                dismissed={dismissed.has(idea.product.product.canonicalId)}
-                onOpen={onOpen}
-                onInteract={onInteract}
-              />
-            ))}
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
-function IdeaCard({
-  idea,
-  saved,
-  dismissed,
-  onOpen,
-  onInteract,
-}: {
-  idea: RankedIdea;
-  saved: boolean;
-  dismissed: boolean;
-  onOpen: (product: UnifiedProduct) => void;
-  onInteract: (idea: RankedIdea, action: LedgerAction) => void;
-}) {
-  const product = useMemo(() => rankedProductToUnified(idea.product), [idea.product]);
-  const showType = idea.productType !== 'main';
-
-  return (
-    <div className="min-w-0">
-      <ProductCard product={product} rank={idea.position} ranked={idea.product} onClick={() => onOpen(product)} />
-      <p className="mt-2 text-[11px] leading-snug text-gray-500 dark:text-gray-400" title={idea.why}>
-        <span className="font-medium text-gray-600 dark:text-gray-300">{idea.intentLabel}</span> —{' '}
-        {idea.why}
-        {showType && (
-          <span className="ml-1.5 inline-flex items-center rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold text-gray-600 dark:bg-[#2a2a2a] dark:text-gray-300">
-            {PRODUCT_TYPE_LABELS[idea.productType]}
-          </span>
-        )}
-      </p>
-      <p className="mt-1 text-[10px] text-gray-400 dark:text-gray-500" title={idea.budget.reason}>
-        {idea.budget.reason}
-        {idea.semantic !== null ? ` · ${Math.round(idea.semantic * 100)}% match` : ''}
-      </p>
-      <div className="mt-1.5 flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => onInteract(idea, 'saved')}
-          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors ${
-            saved
-              ? 'bg-blue-600 text-white'
-              : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-[#2a2a2a]'
-          }`}
-        >
-          <Bookmark size={11} /> {saved ? 'Saved' : 'Save'}
-        </button>
-        <button
-          type="button"
-          onClick={() => onInteract(idea, 'dismissed')}
-          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors ${
-            dismissed
-              ? 'bg-gray-800 text-white dark:bg-gray-200 dark:text-gray-900'
-              : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-[#2a2a2a]'
-          }`}
-        >
-          <ThumbsDown size={11} /> Not for them
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function Bundles({
-  bundles,
-  onOpen,
-}: {
-  bundles: Bundle[];
-  onOpen: (product: UnifiedProduct) => void;
-}) {
-  return (
-    <div className="rounded-2xl border border-violet-200 bg-violet-50/50 p-4 dark:border-violet-900/60 dark:bg-violet-950/20">
-      <p className="text-xs font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-300">
-        Pair them up
-      </p>
-      <ul className="mt-2 space-y-3">
-        {bundles.map((bundle) => (
-          <li key={bundle.id}>
-            <p className="text-xs font-medium text-violet-800 dark:text-violet-200">{bundle.label}</p>
-            <p className="text-[11px] text-violet-700/80 dark:text-violet-300/80">{bundle.rationale}</p>
-            <div className="mt-1 flex flex-wrap gap-2">
-              {bundle.items.map((item) => (
-                <button
-                  key={item.product.product.canonicalId}
-                  type="button"
-                  onClick={() => onOpen(rankedProductToUnified(item.product))}
-                  className="rounded-full bg-white px-2.5 py-1 text-[11px] text-gray-700 shadow-sm hover:bg-gray-50 dark:bg-[#1c1c1c] dark:text-gray-200"
-                >
-                  {item.product.product.title.slice(0, 44)}
-                  {item.price ? ` · $${item.price.toFixed(0)}` : ''}
-                </button>
-              ))}
-            </div>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }
