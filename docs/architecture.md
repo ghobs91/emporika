@@ -21,7 +21,7 @@ WebLLM is progressive enhancement: the deterministic planner in `search/planner.
 | Entity resolution | `search/entity-resolution.ts` | Title-similarity merging across retailers (thresholds: >90% medium, >75% low; never merges differing models/generations/variants) |
 | Filtering | `search/filter.ts` | Deterministic hard constraints (price, condition, availability, brands, features) |
 | Ranker | `search/ranker.ts` | Deterministic weighted criteria scoring with stable tie-breakers |
-| Gift Genie | `search/gift/` (`index-data.ts`, `brief.ts`, `plan.ts`, `orchestrator.ts`) | Compiles a saved recipient (gender, age, interests) against a checked-in gift index into several real searches, then interleaves the results. No model in the request path — see `docs/gift-genie.md` |
+| Gift Genie | `search/gift/` (`index-data.ts`, `brands.ts`, `brief.ts`, `plan.ts`, `orchestrator.ts`) | Trait matrix (age / gender / age×gender / interest / brand) compiled into several real searches, then provider-aware interleaved. Each layer can stand alone; no model in the request path — see `docs/gift-genie.md` |
 | Retailer clients | `lib/bestbuy.ts`, `lib/ebay.ts`, `lib/target.ts`, `lib/walmart.ts`, `lib/costco.ts`, `lib/shopify.ts` | API access, auth, and request signing (server-side only) |
 | WebLLM adapters | `lib/webllm/` (`types.ts`, `client.ts`, `mock-adapter.ts`, `real-adapter.ts`, `prompts.ts`, `worker.ts`) | Browser-local query planning; mock adapter is active by default |
 | Costco cookie cache | `lib/costco-cookie-cache.ts`, `lib/costco-cookie-fetcher.ts` | In-memory session cookie cache (2h TTL, dev-mode global) |

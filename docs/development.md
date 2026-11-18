@@ -54,9 +54,14 @@ addition to the unit tests. See `docs/gift-genie.md`.
 # age gating, neutral fallbacks per bracket.
 npx vitest run tests/search/gift-*.test.ts
 
-# Every index query must return real listings. Exits non-zero if any does not,
-# and rewrites docs/gift-index-evidence.json with what the retailers returned.
-npx tsx --env-file=.env.local scripts/probe-gift-index.ts --all --concurrency 2
+# Every authored intent (age / gender / combo / interest / universal) must
+# return real listings. Exits non-zero if any does not, and rewrites
+# docs/gift-index-evidence.json with what the retailers returned.
+npx tsx --env-file=.env.local scripts/probe-gift-index.ts --concurrency 3
+
+# Same for the 314-brand catalog, including whether the brand name actually
+# appears in the listings. Writes docs/gift-brand-evidence.json.
+npx tsx --env-file=.env.local scripts/probe-brand-catalog.ts --concurrency 3
 ```
 
 ## Costco cookie maintenance
