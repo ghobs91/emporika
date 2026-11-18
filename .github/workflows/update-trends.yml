@@ -1,0 +1,65 @@
+name: Update trend manifest
+
+# Rebuilds public/data/trends.json from free publication feeds and commits it.
+# No API keys, no paid services: the workflow only needs the default
+# GITHUB_TOKEN, and the output is a static file the browser fetches.
+on:
+  schedule:
+    # Mondays 06:17 UTC — off the hour to avoid GitHub's cron congestion.
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: Why this manual run (recorded in the commit message)
+        required: false
+        default: manual refresh
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-trends
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Fetch feeds and rebuild the manifest
+        run: npx tsx scripts/fetch-trends.ts
+
+      - name: Fail if the manifest is missing or empty
+        run: |
+          test -s public/data/trends.json
+          node -e "
+            const m = require('./public/data/trends.json');
+            const cohorts = Object.keys(m.cohorts || {});
+            const terms = cohorts.flatMap((c) => Object.values(m.cohorts[c]).flat());
+            if (cohorts.length === 0 || terms.length < 10) {
+              console.error('Trend manifest is empty:', cohorts.length, 'cohorts,', terms.length, 'terms');
+              process.exit(1);
+            }
+            console.log(cohorts.length, 'cohorts,', terms.length, 'terms, updated', m.updatedAt);
+          "
+
+      - name: Commit changes
+        run: |
+          git config user.name 'emporika-trend-bot'
+          git config user.email 'trend-bot@users.noreply.github.com'
+          if git diff --quiet -- public/data/trends.json; then
+            echo 'No trend changes this week.'
+            exit 0
+          fi
+          git add public/data/trends.json
+          git commit -m "chore(trends): refresh manifest (${{ github.event.inputs.reason || 'scheduled' }})"
+          git push

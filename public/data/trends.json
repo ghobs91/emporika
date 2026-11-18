@@ -1,0 +1,262 @@
+{
+  "version": 1,
+  "updatedAt": "2026-11-18T11:11:33.132Z",
+  "methodology": {
+    "sources": "public RSS/Atom feeds from lifestyle, style, tech and food publications",
+    "extraction": "noun-phrase frequency over headlines, restricted to a product-noun lexicon",
+    "attribution": "explicit demographic language when present, otherwise the publication’s default cohorts (a feed prior, not a measurement)",
+    "cohortsWithExplicitAttribution": 7,
+    "cohortsWithFeedPrior": 58,
+    "minScore": 1,
+    "maxTermsPerBucket": 14
+  },
+  "sources": [
+    {
+      "id": "vogue",
+      "label": "Vogue",
+      "url": "https://www.vogue.com/feed/rss",
+      "status": "ok",
+      "items": 30,
+      "headlinesUsed": 30,
+      "httpStatus": 200,
+      "durationMs": 94
+    },
+    {
+      "id": "gq",
+      "label": "GQ",
+      "url": "https://www.gq.com/feed/rss",
+      "status": "ok",
+      "items": 30,
+      "headlinesUsed": 30,
+      "httpStatus": 200,
+      "durationMs": 57
+    },
+    {
+      "id": "allure",
+      "label": "Allure",
+      "url": "https://www.allure.com/feed/rss",
+      "status": "ok",
+      "items": 30,
+      "headlinesUsed": 30,
+      "httpStatus": 200,
+      "durationMs": 68
+    },
+    {
+      "id": "bon-appetit",
+      "label": "Bon Appétit",
+      "url": "https://www.bonappetit.com/feed/rss",
+      "status": "ok",
+      "items": 30,
+      "headlinesUsed": 30,
+      "httpStatus": 200,
+      "durationMs": 101
+    },
+    {
+      "id": "apartment-therapy",
+      "label": "Apartment Therapy",
+      "url": "https://www.apartmenttherapy.com/main.rss",
+      "status": "ok",
+      "items": 20,
+      "headlinesUsed": 20,
+      "httpStatus": 200,
+      "durationMs": 80
+    },
+    {
+      "id": "the-verge",
+      "label": "The Verge",
+      "url": "https://www.theverge.com/rss/index.xml",
+      "status": "ok",
+      "items": 10,
+      "headlinesUsed": 10,
+      "httpStatus": 200,
+      "durationMs": 106
+    },
+    {
+      "id": "engadget",
+      "label": "Engadget",
+      "url": "https://www.engadget.com/rss.xml",
+      "status": "ok",
+      "items": 20,
+      "headlinesUsed": 20,
+      "httpStatus": 200,
+      "durationMs": 157
+    },
+    {
+      "id": "wired",
+      "label": "Wired",
+      "url": "https://www.wired.com/feed/rss",
+      "status": "ok",
+      "items": 40,
+      "headlinesUsed": 40,
+      "httpStatus": 200,
+      "durationMs": 135
+    },
+    {
+      "id": "gizmodo",
+      "label": "Gizmodo",
+      "url": "https://gizmodo.com/rss",
+      "status": "ok",
+      "items": 20,
+      "headlinesUsed": 20,
+      "httpStatus": 200,
+      "durationMs": 318
+    },
+    {
+      "id": "outside",
+      "label": "Outside",
+      "url": "https://www.outsideonline.com/feed/",
+      "status": "ok",
+      "items": 10,
+      "headlinesUsed": 10,
+      "httpStatus": 200,
+      "durationMs": 439
+    },
+    {
+      "id": "lifehacker",
+      "label": "Lifehacker",
+      "url": "https://lifehacker.com/rss",
+      "status": "ok",
+      "items": 40,
+      "headlinesUsed": 40,
+      "httpStatus": 200,
+      "durationMs": 214
+    },
+    {
+      "id": "teen-vogue",
+      "label": "Teen Vogue",
+      "url": "https://www.teenvogue.com/feed/rss",
+      "status": "ok",
+      "items": 30,
+      "headlinesUsed": 30,
+      "httpStatus": 200,
+      "durationMs": 97
+    },
+    {
+      "id": "popular-mechanics",
+      "label": "Popular Mechanics",
+      "url": "https://www.popularmechanics.com/rss/",
+      "status": "ok",
+      "items": 40,
+      "headlinesUsed": 40,
+      "httpStatus": 200,
+      "durationMs": 217
+    }
+  ],
+  "cohorts": {
+    "men": {
+      "accessories": [
+        "watch",
+        "jacket",
+        "jean",
+        "sneaker",
+        "undershirt"
+      ],
+      "fitness": [
+        "helmet"
+      ],
+      "home": [
+        "robot vacuum",
+        "air purifier",
+        "chair"
+      ],
+      "kids": [
+        "lego"
+      ],
+      "outdoors": [
+        "electric stove"
+      ],
+      "tech": [
+        "drone",
+        "portable charger"
+      ]
+    },
+    "teens": {
+      "accessories": [
+        "sneaker",
+        "jacket",
+        "shoe",
+        "boot",
+        "coat",
+        "trench"
+      ],
+      "beauty": [
+        "perfume"
+      ]
+    },
+    "unisex": {
+      "accessories": [
+        "watch",
+        "shoe",
+        "wallet",
+        "fleece"
+      ],
+      "cooking": [
+        "coffee maker",
+        "cutting board",
+        "cast iron skillet",
+        "sheet pan"
+      ],
+      "fitness": [
+        "helmet"
+      ],
+      "home": [
+        "sofa",
+        "candle",
+        "chair",
+        "robot vacuum",
+        "smart bed",
+        "air purifier",
+        "fridge",
+        "sectional"
+      ],
+      "kids": [
+        "lego"
+      ],
+      "outdoors": [
+        "electric stove",
+        "cooler"
+      ],
+      "tech": [
+        "tv",
+        "camera",
+        "reader",
+        "controller",
+        "drone",
+        "keyboard",
+        "laptop",
+        "cable",
+        "earbud",
+        "monitor",
+        "mouse",
+        "portable charger",
+        "tracker"
+      ]
+    },
+    "women": {
+      "accessories": [
+        "jean",
+        "sweater",
+        "skirt"
+      ],
+      "beauty": [
+        "blush",
+        "serum",
+        "lipstick",
+        "spray",
+        "straightener"
+      ],
+      "home": [
+        "chair"
+      ],
+      "kids": [
+        "doll"
+      ],
+      "outdoors": [
+        "tent"
+      ],
+      "tech": [
+        "mouse"
+      ]
+    }
+  }
+}
