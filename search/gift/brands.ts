@@ -392,3 +392,26 @@ export const BRANDS: BrandProfile[] = [
 export function getBrand(slug: string): BrandProfile | undefined {
   return BRANDS.find((brand) => brand.slug === slug);
 }
+
+/**
+ * The concrete search query for a brand: `"<brand> <product noun>"`.
+ *
+ * Two cleanups that matter for search quality:
+ *  - a noun that already starts with the brand ("LEGO" + "lego set") loses the
+ *    prefix, so the noun adds information;
+ *  - adjacent repeated words collapse ("Alo Yoga" + "yoga leggings" would
+ *    otherwise search "Alo Yoga yoga leggings").
+ */
+export function brandProductQuery(brand: BrandProfile): string {
+  const escaped = brand.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const noun = brand.categories[0].replace(new RegExp(`^${escaped}\\s+`, 'i'), '').trim();
+  const words = `${brand.name} ${noun}`.trim().split(/\s+/);
+  const collapsed: string[] = [];
+  for (const word of words) {
+    if (collapsed.length > 0 && collapsed[collapsed.length - 1].toLowerCase() === word.toLowerCase()) {
+      continue;
+    }
+    collapsed.push(word);
+  }
+  return collapsed.join(' ');
+}

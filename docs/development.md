@@ -62,6 +62,11 @@ npx tsx --env-file=.env.local scripts/probe-gift-index.ts --concurrency 3
 # Same for the 314-brand catalog, including whether the brand name actually
 # appears in the listings. Writes docs/gift-brand-evidence.json.
 npx tsx --env-file=.env.local scripts/probe-brand-catalog.ts --concurrency 3
+
+# Re-sample the measured momentum signal from Walmart bestseller ordering and
+# regenerate search/gift/momentum-data.ts. This table goes stale; re-run it
+# whenever the index changes and commit the result.
+npx tsx --env-file=.env.local scripts/build-gift-momentum.ts --concurrency 4
 ```
 
 ## Costco cookie maintenance

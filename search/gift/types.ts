@@ -318,6 +318,8 @@ export interface ScoredIntent {
     combinationBonus: number;
     /** Bonus when the recipient is inside the interest's prime age window. */
     ageAffinity: number;
+    /** Measured purchase-popularity bonus (see `./momentum.ts`). */
+    momentum: number;
   };
 }
 
@@ -357,6 +359,8 @@ export interface GiftIdea {
   why: string;
   /** Facet families the intent answers, so the UI can label coverage. */
   families: FacetFamily[];
+  /** Measured momentum for this intent's query, in [0, 1]. */
+  momentum: number;
   /** Round-robin position among all ideas (1-based). */
   position: number;
 }
@@ -382,6 +386,8 @@ export interface GiftIdeasResponse {
   intents: GiftIntentRun[];
   providersSearched: string[];
   providersUnavailable: Array<{ providerId: string; kind: string; detail: string }>;
+  /** ISO date of the momentum sample behind these ideas. */
+  momentumSampledAt: string;
   timingMs: number;
   error?: string;
 }

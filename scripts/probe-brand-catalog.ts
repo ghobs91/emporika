@@ -15,7 +15,7 @@
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 
-import { BRANDS } from '../search/gift/brands';
+import { BRANDS, brandProductQuery } from '../search/gift/brands';
 import { buildGiftBrief, intentFamilies, scoreIntent, totalScore } from '../search/gift/brief';
 import { buildGiftSearchPlan } from '../search/gift/plan';
 import { executeSearch } from '../search/orchestrator';
@@ -59,12 +59,9 @@ function probeAge(brand: BrandProfile): number {
 }
 
 function brandIntent(brand: BrandProfile): GiftIntent {
-  const noun = brand.categories[0]
-    .replace(new RegExp(`^${brand.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s+`, 'i'), '')
-    .trim();
   return {
     id: `brand/${brand.slug}-${brand.categories[0].toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 30)}`,
-    query: noun ? `${brand.name} ${noun}` : brand.name,
+    query: brandProductQuery(brand),
     kind: 'brand',
     tier: brand.tier,
     strength: brand.strength,

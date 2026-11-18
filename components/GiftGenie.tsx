@@ -38,6 +38,12 @@ import type { UnifiedProduct } from '@/types/unified';
 
 const MAX_INTENTS = 6;
 const MAX_RESULTS = 36;
+/**
+ * Momentum above this is worth calling out as "selling now". Calibrated to the
+ * sampled distribution (`docs/gift-momentum-evidence.json`): p80 is 0.819, so
+ * this marks roughly the top fifth of queries rather than most of the page.
+ */
+const TRENDING_THRESHOLD = 0.82;
 
 const GENDERS: Gender[] = ['woman', 'man', 'nonbinary', 'unspecified'];
 
@@ -411,6 +417,10 @@ function IdeasResult({
           ))}
         </ul>
         <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
+          Trend data: Walmart bestseller ordering, sampled{' '}
+          {response.momentumSampledAt.slice(0, 10)}.
+        </p>
+        <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
           Budget ceiling ${brief.budget.max.toFixed(0)} (
           {brief.budget.source === 'recipient' ? 'your limit' : 'typical for this age'})
           {' · '}
@@ -502,6 +512,14 @@ function GiftIdeaCard({
       >
         <span className="font-medium text-gray-600 dark:text-gray-300">{idea.interestLabel}</span>{' '}
         — {idea.why}
+        {idea.momentum >= TRENDING_THRESHOLD && (
+          <span
+            className="ml-1.5 inline-flex items-center rounded-full bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300"
+            title="Ranks high and is well reviewed in the current bestseller sample"
+          >
+            Selling now
+          </span>
+        )}
       </p>
     </div>
   );

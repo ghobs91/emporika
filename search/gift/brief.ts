@@ -19,7 +19,8 @@
 //   4. neutral majority whenever the shopper named a binary gender
 
 import { AGE_BRACKET_PROFILES, COMBO_INTENTS, GENDER_INTENTS, INTEREST_PROFILES } from './index-data';
-import { BRANDS } from './brands';
+import { BRANDS, brandProductQuery } from './brands';
+import { MOMENTUM_WEIGHT, momentumFor } from './momentum';
 import { ageBracketForAge } from './taxonomy';
 import {
   FACET_FAMILIES,
@@ -116,6 +117,8 @@ export function scoreIntent(
 
   const families = intentFamilies(intent);
   const combinationBonus = COMBINATION_BONUS * Math.max(0, families.length - 1);
+  // Measured, not editorial: how actively this query sells right now.
+  const momentum = MOMENTUM_WEIGHT * momentumFor(intent.query);
 
   return {
     strength: intent.strength,
@@ -124,6 +127,7 @@ export function scoreIntent(
     universalBonus: universal ? UNIVERSAL_BONUS : 0,
     combinationBonus,
     ageAffinity: ageAffinity ? AGE_AFFINITY_BONUS : 0,
+    momentum,
   };
 }
 
@@ -134,7 +138,8 @@ export function totalScore(breakdown: ScoredIntent['breakdown']): number {
     breakdown.leanNudge +
     breakdown.universalBonus +
     breakdown.combinationBonus +
-    breakdown.ageAffinity
+    breakdown.ageAffinity +
+    breakdown.momentum
   );
 }
 
@@ -189,11 +194,6 @@ function brandCandidates(
     .slice(0, MAX_BRAND_CANDIDATES);
 
   return scored.map(({ brand, matched }) => {
-    // "LEGO" + "lego set" would search "LEGO lego set"; strip a leading brand
-    // token so the noun adds information.
-    const noun = brand.categories[0]
-      .replace(new RegExp(`^${brand.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s+`, 'i'), '')
-      .trim();
     const facets = [
       `brand:${brand.slug}`,
       ...matched.map((interest) => `interest:${interest}`),
@@ -203,7 +203,7 @@ function brandCandidates(
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .slice(0, 30)}`,
-      query: noun ? `${brand.name} ${noun}` : brand.name,
+      query: brandProductQuery(brand),
       kind: 'brand',
       tier: brand.tier,
       strength: brand.strength,

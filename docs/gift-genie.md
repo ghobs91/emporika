@@ -22,14 +22,15 @@ two, because only one half can be measured:
 
 | Part | How it is established |
 |---|---|
-| Which traits map to which products/brands | **Editorial.** Curated from general knowledge of current retail, not from survey data, purchase data, or a per-demographic popularity feed. No such feed exists in this repo. |
-| Whether those mappings are *buyable* | **Measured.** Every authored query is run against the live retailers; result counts, providers, price ranges and sample titles are recorded. Every brand is probed the same way, including how often the brand name actually appears in the results. |
+| Which traits map to which products/brands | **Editorial.** Curated from general knowledge of current retail, not from survey data or a per-demographic popularity feed (none exists in this repo). |
+| Which of those are *currently selling* | **Measured.** A momentum signal sampled from Walmart's sales-ranked search (`sort=bestseller`) — see *Momentum* below. |
+| Whether those mappings are *buyable* | **Measured.** Every authored query is run against the live retailers; result counts, providers, price ranges and sample titles are recorded. Every brand is probed the same way, including how often the brand name actually appears. |
 
 So a row in this index means "this is a well-known gift for someone with this
-trait, and the retailers actually stock it" — **not** "this is statistically
-what people with this trait buy". `strength`, `tier` and brand membership are
-editorial rankings, not probabilities. Anything the probes killed was deleted
-(see *Evidence* below).
+trait, and the retailers actually stock it, and shoppers are buying it right
+now" — **not** "this is statistically what people with this trait buy".
+`strength`, `tier` and brand membership remain editorial rankings, not
+probabilities. Anything the probes killed was deleted (see *Evidence*).
 
 ## The matrix
 
@@ -102,6 +103,35 @@ person, `tests/search/gift-brief.test.ts` asserts gender never changes which
 intents are *available*, and removing the layer is a one-line change
 (`GENDER_SPECS` in `index-data.ts`).
 
+## Momentum: the measured popularity half
+
+`search/gift/momentum-data.ts` is generated, not hand-written. For every index
+query it samples the top of Walmart's sales-ranked search and blends:
+
+| Component | Weight | What it captures |
+|---|---|---|
+| `relevance` | 0.45 | share of the bestseller sample whose title matches the query (a query nobody stocks scores 0) |
+| `reviewDepth` | 0.35 | median review count of the sample, log-scaled — established sellers, not a one-week spike |
+| `established` | 0.20 | share of the sample with ≥50 reviews |
+
+It enters scoring as `MOMENTUM_WEIGHT` × momentum, **max +0.06** — enough to
+reorder close calls, not enough to beat a trait combination (+0.10). It is
+never a filter, so a brand Walmart does not carry is not punished for a signal
+it never had; it simply earns no boost.
+
+The UI marks ideas above `TRENDING_THRESHOLD` (0.82 ≈ the top fifth of the
+sampled distribution) as **Selling now**, and states the sample date, because
+this table goes stale.
+
+Honest limits: it is **Walmart-only** (the one sales-ranked feed this app can
+reach), so it reflects US mass-market demand rather than the recipient; and it
+is a *query-level* signal, not a per-product one.
+
+```bash
+# Refresh the table (re-sample + rewrite search/gift/momentum-data.ts)
+npx tsx --env-file=.env.local scripts/build-gift-momentum.ts --concurrency 4
+```
+
 ## Merchant exclusion
 
 A shopper can exclude retailers **per recipient** — "no eBay for my dad" is
@@ -135,6 +165,8 @@ stored with the profile, not re-entered every time.
 | `lib/gift-recipients.ts`, `hooks/useGiftRecipients.ts` | Browser-local recipient storage |
 | `scripts/probe-gift-index.ts` | Verifies every authored intent against the real retailers |
 | `scripts/probe-brand-catalog.ts` | Verifies every brand, including brand-name presence |
+| `search/gift/momentum.ts`, `momentum-data.ts` | Measured purchase-popularity signal (generated) |
+| `scripts/build-gift-momentum.ts` | Re-samples that signal from Walmart's bestseller ordering |
 
 ## Evidence
 
@@ -168,7 +200,17 @@ Last run (index v2.0.0):
 Three brands that the probe showed *no* real presence for (DTC-only, not
 carried by these retailers) were deleted: `Beardbrand`, `Catbird`, `Article`.
 
-The probes are gates — both exit non-zero when anything returns nothing.
+**Momentum — `docs/gift-momentum-evidence.json`**
+
+| Result | Value |
+|---|---|
+| Queries sampled | 536 (every authored + brand query, deduped) |
+| Queries with data | 534 (2 brand queries have no Walmart stock: `gerber multitool`, `yamazaki desk organizer`) |
+| Mean momentum | 0.694 · p50 0.736 · p80 0.819 · max 0.941 |
+| Duration | 153s |
+
+The probes are gates — the intent and brand probes exit non-zero when anything
+returns nothing.
 
 ## Extending the matrix
 
@@ -183,6 +225,8 @@ The probes are gates — both exit non-zero when anything returns nothing.
    ≥5 age-alone intents per bracket, ≥2 neutral fallbacks per bracket, and that
    every brand can actually serve its interests.
 5. Run **both** probes and commit the refreshed evidence files.
+6. Re-run `scripts/build-gift-momentum.ts` so new queries have a momentum
+   value instead of silently scoring 0.
 
 ## Known limitations
 
@@ -190,6 +234,12 @@ The probes are gates — both exit non-zero when anything returns nothing.
   probes prove stock and relevance-by-title, not demographic popularity.
 - **`strength` is a hand-assigned rank**, not a probability and not learned
   from shopper behaviour.
+- **Momentum is Walmart-only and query-level.** It is the one sales-ranked
+  feed available, so it measures US mass-market demand, not demand from *this*
+  recipient, and a query that Walmart under-stocks scores low for reasons that
+  have nothing to do with the gift.
+- **Momentum goes stale.** The table is a snapshot; `MOMENTUM_SAMPLED_AT` and
+  the UI's "sampled <date>" line are how you tell how old it is.
 - **Brand queries are one-noun deep.** `"Nike running shoes"` is one search;
   the catalog does not model per-brand sub-categories, seasonal drops or
   sizing.

@@ -35,5 +35,13 @@ export {
 export type { ValidatedGiftIdeasRequest, GiftIndexShape } from './schema';
 export { PROVIDER_IDS } from './recipient-schema';
 export type { GiftProviderId } from './recipient-schema';
-export { BRANDS, getBrand } from './brands';
+export { BRANDS, getBrand, brandProductQuery } from './brands';
+export {
+  MOMENTUM_WEIGHT,
+  momentumFor,
+  hasMomentum,
+  momentumSampledAt,
+  momentumSampleSize,
+  momentumAgeDays,
+} from './momentum';
 export { GIFT_INDEX_META } from './index-data';

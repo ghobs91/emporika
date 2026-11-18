@@ -16,6 +16,7 @@ import { getAvailableProviders } from '@/search/providers/adapter';
 import { mapWithConcurrency } from '@/search/concurrency';
 import type { ProviderId, SearchApiResponse } from '@/search/types';
 import { PROVIDER_IDS } from './recipient-schema';
+import { momentumFor, momentumSampledAt } from './momentum';
 import { buildGiftBrief } from './brief';
 import { buildGiftSearchPlan } from './plan';
 import { assertGiftIndexValid, type ValidatedGiftIdeasRequest } from './schema';
@@ -121,6 +122,7 @@ export function mergeGiftIdeas(runs: IntentRun[], maxResults: number): GiftIdea[
         interestLabel: entry.interestLabel,
         why: entry.intent.why,
         families: entry.families,
+        momentum: momentumFor(entry.intent.query),
         position: ideas.length + 1,
       });
     }
@@ -155,6 +157,7 @@ export async function executeGiftSearch(
       intents: [],
       providersSearched: [],
       providersUnavailable: [],
+      momentumSampledAt,
       timingMs: Math.round(performance.now() - started),
       error:
         'No retailer providers are configured. Set up API credentials in environment variables.',
@@ -265,6 +268,7 @@ export async function executeGiftSearch(
     intents: intentRuns,
     providersSearched,
     providersUnavailable,
+    momentumSampledAt,
     timingMs: Math.round(performance.now() - started),
     error:
       status === 'error'
