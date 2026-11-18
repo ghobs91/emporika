@@ -8,6 +8,20 @@
 import { z } from 'zod';
 import { AGE_BRACKETS, GENDERS, INTEREST_IDS } from './types';
 
+/** Retailers a gift search can be told to skip. */
+export const PROVIDER_IDS = [
+  'walmart',
+  'bestbuy',
+  'target',
+  'ebay',
+  'costco',
+  'shopify',
+  'backmarket',
+] as const;
+export type GiftProviderId = (typeof PROVIDER_IDS)[number];
+
+const providerIdSchema = z.enum(PROVIDER_IDS);
+
 export const interestIdSchema = z.enum(INTEREST_IDS);
 
 export const giftRecipientSchema = z.object({
@@ -18,6 +32,11 @@ export const giftRecipientSchema = z.object({
   age: z.number().int().min(0).max(120),
   interests: z.array(interestIdSchema).max(12),
   budget: z.number().positive().max(100_000).optional(),
+  /**
+   * Retailers to leave out for this person, e.g. no eBay for someone who
+   * will not shop the marketplace. Persisted with the recipient.
+   */
+  excludedProviders: z.array(providerIdSchema).max(PROVIDER_IDS.length).optional(),
   createdAt: z.number().int().nonnegative(),
   updatedAt: z.number().int().nonnegative(),
 });
@@ -35,13 +54,13 @@ export const giftIdeasRequestSchema = z.object({
     .optional(),
   /** Hard ceiling override; also accepted on the recipient as `budget`. */
   maxPrice: z.number().positive().max(100_000).optional(),
-  /** How many distinct gift intents to search. */
-  maxIntents: z.number().int().min(1).max(5).optional(),
+  /** How many distinct gift intents to search (one per trait layer at minimum). */
+  maxIntents: z.number().int().min(1).max(8).optional(),
   maxResults: z.number().int().min(1).max(120).optional(),
   /** Retailers the shopper pinned; omitted means every eligible retailer. */
-  includedProviders: z
-    .array(z.enum(['walmart', 'bestbuy', 'target', 'ebay', 'costco', 'shopify', 'backmarket']))
-    .optional(),
+  includedProviders: z.array(providerIdSchema).optional(),
+  /** Retailers to skip for this request (merged with the recipient's list). */
+  excludedProviders: z.array(providerIdSchema).optional(),
 });
 
 export type ValidatedGiftIdeasRequest = z.infer<typeof giftIdeasRequestSchema>;

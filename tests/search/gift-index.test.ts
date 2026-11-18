@@ -4,8 +4,14 @@
 // invariant `search/gift/brief.ts` relies on is asserted here.
 
 import { describe, it, expect } from 'vitest';
-import { AGE_BRACKET_PROFILES, INTEREST_PROFILES } from '@/search/gift/index-data';
-import { validateGiftIndex } from '@/search/gift/schema';
+import {
+  AGE_BRACKET_PROFILES,
+  COMBO_INTENTS,
+  GENDER_INTENTS,
+  INTEREST_PROFILES,
+} from '@/search/gift/index-data';
+import { BRANDS } from '@/search/gift/brands';
+import { currentGiftIndex, validateGiftIndex } from '@/search/gift/schema';
 import { AGE_BRACKETS, INTEREST_IDS } from '@/search/gift/types';
 import type { AgeBracket } from '@/search/gift/types';
 
@@ -13,11 +19,7 @@ const MINORS: AgeBracket[] = ['infant', 'toddler', 'child', 'tween', 'teen'];
 
 describe('gift index structure', () => {
   it('validates against its own schema and semantics', () => {
-    const issues = validateGiftIndex({
-      interests: INTEREST_PROFILES,
-      brackets: AGE_BRACKET_PROFILES,
-    });
-    expect(issues).toEqual([]);
+    expect(validateGiftIndex(currentGiftIndex())).toEqual([]);
   });
 
   it('covers every declared interest exactly once', () => {
@@ -27,21 +29,7 @@ describe('gift index structure', () => {
   });
 
   it('covers every age bracket exactly once', () => {
-    const ids = AGE_BRACKET_PROFILES.map((b) => b.id);
-    expect(ids).toEqual([...AGE_BRACKETS]);
-  });
-
-  it('namespaces intent ids under their interest', () => {
-    for (const profile of INTEREST_PROFILES) {
-      for (const intent of profile.intents) {
-        expect(intent.id.startsWith(`${profile.id}/`)).toBe(true);
-      }
-    }
-    for (const bracket of AGE_BRACKET_PROFILES) {
-      for (const intent of bracket.universalIntents) {
-        expect(intent.id.startsWith(`universal/${bracket.id}/`)).toBe(true);
-      }
-    }
+    expect(AGE_BRACKET_PROFILES.map((b) => b.id)).toEqual([...AGE_BRACKETS]);
   });
 
   it('gives every interest real intents with a usable query', () => {
@@ -53,8 +41,55 @@ describe('gift index structure', () => {
         expect(intent.query.trim().length).toBeGreaterThanOrEqual(3);
         expect(intent.query).toBe(intent.query.trim());
         expect(intent.why.length).toBeGreaterThan(10);
+        expect(intent.facets).toContain(`interest:${profile.id}`);
       }
     }
+  });
+
+  it('gives every age bracket its own standalone layer', () => {
+    for (const bracket of AGE_BRACKET_PROFILES) {
+      expect(bracket.ageIntents.length).toBeGreaterThanOrEqual(5);
+      for (const intent of bracket.ageIntents) {
+        expect(intent.facets).toContain(`age:${bracket.id}`);
+      }
+    }
+  });
+
+  it('offers a standalone gender layer for both binary genders', () => {
+    for (const gender of ['woman', 'man'] as const) {
+      expect(GENDER_INTENTS[gender].length).toBeGreaterThanOrEqual(12);
+      for (const intent of GENDER_INTENTS[gender]) {
+        expect(intent.facets).toContain(`gender:${gender}`);
+      }
+    }
+  });
+
+  it('makes combination intents answer more than one trait', () => {
+    expect(COMBO_INTENTS.length).toBeGreaterThan(0);
+    for (const intent of COMBO_INTENTS) {
+      expect(intent.facets.length).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it('carries a brand catalog big enough to be combinatorial', () => {
+    expect(BRANDS.length).toBeGreaterThanOrEqual(150);
+    for (const brand of BRANDS) {
+      expect(brand.categories.length).toBeGreaterThanOrEqual(1);
+      expect(brand.ages.length).toBeGreaterThanOrEqual(1);
+    }
+  });
+
+  it('is large overall — the whole matrix, not just the interest layer', () => {
+    const authored =
+      INTEREST_PROFILES.reduce((sum, p) => sum + p.intents.length, 0) +
+      AGE_BRACKET_PROFILES.reduce((sum, b) => sum + b.ageIntents.length + b.universalIntents.length, 0) +
+      GENDER_INTENTS.woman.length +
+      GENDER_INTENTS.man.length +
+      COMBO_INTENTS.length;
+    // The authored matrix alone is ~1.7x the previous interest-only index;
+    // with the brand layer every profile can reach ~470 distinct searches.
+    expect(authored).toBeGreaterThanOrEqual(275);
+    expect(authored + BRANDS.length).toBeGreaterThanOrEqual(460);
   });
 
   it('never lets an alcohol-related intent reach a minor bracket', () => {
@@ -94,25 +129,31 @@ describe('gift index structure', () => {
 });
 
 describe('validateGiftIndex rejects broken data', () => {
-  const good = {
-    interests: INTEREST_PROFILES,
-    brackets: AGE_BRACKET_PROFILES,
-  };
+  const good = () => structuredClone(currentGiftIndex());
 
   it('flags a duplicated intent id', () => {
-    const clone = structuredClone(good);
+    const clone = good();
     clone.interests[1].intents[0].id = clone.interests[0].intents[0].id;
     expect(validateGiftIndex(clone).join('\n')).toMatch(/duplicate intent id/);
   });
 
-  it('flags a duplicated query across intents', () => {
-    const clone = structuredClone(good);
-    clone.interests[1].intents[0].query = clone.interests[0].intents[0].query;
-    expect(validateGiftIndex(clone).join("\n")).toMatch(/share the query/);
+  it('flags a repeated query inside one source', () => {
+    const clone = good();
+    // Same interest profile, same query twice: a copy-paste bug, not variety.
+    clone.interests[0].intents[1].query = clone.interests[0].intents[0].query;
+    expect(validateGiftIndex(clone).join('\n')).toMatch(/repeats query/);
+  });
+
+  it('allows the same query across different layers', () => {
+    // A genuinely good gift can answer "age" and "interest" at once; selection
+    // de-duplicates it at runtime, so this must not be an index error.
+    const clone = good();
+    clone.interests[0].intents[0].query = clone.brackets[0].ageIntents[0].query;
+    expect(validateGiftIndex(clone).join('\n')).not.toMatch(/repeats query/);
   });
 
   it('flags an interest reachable at an age with nothing to offer', () => {
-    const clone = structuredClone(good);
+    const clone = good();
     const reading = clone.interests.find((p) => p.id === 'reading')!;
     reading.giftableAgeBrackets = ['infant'];
     for (const intent of reading.intents) {
@@ -123,11 +164,35 @@ describe('validateGiftIndex rejects broken data', () => {
   });
 
   it('flags a bracket with too few neutral fallbacks', () => {
-    const clone = structuredClone(good);
+    const clone = good();
     clone.brackets[0].universalIntents = clone.brackets[0].universalIntents.map((intent) => ({
       ...intent,
       lean: 'woman' as const,
     }));
     expect(validateGiftIndex(clone).join('\n')).toMatch(/at least 2 neutral universal intents/);
+  });
+
+  it('flags an unknown facet value', () => {
+    const clone = good();
+    clone.interests[0].intents[0].facets = ['interest:not_a_thing'];
+    expect(validateGiftIndex(clone).join('\n')).toMatch(/unknown interest facet/);
+  });
+
+  it('flags a brand that can never serve its interest', () => {
+    const clone = good();
+    clone.brands[0] = { ...clone.brands[0], ages: ['infant'], interests: ['wine_spirits'] };
+    expect(validateGiftIndex(clone).join('\n')).toMatch(/none of its ages overlap/);
+  });
+
+  it('flags a duplicate brand slug', () => {
+    const clone = good();
+    clone.brands[1] = { ...clone.brands[1], slug: clone.brands[0].slug };
+    expect(validateGiftIndex(clone).join('\n')).toMatch(/duplicate brand slug/);
+  });
+
+  it('flags a bracket that lost its age-alone layer', () => {
+    const clone = good();
+    clone.brackets[0].ageIntents = clone.brackets[0].ageIntents.slice(0, 2);
+    expect(validateGiftIndex(clone).join('\n')).toMatch(/at least 5 age-alone intents/);
   });
 });

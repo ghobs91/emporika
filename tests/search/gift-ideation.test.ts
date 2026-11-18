@@ -40,11 +40,12 @@ function metadata(overrides: Partial<SearchMetadata> = {}): SearchMetadata {
 }
 
 /** Minimal ranked product; the merge only reads `canonicalId`. */
-function product(id: string): RankedProduct {
+function product(id: string, providerId = 'walmart'): RankedProduct {
   return {
     product: { canonicalId: id, title: id },
     rank: 1,
     productScore: 1,
+    bestOffer: { offer: { providerId } },
     alternateOffers: [],
     reasonsToChoose: [],
     tradeoffs: [],
@@ -56,7 +57,7 @@ function response(results: string[], overrides: Partial<SearchApiResponse> = {})
   return {
     status: 'results',
     query: 'q',
-    results: results.map(product),
+    results: results.map((id) => product(id)),
     metadata: metadata(),
     ...overrides,
   };
@@ -113,7 +114,9 @@ describe('buildGiftSearchPlan', () => {
     // Without this, `featureMatch` returns a free 1.0 for every listing and
     // one shared keyword ("herb grinder") ranks as high as the real thing.
     const plan = buildGiftSearchPlan(brief.intents[0], brief, PROVIDERS);
-    expect(plan.hardFilters.requiredFeatures).toContain(brief.intents[0].intent.query);
+    expect(plan.hardFilters.requiredFeatures).toContain(
+      brief.intents[0].intent.query.toLowerCase()
+    );
   });
 });
 
@@ -155,7 +158,31 @@ describe('mergeGiftIdeas', () => {
       expect(idea.intentId).toBe(brief.intents[index].intent.id);
       expect(idea.intentQuery).toBe(brief.intents[index].intent.query);
       expect(idea.why).toBe(brief.intents[index].intent.why);
+      expect(idea.families).toEqual(brief.intents[index].families);
     }
+  });
+
+  it('interleaves across retailers, not just across intents', () => {
+    // One intent, whose ranked list is provider-sorted the way a marketplace
+    // would return it. The merge must not emit four eBay items in a row.
+    const runs = [
+      {
+        scored: brief.intents[0],
+        response: response([], {
+          results: [
+            product('a', 'ebay'),
+            product('b', 'ebay'),
+            product('c', 'ebay'),
+            product('d', 'walmart'),
+            product('e', 'walmart'),
+            product('f', 'shopify'),
+          ].filter(Boolean) as RankedProduct[],
+        }),
+      },
+    ];
+    const ideas = mergeGiftIdeas(runs, 10);
+    const providers = ideas.map((idea) => idea.product.bestOffer?.offer.providerId);
+    expect(providers.slice(0, 3).sort()).toEqual(['ebay', 'shopify', 'walmart']);
   });
 
   it('de-duplicates a product found by several intents, keeping the earlier intent', () => {

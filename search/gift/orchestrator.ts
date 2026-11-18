@@ -14,7 +14,8 @@
 import { executeSearch } from '@/search/orchestrator';
 import { getAvailableProviders } from '@/search/providers/adapter';
 import { mapWithConcurrency } from '@/search/concurrency';
-import type { SearchApiResponse } from '@/search/types';
+import type { ProviderId, SearchApiResponse } from '@/search/types';
+import { PROVIDER_IDS } from './recipient-schema';
 import { buildGiftBrief } from './brief';
 import { buildGiftSearchPlan } from './plan';
 import { assertGiftIndexValid, type ValidatedGiftIdeasRequest } from './schema';
@@ -54,39 +55,77 @@ interface IntentRun {
 
 /**
  * Interleave one intent's ranked list after another, de-duplicating by
- * canonical product id. A product that appears under several intents keeps
- * the position from the highest-scoring intent, because `runs` is passed in
- * brief order.
+ * canonical product id.
+ *
+ * Two fairness rules, both deterministic:
+ *  - round-robin over intents, so one intent cannot fill the page;
+ *  - within an intent, take the listing whose *retailer* is least represented
+ *    so far, so a marketplace with hundreds of near-identical listings cannot
+ *    crowd out the other retailers.
+ *
+ * A product that appears under several intents keeps the position from the
+ * highest-scoring intent, because `runs` is passed in brief order.
  */
 export function mergeGiftIdeas(runs: IntentRun[], maxResults: number): GiftIdea[] {
   const buckets = runs.map((run) => run.response?.results ?? []);
+  const cursors = buckets.map(() => 0);
+  const providerUse = new Map<string, number>();
   const seen = new Set<string>();
   const ideas: GiftIdea[] = [];
 
+  // Bounded so a bucket of unknown length cannot spin: each run can place at
+  // most its bucket size, and every round places at most one per run.
   const longest = buckets.reduce((max, bucket) => Math.max(max, bucket.length), 0);
 
-  for (let index = 0; index < longest; index += 1) {
+  for (let round = 0; round < longest; round += 1) {
+    let progressed = false;
+
     for (let runIndex = 0; runIndex < runs.length; runIndex += 1) {
       if (ideas.length >= maxResults) return ideas;
 
-      const product = buckets[runIndex][index];
-      if (!product) continue;
+      const bucket = buckets[runIndex];
+      let bestIndex = -1;
+      let bestUse = Number.POSITIVE_INFINITY;
 
-      const canonicalId = product.product.canonicalId;
-      if (seen.has(canonicalId)) continue;
-      seen.add(canonicalId);
+      for (let index = cursors[runIndex]; index < bucket.length; index += 1) {
+        const candidate = bucket[index];
+        if (!candidate) continue;
+        if (seen.has(candidate.product.canonicalId)) continue;
 
-      const { intent, interest, interestLabel } = runs[runIndex].scored;
+        const provider = candidate.bestOffer?.offer.providerId ?? 'unknown';
+        const use = providerUse.get(provider) ?? 0;
+        if (use < bestUse) {
+          bestUse = use;
+          bestIndex = index;
+        }
+        // Nothing beats an unused retailer; stop scanning.
+        if (use === 0) break;
+      }
+
+      if (bestIndex < 0) continue;
+
+      const product = bucket[bestIndex];
+      cursors[runIndex] = bestIndex + 1;
+      seen.add(product.product.canonicalId);
+      progressed = true;
+
+      const provider = product.bestOffer?.offer.providerId ?? 'unknown';
+      providerUse.set(provider, (providerUse.get(provider) ?? 0) + 1);
+
+      const entry = runs[runIndex].scored;
       ideas.push({
         product,
-        intentId: intent.id,
-        intentQuery: intent.query,
-        interestId: interest,
-        interestLabel,
-        why: intent.why,
+        intentId: entry.intent.id,
+        intentQuery: entry.intent.query,
+        interestId: entry.interest,
+        interestLabel: entry.interestLabel,
+        why: entry.intent.why,
+        families: entry.families,
         position: ideas.length + 1,
       });
     }
+
+    if (!progressed) break;
   }
 
   return ideas;
@@ -128,10 +167,18 @@ export async function executeGiftSearch(
       ? { ...brief.budget, max: request.maxPrice, source: 'recipient' as const }
       : brief.budget;
 
+  // Retailers the shopper never wants for this person (persisted on the
+  // recipient) plus anything excluded for this one request.
+  const excludedProviders = uniqueStrings([
+    ...(request.excludedProviders ?? []),
+    ...(request.recipient.excludedProviders ?? []),
+  ]).filter(isProviderId);
+
   const preferences = {
     budget: { max: effectiveBudget.max, currency: 'USD' },
     maxResults: GIFT_DEFAULTS.perIntentResults,
     includedProviders: request.includedProviders,
+    excludedProviders: excludedProviders.length > 0 ? excludedProviders : undefined,
     // Gift searches are new-in-box; see `./plan.ts`.
     allowedConditions: ['new' as const],
   };
@@ -170,6 +217,7 @@ export async function executeGiftSearch(
     intentQuery: scored.intent.query,
     interestId: scored.interest,
     interestLabel: scored.interestLabel,
+    families: scored.families,
     status: response?.status ?? 'error',
     resultCount: response?.results?.length ?? 0,
     providersSearched: response?.metadata?.providersSearched ?? [],
@@ -227,6 +275,15 @@ export async function executeGiftSearch(
   };
 }
 
-function unique(values: string[]): string[] {
+function unique<T>(values: T[]): T[] {
   return Array.from(new Set(values));
+}
+
+function uniqueStrings(values: string[]): string[] {
+  return unique(values);
+}
+
+/** Narrow a plain string to a provider id the pipeline understands. */
+function isProviderId(value: string): value is ProviderId {
+  return (PROVIDER_IDS as readonly string[]).includes(value);
 }

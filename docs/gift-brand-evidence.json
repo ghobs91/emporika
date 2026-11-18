@@ -1,0 +1,6927 @@
+{
+  "generatedAt": "2026-11-18T01:04:14.238Z",
+  "indexVersion": "2.0.0",
+  "providers": [
+    "walmart",
+    "bestbuy",
+    "ebay",
+    "shopify"
+  ],
+  "durationMs": 106800,
+  "summary": {
+    "brands": 314,
+    "withResults": 314,
+    "empty": 0,
+    "weakBrandMatch": 1
+  },
+  "results": [
+    {
+      "slug": "adidas",
+      "name": "Adidas",
+      "query": "Adidas sneakers",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 20,
+        "max": 143.88
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "adidas Gazelle Men’s US 12 Black/Yellow Striped Low Top Lace-Up Sneakers",
+        "Size 10 Men's ADIDAS Barreda Decode White Black Grey JI2315 Sneakers Shoes NEW",
+        "adidas Barreda Men’s Green/White Low Top Lace-Up Sneakers US 10.5 JR1320"
+      ]
+    },
+    {
+      "slug": "all-clad",
+      "name": "All-Clad",
+      "query": "All-Clad stainless steel pan",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 51,
+        "max": 189.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "All-Clad D5 Brushed Stainless Steel 8x22 Fry Pan",
+        "(2) All-Clad Stainless Steel Tri-Ply/D3  Bonded  3-Quart Saute Pan NO LID (DEMO)",
+        "All-Clad D3 3-Ply Stainless Steel 10\" Fry Pan"
+      ]
+    },
+    {
+      "slug": "alo-yoga",
+      "name": "Alo Yoga",
+      "query": "Alo Yoga yoga leggings",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 18.99,
+        "max": 135
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Alo Yoga Airlift High-Waist Trifecta Leggings Navy Blue/White Women's XS READ",
+        "Alo Yoga Pink Heather Ankle Yoga Leggings Pull-On Women's XS W5941R",
+        "Alo Yoga Women's Blue Solid Ankle Leggings Xxs Regular Size Logo Accent"
+      ]
+    },
+    {
+      "slug": "amazon",
+      "name": "Amazon",
+      "query": "Amazon echo dot",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 17.99,
+        "max": 59.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Mission Battery Base for Amazon Echo Dot 4th & 5th Gen White MC95W | Brand New",
+        "Amazon Echo Dot Kids Edition Smart Speaker with Alexa  Green",
+        "Amazon Echo Dot 3rd Gen Smart Speaker with Alexa New Sealed"
+      ]
+    },
+    {
+      "slug": "anker",
+      "name": "Anker",
+      "query": "Anker power bank",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 20,
+        "max": 69.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "2-Pack-Anker Power Bank(Power -Core 10K) Battery Pack Power IQ （Black）,",
+        "Anker Power Bank 10000mAh Battery 30W Portable Charger Built-in USB-C Cable",
+        "FACTORY SEALED Anker Power Bank Travel Essential  A1688  10,000mAh 30W w/ USB-C"
+      ]
+    },
+    {
+      "slug": "anthropologie",
+      "name": "Anthropologie",
+      "query": "Anthropologie throw blanket",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 29,
+        "max": 79.2
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Anthropologie Throw Blanket Large 60x70 Colorblock Cotton Lightweight Fringed",
+        "Anthropologie Damson Madder  COTTON PRINTED THROW BLANKET",
+        "Anthropologie Biquette Cotton Knit Novelty Fish Throw Blanket 50”x70”"
+      ]
+    },
+    {
+      "slug": "apple",
+      "name": "Apple",
+      "query": "Apple airpods",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 27.87,
+        "max": 129
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Apple AirPods with Charging Case (2nd Generation)",
+        "Apple AirPods Pro 2nd Generation with MagSafe Wireless Charging Case (USB‑C)...",
+        "Apple AirPods Pro 2 Wireless Earbuds"
+      ]
+    },
+    {
+      "slug": "arc-teryx",
+      "name": "Arc'teryx",
+      "query": "Arc'teryx shell jacket",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 130,
+        "max": 299
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Arc'teryx Beta LT Jacket - Men's GORE-TEX Shell",
+        "Arc'teryx Beta LT Men's Black Waterproof Shell Jacket",
+        "Arc'teryx Beta Men's Jacket, Sea Salt Hard Shell"
+      ]
+    },
+    {
+      "slug": "asics",
+      "name": "ASICS",
+      "query": "ASICS running shoes",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 54.99,
+        "max": 84.15
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "ASICS GEL-Excite 11 Running Shoes Dark Gray Lime Mens Sz 10 1011C080 NWT NO BOX",
+        "ASICS Versablast 4 Men's White Black Running Shoes M Width Sneakers",
+        "ASICS Men's VERSABLAST 4 Running Shoes White Black Athletic Sneaker Authentic"
+      ]
+    },
+    {
+      "slug": "asmodee",
+      "name": "Asmodee",
+      "query": "Asmodee board game",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 16.36,
+        "max": 44.88
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Asmodee Board Games - Best Sellers (Stand Alone Games)",
+        "Asmodee Azul Crystal Mosaic Board Game EXPANSION - Tile-Placement Strategy, Fami",
+        "Asmodee Harmonies Board Game - Landscapes"
+      ]
+    },
+    {
+      "slug": "athleta",
+      "name": "Athleta",
+      "query": "Athleta leggings",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 6.98,
+        "max": 69.95
+      },
+      "brandMatchShare": 0.85,
+      "sampleTitles": [
+        "NEW Womens Athleta Leggings Sz Small Yoga Athletic 1778",
+        "`Athleta Sonar Leggings Womens S High Rise Black 7/8 Tight Athletic Yoga Pants`",
+        "Athleta Blue & Gray Camo High-Rise Leggings"
+      ]
+    },
+    {
+      "slug": "audio-technica",
+      "name": "Audio-Technica",
+      "query": "Audio-Technica turntable",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 59.99,
+        "max": 328.99
+      },
+      "brandMatchShare": 0.95,
+      "sampleTitles": [
+        "Audio-Technica AT-LP70X Automatic Turntable (Black/Grey)",
+        "Audio-Technica AT-LP60X Fully Automatic Belt-Drive Stereo Turntable (Black)",
+        "Audio-Technica: AT-LP60X-BK Automatic Turntable - Black"
+      ]
+    },
+    {
+      "slug": "away",
+      "name": "Away",
+      "query": "Away carry on luggage",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 41,
+        "max": 295
+      },
+      "brandMatchShare": 0.95,
+      "sampleTitles": [
+        "Away Insider Packing Cubes Set of 4 – Lightweight Travel Organizers for Luggage,",
+        "Away the Everything Bag Coast Blue Carry On Duffle Weekender Travel Luggage Tote",
+        "AWAY The Everywhere 17 Inch Carry On Tote Bag Luggage. Unused."
+      ]
+    },
+    {
+      "slug": "bagsmart",
+      "name": "Bagsmart",
+      "query": "Bagsmart packing cubes",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 13.98,
+        "max": 27.95
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Bagsmart Packing Cubes Set Travel Luggage Organizers Black Gray Mesh Bags",
+        "BAGSMART Packing Cubes - Beige - Pack of 6",
+        "6pc-BAGSMART Travel Packing Cubes Luggage Organizer Set Mesh Zippered White/Gray"
+      ]
+    },
+    {
+      "slug": "balega",
+      "name": "Balega",
+      "query": "Balega running socks",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 10.39,
+        "max": 22.98
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Balega Hidden Comfort Sole Cushioning Running Socks",
+        "BALEGA Socks Mens L HIDDEN COMFORT No Show RUNNING Cushioned Ventilated USA NWT",
+        "BALEGA UNISEX ADULT HIDDEN COMFORT RUNNING SOCKS: BLUE: NEW WITH TAGS: SIZE S"
+      ]
+    },
+    {
+      "slug": "baratza",
+      "name": "Baratza",
+      "query": "Baratza coffee grinder",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 34.99,
+        "max": 342.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Baratza Sette 30 AP Coffee Grinder",
+        "Baratza Encore Coffee Grinder",
+        "Baratza Encore Coffee Grinder ZCG485BLK, Black"
+      ]
+    },
+    {
+      "slug": "bearaby",
+      "name": "Bearaby",
+      "query": "Bearaby weighted blanket",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 55.6,
+        "max": 215.95
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Bearaby Weighted Blanket 10 Lbs Driftwood Beige Ocean Napper Soft!",
+        "Bearaby Weighted Blanket Cotton 20 lbs. Cloud White 45\" x 72\"",
+        "Bearaby Cotton Napper Weighted Knit Blanket Asteroid"
+      ]
+    },
+    {
+      "slug": "beats",
+      "name": "Beats",
+      "query": "Beats headphones",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 28.95,
+        "max": 120
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Beats by Dr. Dre Tour2 Active In-Ear Headphones Integrated Remote & Mic",
+        "Beats Solo2 Wireless On-Ear Headphones White",
+        "Beats Studio3 Wireless Bluetooth Noise-Cancelling Headphones – New & Sealed – Multiple Col"
+      ]
+    },
+    {
+      "slug": "belkin",
+      "name": "Belkin",
+      "query": "Belkin wireless charging stand",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 11.93,
+        "max": 61.66
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Belkin Wireless Charging Stand 10W - Black WIB001BTBK",
+        "WIB001TTWH - Belkin WIRELESS CHARGING STAND 10W,WHT",
+        "Belkin Wireless 7.5W Qi Stand for iPhone, AirPod & Apple Watch - Black (AU Plug)"
+      ]
+    },
+    {
+      "slug": "bell",
+      "name": "Bell",
+      "query": "Bell bike helmet",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 9.99,
+        "max": 30
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Bell Axle Bike Helmet Mint Adult 14+ 52-58cm",
+        "Bell Traverse Cycling Helmet Size L Adjustable Fit Half Shell White/Gray/Black",
+        "BELL Richter Adult Bicycle Helmet, Black / Orange for Age 8-14 Adjustable Cpix"
+      ]
+    },
+    {
+      "slug": "bellroy",
+      "name": "Bellroy",
+      "query": "Bellroy leather wallet",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 49.99,
+        "max": 189.81
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Bellroy Passport Cover - Leather Travel Wallet - Navy - Brand New",
+        "Bellroy Card Slip RFID Safe Premium Leather Minimalist Card Wallet Mustard NIB",
+        "New Bellroy Note Wallet Slim Leather Bifold Design, RFID Blocking - Dark Cocoa"
+      ]
+    },
+    {
+      "slug": "birkenstock",
+      "name": "Birkenstock",
+      "query": "Birkenstock sandals",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 60.99,
+        "max": 79.35
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "FLASH SALE!! Birkenstock Women's Arizona Birkibuc Sandals AUTHENTIC NEW FREESHIP",
+        "Birkenstock Milano Arizona Sandals with Heel Strap Birko-Flor Upper Mocha &Black",
+        "Birkenstock Arizona Soft Footbed Desert Camo Sandals Women’s EU 36"
+      ]
+    },
+    {
+      "slug": "black-diamond",
+      "name": "Black Diamond",
+      "query": "Black Diamond headlamp",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 19.99,
+        "max": 46.5
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Black Diamond SpotLite 160 Headlamp 160 Lumens IPX8 LED AAA Red Black/Blue",
+        "Black Diamond SpotLite 160 LED Headlamp 160 Lumens IPX8 Waterproof Red LED",
+        "Black Diamond Kids Wiz Headlamp Full Spectrum LED, Blue, Brand New"
+      ]
+    },
+    {
+      "slug": "bosch",
+      "name": "Bosch",
+      "query": "Bosch cordless drill",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 8,
+        "max": 119
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "BOSCH Cordless Drill  1/2 in  18V DC GSR18V-400B12 NEW SEALED",
+        "BOSCH Cordless Drill 18V, Bare Tool GSR18V-45 Solo",
+        "18V Bosch Brute Cordless Hammer Drill"
+      ]
+    },
+    {
+      "slug": "bose",
+      "name": "Bose",
+      "query": "Bose noise cancelling headphones",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 14,
+        "max": 249.97
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Bose QuietComfort 3 QC3 Noise Cancelling On-ear Wired Headphones Headset",
+        "Bose Noise Cancelling Headphones 700 (Black)",
+        "BOSE QC25 Noise Cancelling Headphones  -"
+      ]
+    },
+    {
+      "slug": "bose-sleep",
+      "name": "Bose Sleep",
+      "query": "Bose Sleep sleep headphones",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 3.24,
+        "max": 399.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Bose QuietComfort Headphones - Wireless Bluetooth Headphones, Active Over Ear Noise Cancel",
+        "Bose Sleepbuds II In-Ear Wireless Bluetooth Headphones White 432893",
+        "NEW 3 pairs Bose StayHear+ Sleep Tips, Small, Gray with White, #805879-0010"
+      ]
+    },
+    {
+      "slug": "bowflex",
+      "name": "Bowflex",
+      "query": "Bowflex adjustable dumbbells",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 9,
+        "max": 275
+      },
+      "brandMatchShare": 0.95,
+      "sampleTitles": [
+        "Bowflex SelectTech 552 Adjustable Dumbbells Pair, 5-52.5 lbs, Space-Saving Home Gym Equipm",
+        "✅ Dumbbell Handle Replacement for Bowflex SelectTech 552 Adjustable Dumbbells",
+        "Bowflex SelectTech Adjustable Weights and Dumbbells"
+      ]
+    },
+    {
+      "slug": "braun",
+      "name": "Braun",
+      "query": "Braun electric shaver",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 19.69,
+        "max": 179.98
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Braun Electric Shaver for Men, Series 5 5118s Waterproof, Wet & Dry Shave, Turbo",
+        "Braun Electric Shaver for Men, Series 5 5150cs, Wet & Dry Razor, Turbo Shaving Mode, Foil ",
+        "Braun M-60b Mobile Shave Electric Razor for Men Mobile Electric Foil Shaver NEW"
+      ]
+    },
+    {
+      "slug": "breville",
+      "name": "Breville",
+      "query": "Breville espresso machine",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 5.95,
+        "max": 70.79
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Breville Espresso Machine Sette White Plain Retail Box - SP0101387",
+        "Breville Espresso Machine Vtp1 Eps Bottom C Bundle - SP0021170",
+        "Breville Espresso Machine Sust Pretty Box Bund Le C - SP0101489"
+      ]
+    },
+    {
+      "slug": "brooklinen",
+      "name": "Brooklinen",
+      "query": "Brooklinen sheets set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 62.4,
+        "max": 129
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Brooklinen Luxe Sateen Flat Sheet King New White",
+        "BROOKLINEN Classic Percale Sheet Set  Twin Floating Petals In Aloe Multi 3 Piece",
+        "Brooklinen 100% Cotton TWIN XL Sheet Set White Classic Percale- (BC-020)"
+      ]
+    },
+    {
+      "slug": "brooks",
+      "name": "Brooks",
+      "query": "Brooks running shoes",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 54.61,
+        "max": 99.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Brooks Running Shoes Men's Adrenaline GTS 25 Medium D Primer Grey/Ebony 8-12",
+        "Brooks Men's Cascadia 19 Running Shoes Sneakers Size 9.5D",
+        "Brooks Women's Cascadia 19 Trail Running Shoes Sneakers Size 6"
+      ]
+    },
+    {
+      "slug": "brother",
+      "name": "Brother",
+      "query": "Brother sewing machine",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 41,
+        "max": 298.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "New Brother Sewing machine Lx3817g lightweight, full-size",
+        "Brother Sewing and Quilting Machine, Computerized, 165 Built-in Stitches, LCD Display, Wid",
+        "Brother Sewing Machine, XM2701, Lightweight Machine with 27 Stitches, 6 Included Sewing Fe"
+      ]
+    },
+    {
+      "slug": "byredo",
+      "name": "Byredo",
+      "query": "Byredo perfume gift set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 6.99,
+        "max": 259
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "BYREDO Pick + Choose Perfume  0.06 fl oz travel sprays",
+        "Byredo Perfume Sample Vials 2ml each. Choose your Scent & Combined Shipping",
+        "BYREDO Eau De Parfum Sample Vials 2ml [Choose Your Scent - Combined Shipping]"
+      ]
+    },
+    {
+      "slug": "cabeau",
+      "name": "Cabeau",
+      "query": "Cabeau travel neck pillow",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 12,
+        "max": 84.98
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Cabeau Travel Neck Pillow EE Evolutiion Earth Wind",
+        "Cabeau Travel Neck Pillow for Airplanes - The Neck's Evolution TNE S3 Grey ",
+        "Cabeau Travel Neck Pillow for Airplanes – The Neck’s Evolution, TNE S3 – Supportive Memory"
+      ]
+    },
+    {
+      "slug": "canon",
+      "name": "Canon",
+      "query": "Canon instant camera",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 9.99,
+        "max": 374.49
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "4520C002 - Canon Instant Camera for Printer",
+        "Carrying Case for Canon Ivy Instant Camera Photo Printer Hard Shell Shockproof",
+        "Brand New Canon Ivy CLIQ Instant Camera Printer. 2”x3” Photos (Ladybug Red)"
+      ]
+    },
+    {
+      "slug": "carhartt",
+      "name": "Carhartt",
+      "query": "Carhartt beanie hat",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 8,
+        "max": 26.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Carhartt Beanie Hat Cap",
+        "Carhartt Beanie Hat Knit Cuffed Logo 106304-Brown Men's Women's Adult One Size",
+        "Ladies Carhartt Beanie Winter Hat One Size, New With Tags"
+      ]
+    },
+    {
+      "slug": "casio",
+      "name": "Casio",
+      "query": "Casio digital watch",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 5,
+        "max": 70
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Casio Digital Watch",
+        "Casio F91W-1 Wrist Watch for Men",
+        "Casio F91W Classic Resin Strap Digital Waterproof Sport Watch"
+      ]
+    },
+    {
+      "slug": "casper",
+      "name": "Casper",
+      "query": "Casper weighted blanket",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 34,
+        "max": 129.99
+      },
+      "brandMatchShare": 0.6,
+      "sampleTitles": [
+        "Casper Weighted Blanket, 15 lbs Dusty Rose",
+        "Casper Weighted Blanket, 20 lbs Gray 951-000538-003",
+        "Casper Friendly Ghost Plush Throw Blanket 50 x 70 in Gray Machine Washable"
+      ]
+    },
+    {
+      "slug": "catit",
+      "name": "Catit",
+      "query": "Catit cat toy set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 5.5,
+        "max": 49.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Catit Senses 2.0 Circuit Ball Dome Interactive Cat Activity Toy MPN 43154",
+        "Catit Pixi Treat Dispenser, Interactive Cat Toy, Mouse Design, Self Righting",
+        "Catit Senses 2.0 Self Grooming Cat Brush & Interactive Cat Toy"
+      ]
+    },
+    {
+      "slug": "cerave",
+      "name": "CeraVe",
+      "query": "CeraVe skincare gift set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 7,
+        "max": 109
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Cerave Ceramides Skincare Essentials Travel Kit (Hydrating Cleanser 88Ml + Moisturizing Cr",
+        "CeraVe Hydrating Skincare Set for Normal to Dry Skin Travel Size Set",
+        "CeraVe Everyday Skincare Routine Sample Size Set - 4 Pieces"
+      ]
+    },
+    {
+      "slug": "charlotte-tilbury",
+      "name": "Charlotte Tilbury",
+      "query": "Charlotte Tilbury makeup gift set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 29.99,
+        "max": 87
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Charlotte Tilbury Makeup Gift Set",
+        "Charlotte Tilbury Limited Edition 3pc Mini Makeup Brush Set with Gift Box",
+        "Charlotte Tilbury Limited Edition Makeup Brush Set With Beautiful Gift Bag"
+      ]
+    },
+    {
+      "slug": "chemex",
+      "name": "Chemex",
+      "query": "Chemex pour over coffee maker",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 2.86,
+        "max": 95.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Pour Over Coffee Maker Lid - Bamboo Heat Retaining Cover for Chemex & Cosori",
+        "CHEMEX Classic Series 3-Cup Glass Pour-Over Coffee Maker",
+        "Chemex Classic Series Pour-Over Glass Coffee Maker 6-cups"
+      ]
+    },
+    {
+      "slug": "chipolo",
+      "name": "Chipolo",
+      "query": "Chipolo bluetooth tracker",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 14.5,
+        "max": 44.9
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Orbitkey x Chipolo Bluetooth Tracker v2",
+        "Chipolo Bluetooth Tracker V2, Black",
+        "Chipolo Classic Smart Key Ring Bluetooth Tracker Finder Locator Black NIB Tag "
+      ]
+    },
+    {
+      "slug": "chuckit",
+      "name": "Chuckit",
+      "query": "Chuckit dog toy bundle",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 6,
+        "max": 57.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Chuckit! Large Dog Toy Bundle: 3-inch Ultra Ball (1-Pack) & Tennis Balls (2-Pack",
+        "Chuckit! Dog Toy Bundle 2-Pack Ultra Ball & 2-Pack Air Glow Fetch Balls Medium",
+        "Chuckit! Interactive Dog Toy Ultra Fetch Stick Day Night Bundle, Pack of 2"
+      ]
+    },
+    {
+      "slug": "citizen",
+      "name": "Citizen",
+      "query": "Citizen eco-drive watch",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 42,
+        "max": 149.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Citizen Eco-Drive Green Dial Stainless Steel Watch CA4674-58X",
+        "Citizen Eco-Drive Blue Dial Stainless Steel Watch BM7567-50L",
+        "Citizen Eco-Drive Stainless Steel Green Dial Watch EM1110- 81N"
+      ]
+    },
+    {
+      "slug": "clover",
+      "name": "Clover",
+      "query": "Clover crochet hooks set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 7.41,
+        "max": 96
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Crochet Hooks Set Clover Amour Steel Pastel 9 Pcs Ergonomic Easy Grip Bright",
+        "14 Pcs Crochet Hooks Set Clover Amour Steel Pastel Ergonomic Easy Grip Bright",
+        "Clover Crochet hooks 3  with  2 new in package"
+      ]
+    },
+    {
+      "slug": "coach",
+      "name": "Coach",
+      "query": "Coach crossbody bag",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 70,
+        "max": 145
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Coach C2611 Ivory Glazed Leather Crossbody Bag NWT",
+        "Coach F34899 Celeste Hobo Signature Canvas Crossbody Bag Brown/Black",
+        "Coach Black Pebbled Leather Shoulder Bag Zip Gold Hardware w/ Detachable Strap"
+      ]
+    },
+    {
+      "slug": "coleman",
+      "name": "Coleman",
+      "query": "Coleman camping lantern",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 5.99,
+        "max": 42.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Coleman Camping Lantern Twin Tube Fluorescent Model 5355=700 With Box Brand New",
+        "Coleman Camping Lantern Cooler AuthDealer Store Man Cave Clock Retro Sign",
+        "Upgrade Camping Lantern Accessories Lantern Mantles for Coleman #21 Mantles 10Pc"
+      ]
+    },
+    {
+      "slug": "columbia",
+      "name": "Columbia",
+      "query": "Columbia fleece jacket",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 10,
+        "max": 60
+      },
+      "brandMatchShare": 0.95,
+      "sampleTitles": [
+        "Columbia Fleece Jacket Womens - L",
+        "Unisex Columbia fleece jacket",
+        "Columbia Men's Steens Mountain™ Fleece 2.0 Full-Zip Jacket"
+      ]
+    },
+    {
+      "slug": "connetix",
+      "name": "Connetix",
+      "query": "Connetix magnetic building tiles",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 18,
+        "max": 44.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "CONNETIX Magnetic Tiles Bright Essentials Pack Building Blocks 24pc:",
+        "Connetix Pro Constructor Set 70pc Magnetic Tiles CP-T-00070-CO",
+        "Connetix PRO Constructor Set 70 Pieces Magnetic Tiles New Sealed"
+      ]
+    },
+    {
+      "slug": "converse",
+      "name": "Converse",
+      "query": "Converse sneakers",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 15.37,
+        "max": 62.95
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Converse Adult Day One Classic Sneakers",
+        "Converse Adult Day One Court Sneakers",
+        "Converse Kids' Street Ox Low Top Sneakers"
+      ]
+    },
+    {
+      "slug": "copic",
+      "name": "Copic",
+      "query": "Copic fineliner pen set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 3.99,
+        "max": 25.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "COPIC Multiliner Pen 4pc Warm Gray",
+        "Copic MultiLiner Drawing Pen Black",
+        "COPIC Multiliner+ Pen 0.03 Cobalt"
+      ]
+    },
+    {
+      "slug": "coravin",
+      "name": "Coravin",
+      "query": "Coravin wine preserver",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 9,
+        "max": 195
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Coravin Capsule",
+        "Coravin Pure Capsule (Single Unit)",
+        "Argon Gas Capsules 10PCS for Coravin Wine Preservation System GreatWhip"
+      ]
+    },
+    {
+      "slug": "cordoba",
+      "name": "Cordoba",
+      "query": "Cordoba ukulele",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 17.5,
+        "max": 149.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Protege by Cordoba Concert Ukulele",
+        "Cordoba 15CFM Ukulele",
+        "Cordoba Deluxe Tenor Ukulele Gig Bag"
+      ]
+    },
+    {
+      "slug": "corkcicle",
+      "name": "Corkcicle",
+      "query": "Corkcicle wine tumbler",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 8.5,
+        "max": 28.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Corkcicle Wine Tumbler",
+        "Corkcicle Turquoise Sparkle 12oz Stemless Wine Tumbler Stainless Steel Lid",
+        "Corkcicle Classic Stemless Insulated Wine Tumbler Bright White New 12 Oz"
+      ]
+    },
+    {
+      "slug": "coros",
+      "name": "Coros",
+      "query": "Coros running watch",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 55.99,
+        "max": 335.3
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "COROS PACE 3 GPS Sport Watch - Lightweight, Comfortable Running Watch, 17-Day Battery Life",
+        "COROS PACE 3 GPS Sport Watch, Lightweight Running Watch - Chalk Nylon",
+        "COROS PACE Pro GPS Sport Watch, 1.3-inch AMOLED Touchscreen, Fastest in Class Processor Ru"
+      ]
+    },
+    {
+      "slug": "corsair",
+      "name": "Corsair",
+      "query": "Corsair mechanical keyboard",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 29.99,
+        "max": 329.99
+      },
+      "brandMatchShare": 0.9,
+      "sampleTitles": [
+        "CORSAIR - K65 RGB Mini Wired 60% Mechanical Gaming Keyboard. White, New",
+        "Corsair K60 PRO TKL RGB Mechanical Gaming Keyboard OPX Switches Black",
+        "CORSAIR K65 rgb mini 60% Mechanical Keyboard-  New English Key - SEALED / NEW"
+      ]
+    },
+    {
+      "slug": "craftsman",
+      "name": "Craftsman",
+      "query": "Craftsman tool set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 25.98,
+        "max": 83.2
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "CRAFTSMAN VERSASTACK 11-Piece Metric Polished Chrome Mechanics Tool Set with Hard Case",
+        "Craftsman 31-PC Mini Ratchet Bit Set | Compact Driver Tool | Case Included | NEW",
+        "Craftsman 1/4 in. drive SAE 6 Point Mechanic's Tool Set 24 pc"
+      ]
+    },
+    {
+      "slug": "crayola",
+      "name": "Crayola",
+      "query": "Crayola kids art set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 6.57,
+        "max": 29.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Crayola Kids Art Set with Crayons, Markers, Coloring Sheets, MPN 04-1051-0-250",
+        "Crayola Colored Pencil Set, 36 Ct, Arts,Crafts, School Supplies, GIfts for Kids.",
+        "Crayola Trolls World Tour, Neon Create & Color Art Set Kit 70 Art Supplies Case"
+      ]
+    },
+    {
+      "slug": "cricut",
+      "name": "Cricut",
+      "query": "Cricut craft cutting machine",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 10.89,
+        "max": 139.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "AC Adapter For Cricut Expression CREX001 Provo Craft Cutting Machine Power Cord",
+        "Cricut Personal Electronic Cutter Machine Model CRV001",
+        "Cricut Maker 3 Machine Tools and Rainbow Vinyl Bundle"
+      ]
+    },
+    {
+      "slug": "crocs",
+      "name": "Crocs",
+      "query": "Crocs clogs",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 18.99,
+        "max": 52.49
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Crocs Kids Baya Clogs",
+        "Crocs Unisex Adult Classic Slip On Sandals Ultra Light Water Friendly ClogsView",
+        "Crocs Kids' Baya Slip-On Clogs"
+      ]
+    },
+    {
+      "slug": "crosley",
+      "name": "Crosley",
+      "query": "Crosley turntable",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 21.99,
+        "max": 110
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Crosley Chalkboard Cruiser Deluxe 3-Speed Portable Turntable Bluetooth",
+        "Crosley Cruiser Green Belt Drive Portable Turntable Record Player",
+        "Crosley CR8005G-BK Cruiser Premier 3-Speed Turntable - Black"
+      ]
+    },
+    {
+      "slug": "cuisinart",
+      "name": "Cuisinart",
+      "query": "Cuisinart food processor",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 19.57,
+        "max": 316.97
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Cuisinart Food Processor, Dishwasher Safe 11-Cup Food Processor with Slicing & Shredding D",
+        "Cuisinart Mini Prep Plus 3 Cup Food Processor - White - DLC-2A  New & Unused",
+        "Cuisinart Mini-Prep Plus Food Processor, 3 Cup Mini Food Processor to Chop Herbs, Vegetabl"
+      ]
+    },
+    {
+      "slug": "daiwa",
+      "name": "Daiwa",
+      "query": "Daiwa fishing rod",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 7,
+        "max": 94.04
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "NEW Daiwa IM6 Model TG80 5'9\"  Medium A75115A Fishing Rod",
+        "Daiwa Sweepfire-D Series SWD602MFB Medium Casting Rod, 10 to 20 lb Lure, 6 ft",
+        "Daiwa Laguna Spinning Rod"
+      ]
+    },
+    {
+      "slug": "daniel-wellington",
+      "name": "Daniel Wellington",
+      "query": "Daniel Wellington wristwatch",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 8.79,
+        "max": 135
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "for Daniel Wellington Original Watch Strap with Women's Milan Exquisite Breathab",
+        "READ! Daniel Wellington Women's Watch Rose Gold Leather Strap *NEEDS BATTERY!!!",
+        "Daniel Wellington Classic Sheffield Men's 40mm Quartz Black Leather Watch 0206DW"
+      ]
+    },
+    {
+      "slug": "de-longhi",
+      "name": "De Longhi",
+      "query": "De Longhi espresso machine",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 0.02,
+        "max": 100
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Delonghi Fully Automatic Espresso Machine Dei Notes - IT0198_",
+        "Delonghi Fully Automatic Espresso Machine Dei Notes - IT0287",
+        "Delonghi Fully Automatic Espresso Machine Connection - 5332188800"
+      ]
+    },
+    {
+      "slug": "deuter",
+      "name": "Deuter",
+      "query": "Deuter hiking daypack",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 25.9,
+        "max": 286.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Deuter Trail 18 Backpack – 18L – Lightweight Hiking / Daypack",
+        "Deuter AC Lite 24L Hiking & Daypack Backpack - Black / Sahale",
+        "Deuter Vista Spot 18L Daypack Backpack Blue/Red Padded Straps 13\" Laptop"
+      ]
+    },
+    {
+      "slug": "dewalt",
+      "name": "DeWalt",
+      "query": "DeWalt cordless drill",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 30,
+        "max": 89.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Dewalt Cordless Drills, 1/2 in, 20V DC",
+        "1/2\" Cordless Hammer Drill/Driver Brushless For DEWALT 20V MAX Battery 2-Speed",
+        "DeWalt DCD996B 20V MAX XR Cordless Hammer Drill Driver Brushless, Tool Only"
+      ]
+    },
+    {
+      "slug": "diptyque",
+      "name": "Diptyque",
+      "query": "Diptyque scented candle",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 18.88,
+        "max": 75
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Diptyque Scented Candle 2.4 fl oz. New in box made in France Assorted",
+        "LIMITED EDITION ROSES DIPTYQUE SCENTED CANDLE NEW IN BOX 6.7 OZ 190 G",
+        "Diptyque Jasmin (jasmine) Mini Votive Scented Candle 1.23 oz / 35g (new w/ box)"
+      ]
+    },
+    {
+      "slug": "dji",
+      "name": "DJI",
+      "query": "DJI drone",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 42.99,
+        "max": 169
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "DJI Mini 3 Fly More Combo (DJI RC), Drones with Camera for Adults 4K, 3 Batteries for 114-",
+        "DJI 4 Pro Drone",
+        "DJI 4T Drone"
+      ]
+    },
+    {
+      "slug": "dr-martens",
+      "name": "Dr. Martens",
+      "query": "Dr. Martens boots",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 45.99,
+        "max": 174.95
+      },
+      "brandMatchShare": 0.95,
+      "sampleTitles": [
+        "Dr. Martens Brown Leather Chukka Ankle Boots Lace-Up Round Toe US 14 UK 13 EU 48",
+        "Dr. Martens 1460 Nappa Leather Women's Boots - Black, US 7",
+        "Dr. Martens Burgundy Leather Combat Ankle Boots Lace Up Round Toe 7.5 NIB"
+      ]
+    },
+    {
+      "slug": "dramm",
+      "name": "Dramm",
+      "query": "Dramm watering can",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 7.79,
+        "max": 52
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Dramm Watering Can Replacement Spouts",
+        "Dramm Watering Can",
+        "Dramm 2 Liter Watering Can"
+      ]
+    },
+    {
+      "slug": "drunk-elephant",
+      "name": "Drunk Elephant",
+      "query": "Drunk Elephant skincare gift set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 15,
+        "max": 89.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Drunk Elephant Trust The Pros Skincare Set BRAND NEW ‼️‼️",
+        "Drunk Elephant The Evening Standard 4 Piece Travel Skincare Set Sephora NEW",
+        "Drunk Elephant Protini Polypeptide Cream Set A Day in the Sun NEW Skincare Gift"
+      ]
+    },
+    {
+      "slug": "drybar",
+      "name": "Drybar",
+      "query": "Drybar hair styling tool",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 12.25,
+        "max": 220
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Drybar Hair Clips Hair Claws Sectioning Clips Hold Me 3Pack Hair Salon Hair Tool",
+        "DRYBAR Half Pint 1.75” Barrel Brush Hair Tool For Volume, Shine & Curl.  New",
+        "Drybar The Mixologist Interchangeable Styling Iron – One Tool, Three Styles – Reduces Friz"
+      ]
+    },
+    {
+      "slug": "dunlop",
+      "name": "Dunlop",
+      "query": "Dunlop guitar picks",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 4.94,
+        "max": 52.45
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Dunlop Guitar Picks 12 Pack Nylon Max-Grip .73mm Standard Shape",
+        "Dunlop Guitar Picks 12 Picks Tortex Variety Pack 2 of each Tortex Thickness",
+        "Dunlop Guitar Picks 12 Pack Tortex III 1.0mm 462P1.00"
+      ]
+    },
+    {
+      "slug": "duplo",
+      "name": "DUPLO",
+      "query": "DUPLO set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 3.96,
+        "max": 59.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "New, Sealed LEGO® DUPLO Set 10440 - Balancing & Stacking Tree (27 pcs)",
+        "New, Sealed LEGO® DUPLO Set 10927 - Pizza Stand (18 pcs)",
+        "Creative Garden & Flowers, 10444 - Duplo Set"
+      ]
+    },
+    {
+      "slug": "dyson",
+      "name": "Dyson",
+      "query": "Dyson cordless vacuum",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 40.96,
+        "max": 195
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Dyson V8 Cordless Vacuum Cleaner �C V8 Animal Extra",
+        "Dyson V8 Cordless Vacuum Cleaner",
+        "Dyson V15 Detect Cordless Stick Vacuum Cleaner"
+      ]
+    },
+    {
+      "slug": "e-l-f",
+      "name": "e.l.f.",
+      "query": "e.l.f. makeup gift set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 6,
+        "max": 139.15
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "NIB 4pc e.l.f. Makeup Gift Set",
+        "NWT E.L.F. 4pc Makeup Gift Set",
+        "Beauty Bundle Sephora e.l.f. PÜR Brushes Lashes Makeup Bag Gift Set New"
+      ]
+    },
+    {
+      "slug": "eagle-creek",
+      "name": "Eagle Creek",
+      "query": "Eagle Creek packing cubes",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 11.18,
+        "max": 35
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Eagle Creek Pack-it Spector Light Weight Slim Packing Cubes, Small,  Blue, New",
+        "Eagle Creek Pack It Reveal Packing Cubes Set of 2 Az Blue Grey Organizer Bag",
+        "Eagle Creek Pack It Slim Packing Cubes Set Black Organizer Bags Medium & Small"
+      ]
+    },
+    {
+      "slug": "elgato",
+      "name": "Elgato",
+      "query": "Elgato stream deck",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 14.99,
+        "max": 243
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Elgato Stream Deck Module 32 Key 3D Printed Case",
+        "Dual Vertical Controller Stand for Elgato Stream Deck XL and Original, Black",
+        "Elgato Stream Deck Neo Programmable Keypad USB-C Black English QWERTY"
+      ]
+    },
+    {
+      "slug": "ember",
+      "name": "Ember",
+      "query": "Ember heated coffee mug",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 25,
+        "max": 100
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Ember Mug 2 White 10 oz Smart Temperature Control Heated Coffee Cup DISTRESSED ",
+        "Ember Mug 2 Heated Smart Coffee Mug White Ceramic 10 oz w/ Charging Coaster",
+        "Ember Temperature Control Ceramic Smart Mug 10 Oz White (CM17) - New Sealed"
+      ]
+    },
+    {
+      "slug": "epicka",
+      "name": "Epicka",
+      "query": "Epicka universal travel adapter",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 14.39,
+        "max": 147.85
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Epicka Universal Travel Adapter (TA-105) International Power Plug Adapter",
+        "Epicka Universal Travel Adapter With 4 Usb Ports Worldwide Compatibility 6 In 1",
+        "EPICKA Universal Travel Adapter, European Plug Adapter (Not a Grey"
+      ]
+    },
+    {
+      "slug": "eufy",
+      "name": "Eufy",
+      "query": "Eufy robot vacuum",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 22.99,
+        "max": 129
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "eufy Hard Floor Cleaner for eufy Robot Vacuum Omni S2",
+        "eufy Robot Vacuum Accessories, Rolling Brush*1,Brush Guard*1,Little Bird Brush*1, Compatib",
+        "eufy Robot Vacuum Omni C20, Robot Vacuum and Mop Combo + Official RoboVac Hard Floor Clean"
+      ]
+    },
+    {
+      "slug": "everlane",
+      "name": "Everlane",
+      "query": "Everlane cashmere sweater",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 27.99,
+        "max": 124.99
+      },
+      "brandMatchShare": 0.6,
+      "sampleTitles": [
+        "Everlane Cashmere Sweater Blue, Small NWT",
+        "Everlane Sweater Womens Xxs Beige Cashmere Knit Pullover New ",
+        "Everlane The Cashmere Relaxed V-neck Sweater Women's Size XS in Black NWT"
+      ]
+    },
+    {
+      "slug": "exploding-kittens",
+      "name": "Exploding Kittens",
+      "query": "Exploding Kittens party game",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 6.5,
+        "max": 29.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Mantis Card Game by Exploding Kittens Party Game of Rainbows & Revenge BRAND NEW",
+        "I Suck At Drawing Cinema Edition - Exploding Kittens Party Game - B&N Excl - NEW",
+        "Exploding Kittens Exploding Kittens Party Card Game 2-5 Players 2015 EK15"
+      ]
+    },
+    {
+      "slug": "faber-castell",
+      "name": "Faber-Castell",
+      "query": "Faber-Castell colored pencils",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 5.99,
+        "max": 87.67
+      },
+      "brandMatchShare": 0.85,
+      "sampleTitles": [
+        "Faber-Castell Colored Pencils - Tin of 24 Polychromos",
+        "Faber-Castell Black Edition Colored Pencils| Great Back to School Art Supplies |",
+        "Faber-Castell Classic Colored Pencils Tin Set, 48 Vibrant Color Pencils"
+      ]
+    },
+    {
+      "slug": "feetures",
+      "name": "Feetures",
+      "query": "Feetures running socks",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 10.39,
+        "max": 34.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "2 Pairs Bombas & Feetures Performance Running Athletic Ankle Socks NWT",
+        "Feetures Elite Invisible Running Socks Unisex M Light Gray Light Cushion GBO4765",
+        "Feetures Elite Light Cushion No Show Tab Running Socks Compression Small, Pink"
+      ]
+    },
+    {
+      "slug": "fellow",
+      "name": "Fellow",
+      "query": "Fellow electric kettle",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 21,
+        "max": 199.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Fellow Electric Kettle - Bundle Item",
+        "FELLOW Electric Kettle Corvo EKG Pro 0.9L Temperature Control Matte White, Maple",
+        "Fellow Clyde Electric Kettle Replacement Power Base w/ Cord OEM Black"
+      ]
+    },
+    {
+      "slug": "fender",
+      "name": "Fender",
+      "query": "Fender guitar",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 36.88,
+        "max": 379.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Fender x Loog Telecaster Kids Electric Guitar 3 Strings Beginner Set (Black)",
+        "Fender CD60 | Dreadnought Acoustic Guitar | Sunburst",
+        "Fender Squier Debut Collection Stratocaster HSS Electric Guitar - Dakota Red"
+      ]
+    },
+    {
+      "slug": "fenty-beauty",
+      "name": "Fenty Beauty",
+      "query": "Fenty Beauty makeup gift set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 7.99,
+        "max": 189
+      },
+      "brandMatchShare": 0.95,
+      "sampleTitles": [
+        "**NEW** Fenty Beauty Sampler Set - *Fragrance *Skin Care *Makeup - FREE SHIPPING",
+        "Fenty Beauty 4 Pc Makeup Set Peach Face Blush RiRi Gloss Mascara + Bag NEW",
+        "FENTY BEAUTY LIP & EYE KIT WITH MAKEUP BAG POUCH"
+      ]
+    },
+    {
+      "slug": "fisher-price",
+      "name": "Fisher-Price",
+      "query": "Fisher-Price baby sensory toys",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 7,
+        "max": 47.79
+      },
+      "brandMatchShare": 0.95,
+      "sampleTitles": [
+        "Fisher Price So Many Senses Gift Set, 4 Baby Sensory Toys With Fine Motor Activities",
+        "Fisher-Price Camp & Crinkle Gift Set 7 Piece Fishing & Hiking Baby Sensory Toys",
+        "Fisher-Price Mini Me Moments Reel Fun Fishing Gift Set, 4 Baby Toys for Newborn Sensory Pl"
+      ]
+    },
+    {
+      "slug": "fiskars",
+      "name": "Fiskars",
+      "query": "Fiskars gardening tool set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 4.65,
+        "max": 26.99
+      },
+      "brandMatchShare": 0.95,
+      "sampleTitles": [
+        "Hand Trowel - Fiber Composite Gardening Hand Tool with Hang Hole - Lawn and Yard",
+        "Fiskars 3pc Garden Tool Set w/ Trowel, Cultivator, and Transplanter BRAND NEW",
+        "Fiskars Multipurpose Planting Tool"
+      ]
+    },
+    {
+      "slug": "fitbit",
+      "name": "Fitbit",
+      "query": "Fitbit fitness tracker",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 15.95,
+        "max": 52.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Fitbit Fitness Tracker Charge 2 – Multiple Colors Available",
+        "Fitbit Inspire 3 Activity Tracker - FB424BKBK-US black - case only",
+        "Fitbit Inspire 2 Health and Fitness Tracker with Heart Rate HRM, 24/7"
+      ]
+    },
+    {
+      "slug": "flipbelt",
+      "name": "FlipBelt",
+      "query": "FlipBelt running belt",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 10,
+        "max": 46
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Flipbelt Running Belt Size Extra Large Black Activewear XL",
+        "FlipBelt Running Belt - Unisex",
+        "NEW FlipBelt Running Belt Unisex Large PINK Pockets BIKE HIKE TRAVEL FITNESS"
+      ]
+    },
+    {
+      "slug": "fluance",
+      "name": "Fluance",
+      "query": "Fluance turntable",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 14.99,
+        "max": 349.99
+      },
+      "brandMatchShare": 0.85,
+      "sampleTitles": [
+        "Fluance RT81+ Vinyl Turntable, VM95E Cartridge, Walnut",
+        "Fluance RT80 Classic High Fidelity Vinyl Turntable Record Player with Audio Technica AT91 ",
+        "Fluance RT81 Turntable with AT95E Cartridge, Belt Drive, Built-in Preamp, Adjustable Count"
+      ]
+    },
+    {
+      "slug": "fossil",
+      "name": "Fossil",
+      "query": "Fossil leather wallet",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 6.99,
+        "max": 49.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Vintage Fossil Leather Wallet Soft Leather Snap Closure Multi Card Bill Holder",
+        "NEW Fossil blue pebble leather women's wallet with gray interior",
+        "Vtg Fossil Leather Canvas Wallet New With Tags"
+      ]
+    },
+    {
+      "slug": "franklin-sensors",
+      "name": "Franklin Sensors",
+      "query": "Franklin Sensors stud finder",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 8.72,
+        "max": 43.2
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Lightweight EVA Case for Franklin Sensors Stud Finders - Travel-Friendly Design",
+        "Franklin Sensors M10 Stud Finder (3 Sensors & 1\" Max Detection Depth)",
+        "Franklin Sensors Professional Stud Finder M10 "
+      ]
+    },
+    {
+      "slug": "fujifilm",
+      "name": "Fujifilm",
+      "query": "Fujifilm instant camera",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 39.99,
+        "max": 119.95
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Fujifilm instax Mini SE Instant Camera with 10 Mini Film, Pink Exp 03/28",
+        "Fujifilm instax Mini SE Instant Camera w/Bonus 10 pack Mini Film -Various Colors",
+        "New FujiFilm Instax Mini SE Instant Print Film Camera"
+      ]
+    },
+    {
+      "slug": "funko",
+      "name": "Funko",
+      "query": "Funko pop vinyl figure",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 7,
+        "max": 37.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Viktor Minnesota Vikings Funko Pop Vinyl Figure Diseño Moderno Garantizado Pro",
+        "Funko Pop Vinyl Figure Captain America Infinity Saga #1476- Marvel",
+        "Spider-Man: Across The Spider-Verse Spider-Punk Unmasked Funko Pop Vinyl Figure #1411"
+      ]
+    },
+    {
+      "slug": "furhaven",
+      "name": "Furhaven",
+      "query": "Furhaven pet bed",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 7.22,
+        "max": 47.73
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Furhaven Pet Bed 18” Round For  Cats And Small Dogs",
+        "Furhaven Pet Bed for Dogs and Cats - Ultra Plush Curly Faux Fur and Suede",
+        "Furhaven Pet Bed for Dogs and Cats - Plush Long Faux Fur Round Ultra Calming"
+      ]
+    },
+    {
+      "slug": "furminator",
+      "name": "Furminator",
+      "query": "Furminator pet grooming brush",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 7.99,
+        "max": 22.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Furminator Pet Grooming Brush Deshedding Tool Rake for Dogs and Cats",
+        "FURminator Pet Brush Dog Grooming Comb, Small, Deshedding Edge Tool For Dogs",
+        "FURminator Undercoat deShedding Tool Deshedding Brush Small Cat P-92914"
+      ]
+    },
+    {
+      "slug": "gaiam",
+      "name": "Gaiam",
+      "query": "Gaiam yoga mat",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 9.99,
+        "max": 59.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Gaiam Yoga Mat Classic Print, 4mm Non-Slip Mat",
+        "Gaiam Yoga Mat Premium 68\"L x 24\"W x 6mm Thick, Indigo Point -⭐⭐⭐⭐⭐",
+        "GAIAM YOGA MAT PREMIUM - BERRY PINK - 68\"L X 24\"W X 4MM - BERRY PINK"
+      ]
+    },
+    {
+      "slug": "galison",
+      "name": "Galison",
+      "query": "Galison jigsaw puzzle",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 5,
+        "max": 19.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Galison Jigsaw Puzzle Butterfly Migration 1000 Pieces 20\" x 27\"",
+        "Galison \"Who Are You?\" Puzzle 1000 Pieces Jigsaw - NEW SEALED",
+        "Wendy Gold State Birds 1000 Piece Puzzle by Galison and Wendy Gold New Sealed"
+      ]
+    },
+    {
+      "slug": "garmin",
+      "name": "Garmin",
+      "query": "Garmin running watch",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 12,
+        "max": 179.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Garmin Forerunner 945 GPS Running Watch",
+        "Garmin Forerunner 55, GPS Running Watch with Daily Suggested Workouts, Up to 2 weeks of Ba",
+        "Garmin Forerunner 245 GPS Running Watch - Slate Gray 010-02120-00"
+      ]
+    },
+    {
+      "slug": "gerber",
+      "name": "Gerber",
+      "query": "Gerber multitool",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 8.67,
+        "max": 155
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Gerber Multitool Lockdown Pry EDC",
+        "Clip & Carry Kydex Multitool Sheath - For the Gerber MP600 - USA Made",
+        "Gerber Vise Mini Multitool E BLS"
+      ]
+    },
+    {
+      "slug": "giro",
+      "name": "Giro",
+      "query": "Giro bike helmet",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 7.99,
+        "max": 56.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Black GIRO Bicycle Helmet w/protective Carrying Black Case",
+        "Giro Transfer Adult Bike Helmet Burgundy Gray 2010 Good Condition",
+        "Giro Vasona MIPS Women's Bike Helmet Matte Black Universal Fit 50-57cm New"
+      ]
+    },
+    {
+      "slug": "glocusent",
+      "name": "Glocusent",
+      "query": "Glocusent book light",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 7.49,
+        "max": 24.87
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Glocusent Book Lights for Reading at Night, Rechargeable Book Light Clip on - 3",
+        "Glocusent Book Lights for Reading at Night, Rechargeable Reading Light with Slee",
+        "Glocusent Book Light & Neck Light, 100H/10H Reading Light for Books in Bed"
+      ]
+    },
+    {
+      "slug": "glow-recipe",
+      "name": "Glow Recipe",
+      "query": "Glow Recipe skincare gift set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 1.5,
+        "max": 110
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Glow Recipe Skincare Gift Set Pink Mini Tote Hue Drops Toner Pads NEW",
+        "Glow Recipe Skincare Gift Set Pink Mini Tote - Serums, Toner, Toner Pads, Creams",
+        "Glow Recipe Serum Stars Skincare 5-Piece Serum Toner Moisturizer Gift Set"
+      ]
+    },
+    {
+      "slug": "goal-zero",
+      "name": "Goal Zero",
+      "query": "Goal Zero camping lantern",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 19.99,
+        "max": 64.95
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "NEW Goal Zero CRUSH LIGHT Collapsible 60 Lumens Solar Lantern USB Rechargeable",
+        "Goal Zero Lighthouse Micro Charge USB Rechargeable Flashlight Lantern Power Bank",
+        "Goal Zero USB Lantern + Flashlight Light House Micro 120/150 Lumens NIB"
+      ]
+    },
+    {
+      "slug": "goodr",
+      "name": "Goodr",
+      "query": "Goodr sunglasses",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 5,
+        "max": 30
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "BRAND NEW goodr sunglasses",
+        "Goodr Sunglasses “It’s Not Black It’s Obsidian ” Black Frame Black Lens",
+        "Goodr Sunglasses Rainbow Runway Ready Sunglasses With Box & Pouch"
+      ]
+    },
+    {
+      "slug": "google",
+      "name": "Google",
+      "query": "Google nest hub",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 12.99,
+        "max": 189
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Google Nest Hub Wall Mount (Black or White) Free Shipping",
+        "Google Nest Hub Smart Display",
+        "Google Nest Hub (2nd Gen) + Wyze Bundles"
+      ]
+    },
+    {
+      "slug": "gopro",
+      "name": "GoPro",
+      "query": "GoPro action camera",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 9.95,
+        "max": 104
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "GoPro HERO12 Black - Waterproof Action Camera with 5.3K60 Ultra HD Video, 27MP Photos, HDR",
+        "GoPro HERO2 Action Camera Waterproof 11.0 MP Silver USB Lithium-Ion Battery",
+        "GoPro Hero3 Silver 11MP Action Camera"
+      ]
+    },
+    {
+      "slug": "gorjana",
+      "name": "Gorjana",
+      "query": "Gorjana gold bracelet",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 14.99,
+        "max": 94.64
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Gorjana Prism Alphabet Aqua String Bracelet Gold Plated Letter A",
+        "Gorjana Prism Alphabet Bright Pink String Bracelet Gold Plated Letter C",
+        "Gorjana Turqouise Bracelet With Gold Wishbone New With Tags Adjustable"
+      ]
+    },
+    {
+      "slug": "govee",
+      "name": "Govee",
+      "query": "Govee led strip lights",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 6.79,
+        "max": 49.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Govee RGBIC LED Strip Lights, Smart LED Lights for Bedroom, Bluetooth LED Lights",
+        "Govee 16.4ft RGBIC LED Strip Lights, LED Lights for Bedroom, APP Control",
+        "Govee RGBIC 3.28ft LED Strip Lights"
+      ]
+    },
+    {
+      "slug": "gregory",
+      "name": "Gregory",
+      "query": "Gregory hiking daypack",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 43.99,
+        "max": 159.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Gregory Z30 Hiking Backpack CrossFlo 30L Internal Frame Daypack NWOT",
+        "Gregory Resin 25 Backpack Mens One Size Obsidian Black 25L Hiking Daypack Nylon",
+        "Gregory Nano 24 Backpack Hiking Travel Daypack Hydration Moab Tan"
+      ]
+    },
+    {
+      "slug": "gymshark",
+      "name": "Gymshark",
+      "query": "Gymshark gym shorts",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 14.39,
+        "max": 27.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Gymshark Shorts Men’s Slim Fit White Arrival 7” Linerless Gym Running MEDIUM NEW",
+        "Gymshark Arrival 7” Shorts White Size Small Brand New",
+        "Gymshark Shorts Mens XL Slim Fit Arrival 7” Linerless Gym Running Train New"
+      ]
+    },
+    {
+      "slug": "hario",
+      "name": "Hario",
+      "query": "Hario pour over coffee maker",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 10.66,
+        "max": 134.94
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "LilyDrip for Hario Pour Over Coffee Maker",
+        "Hario V60 Plastic Coffee Dripper Pour over Cone Coffee Maker Size 02, Red NEW",
+        "Hario Paperless Coffee Dripper Filter CFOD-02, Pour over coffee maker Japan made"
+      ]
+    },
+    {
+      "slug": "harry-s",
+      "name": "Harry's",
+      "query": "Harry's razor gift set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 2.88,
+        "max": 24.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Harry's 5 Blade Men's Razor Set - Bright Orange",
+        "Harry's Razor Dark Blue w/ x2 Refill Cartridges and Travel Cover, New, NO BOX",
+        "Harry's Men's Razor 5-Blade Cartridges Refill (Pack of 4)"
+      ]
+    },
+    {
+      "slug": "hasbro",
+      "name": "Hasbro",
+      "query": "Hasbro board game",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 5.93,
+        "max": 25
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Sorry! Board Game for Kids Ages 6 and Up; Classic Hasbro Board Game; Each Player",
+        "NEW Monopoly Disney Mickey and Friends Edition Hasbro Board Game - FREE SHIPPING",
+        "Hasbro Gaming Trouble Board Game for Kids Ages 5 and Up 2-4 Players"
+      ]
+    },
+    {
+      "slug": "hoka",
+      "name": "Hoka",
+      "query": "Hoka running shoes",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 69,
+        "max": 119.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "HOKA Bondi 9 Road-Running Shoes - Men's Trainer Bondi 8 Sneaker USA Stk",
+        "Hoka One One Arahi 7 Black/White Women's Running Shoes US 9.5B 1147851-BWHT",
+        "Hoka One One Clifton 10 Running Men's Shoes - Black & White"
+      ]
+    },
+    {
+      "slug": "homesick",
+      "name": "Homesick",
+      "query": "Homesick scented candle",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 9,
+        "max": 35.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Fresh Bouquet Homesick Scented Candle",
+        "Housewarming Homesick Scented Candle ",
+        "Homesick Scented Candles for Home (Thanks) - 13.75 oz oz, Thanks "
+      ]
+    },
+    {
+      "slug": "hugger-mugger",
+      "name": "Hugger Mugger",
+      "query": "Hugger Mugger yoga bolster",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 24,
+        "max": 202.92
+      },
+      "brandMatchShare": 0.95,
+      "sampleTitles": [
+        "Hugger Mugger Yoga Bolster Purple 24” Rectangle Mat w/ Carry Straps",
+        "Hugger Mugger Pranayama Printed Yoga Bolster",
+        "Hugger Mugger Standard Yoga Bolster - Firm, Supportive, Handmade, Durable"
+      ]
+    },
+    {
+      "slug": "husky",
+      "name": "Husky",
+      "query": "Husky tool set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 17,
+        "max": 79.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "NEW Husky 52pc Homeowner's Tool Kit 1013957634 Lifetime Warranty + Carrying Case",
+        "Husky 5 Piece Plier and Wrench Set Multi-Tool Kit 1014 996 306",
+        "Husky 52 Piece Homeowners Tool Kit Set Household Repair Case Hammer 1013957634"
+      ]
+    },
+    {
+      "slug": "hydro-flask",
+      "name": "Hydro Flask",
+      "query": "Hydro Flask insulated water bottle",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 10,
+        "max": 58.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Hydro Flask Insulated Water Bottle, Grey/Yellow, 32oz",
+        "Hydro Flask Insulated Water Bottle 16 Oz Sapphire Blue Stainless Steel",
+        "Hydro Flask Wide Mouth Water Bottle 32 Oz Dew Insulated with Flex Cap NEW"
+      ]
+    },
+    {
+      "slug": "hyperice",
+      "name": "Hyperice",
+      "query": "Hyperice massage gun",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 24.95,
+        "max": 243.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Hyperice Hypervolt Bluetooth Cordless Handheld Percussion Massage Gun 5 Heads",
+        "Hyperice Hypervolt Bluetooth Percussion Massage Gun Gray/Black 5 Heads",
+        "Hyperice Hypervolt Plus BT Bluetooth Percussion Massage Gun Black QuietGlide"
+      ]
+    },
+    {
+      "slug": "hyperx",
+      "name": "HyperX",
+      "query": "HyperX gaming headset",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 10.99,
+        "max": 59.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Ideal Gaming Noise Reduction Microphone for HYPERX Cloud Alpha Gaming Headset",
+        "Replacement Mic for HyperX Cloud 2 II CloudX Core Pro Xbox PS4 PC Gaming Headset",
+        "Replacement Gaming Mic for HyperX Cloud Alpha Xbox PS4 Computer Gaming Headset"
+      ]
+    },
+    {
+      "slug": "ikea",
+      "name": "IKEA",
+      "query": "IKEA table lamp",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 6,
+        "max": 39.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Ikea Table Lamp (14\")",
+        "Ikea Table lamp",
+        "IKEA TOMELILLA Table Lamp Nickel Plated White w/E26Bulb Included 704.640.01-NEW"
+      ]
+    },
+    {
+      "slug": "instant-pot",
+      "name": "Instant Pot",
+      "query": "Instant Pot pressure cooker",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 4.25,
+        "max": 89.9
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Instant Pot Pressure Cooker Cookbook..., Jennifer Smith",
+        "Instant Pot Pro 6-Quart Electric Pressure Cooker, 10-in-1 Slow Cooker, Rice/Grain Cooker, ",
+        "Instant Pot Duo Plus 8 qt 9-in-1 Electric Pressure Cooker"
+      ]
+    },
+    {
+      "slug": "irobot",
+      "name": "iRobot",
+      "query": "iRobot robot vacuum",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 30,
+        "max": 167
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "iRobot Roomba 105 Combo Robot Vacuum & Mop with AutoEmpty Dock - Self-Empties for 75 Days,",
+        "iRobot Roomba Robotic Vacuum Cleaner Model 4108 in Sage Green (Not Tested)",
+        "iRobot i755020 Roomba i7 plus Wi-Fi Connected Robot Vacuum with Automatic Dirt Disposal (7"
+      ]
+    },
+    {
+      "slug": "jabra",
+      "name": "Jabra",
+      "query": "Jabra wireless earbuds",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 20,
+        "max": 103
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "OEM Jabra STEP Bluetooth Wireless Stereo Music Headphones Headset Earbuds Black",
+        "Jabra Elite Active 65t Earbuds True Wireless with Charging Case- Titanium Black",
+        "Jabra Sport Pace Wireless Bluetooth Earbuds Black New Sealed 100-97700000-02"
+      ]
+    },
+    {
+      "slug": "jade-yoga",
+      "name": "Jade Yoga",
+      "query": "Jade Yoga yoga mat",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 39.99,
+        "max": 92.95
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "JADE YOGA 668P VOYAGER PURPLE FOLDABLE TRAVEL YOGA MAT 68\" X 24\"",
+        "JADE YOGA HARMONY SKY BLUE NON SLIP NATURAL RUBBER MAT 3/16\" X 24\" X 68\" 368SKB",
+        "Jade Yoga - Voyager Natural Rubber Yoga Mat, Olive, 1/16\" 24\" x 68\" "
+      ]
+    },
+    {
+      "slug": "janome",
+      "name": "Janome",
+      "query": "Janome sewing machine",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 4,
+        "max": 349
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Foot Control Pedal Power Cord 033770217 Compatible with Janome Sewing Machine",
+        "Janome Sewing Machine Sewist 721 With Bonus Value Kit New",
+        "Janome Sewing Machine Model Heavy Duty HD1400 + Bonus Kit + Warranty"
+      ]
+    },
+    {
+      "slug": "jbl",
+      "name": "JBL",
+      "query": "JBL bluetooth speaker",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 19.99,
+        "max": 74.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "JBL GO3 Portable Bluetooth Waterproof Speaker, multiple colors!!!",
+        "JBL Go 3 Portable Waterproof & Dustproof IP67 Outdoor Wireless Bluetooth Speaker",
+        "JBL Go 4 Waterproof/Dustproof Bluetooth Portable Speaker Black/Blue/Red 7h"
+      ]
+    },
+    {
+      "slug": "jellycat",
+      "name": "Jellycat",
+      "query": "Jellycat stuffed animal plush",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 9.09,
+        "max": 61
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Jellycat Stuffed Animal Plush Toy, Amuseables Farfalle and Ravioli",
+        "Jellycat Stuffed Animal Plush Toy, Bashful Fox Cub",
+        "Jellycat Stuffed Animal Plush Toy, Strawberry Cream Blossom Bunny"
+      ]
+    },
+    {
+      "slug": "jetboil",
+      "name": "Jetboil",
+      "query": "Jetboil camping stove",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 12,
+        "max": 117.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Single Jetboil Stainless Steel Pot Support Hiking Cooking Stove Camping 🔥",
+        "Jetboil Stainless Steel Pot Support Hiking Cooking Camping Stove Pans Burner",
+        "Jetboil Jetpower 100g Camping Fuel Canister| Outdoors Camping Backpacking Stoves"
+      ]
+    },
+    {
+      "slug": "jo-malone",
+      "name": "Jo Malone",
+      "query": "Jo Malone perfume gift set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 15.8,
+        "max": 92.07
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Jo Malone Blackberry & Bay 3.4 oz Women's Eau de Cologne Spray Perfume New USA",
+        "Jo Malone Cologne Vials Signature Scents Women Perfume and Creme Gift Set",
+        "Jo Malone Cologne Collection Set 9ml*5 Spray for Women Perfume New Gift Set"
+      ]
+    },
+    {
+      "slug": "k9-ballistics",
+      "name": "K9 Ballistics",
+      "query": "K9 Ballistics pet bed",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 12.95,
+        "max": 282.09
+      },
+      "brandMatchShare": 0.75,
+      "sampleTitles": [
+        "4 rubber feet for K9 Ballistics pet beds",
+        "K9 Ballistics Tough Rectangle Bolster Dog Bed, Cover Black",
+        "k9 Ballistics Dog Bed Cover Only Rectangle Bolster XXL Titanium "
+      ]
+    },
+    {
+      "slug": "kala",
+      "name": "Kala",
+      "query": "Kala ukulele",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 25,
+        "max": 99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Kala KA-15S Soprano Ukulele Mahogany Top/Body Satin Brown 4-String",
+        "Kala Learn to Play Ukulele, Mahogany, Brown Model KALA-LTP-S2 MFD 2204  VINTAGE",
+        "Kala UC-T Foam Hardcase for Tenor Ukulele"
+      ]
+    },
+    {
+      "slug": "kate-spade",
+      "name": "Kate Spade",
+      "query": "Kate Spade crossbody bag",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 10,
+        "max": 121.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Kate Spade Leather Crossbody Bag",
+        "Kate Spade New York Womens Black Leather Adjustable Strap Crossbody Bag",
+        "Kate Spade New York Womens Cedar Street Magnolia Light Blue Crossbody Bag"
+      ]
+    },
+    {
+      "slug": "kelty",
+      "name": "Kelty",
+      "query": "Kelty camping chair",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 22.21,
+        "max": 94
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Kelty Tapestry Camp Chair - Folding Camping Chair 61511619TAP",
+        "Kelty Camp Chair",
+        "Kelty Camp Chair Canyon Brown/Beluga One Size 61511619TAP"
+      ]
+    },
+    {
+      "slug": "kendra-scott",
+      "name": "Kendra Scott",
+      "query": "Kendra Scott necklace",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 22,
+        "max": 29.45
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Kendra Scott Ari Heart Gold Pendant Necklace in Rose Quartz",
+        "Kendra Scott Elisa Silver Pendant Necklace In London Blue New",
+        "Kendra Scott Brynne Gold Plated Short Pendant Necklace In Shell"
+      ]
+    },
+    {
+      "slug": "keurig",
+      "name": "Keurig",
+      "query": "Keurig coffee maker",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 5.99,
+        "max": 187
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "KEURIG Coffee Maker B79/A RARE Steel Blue *Brand New*",
+        "Keurig Single-Serve Coffee Maker (From Holiday Inn Express) 110v US",
+        "Keurig K-Mini Mate Single-Serve K-Cup Pod Coffee Maker - Red"
+      ]
+    },
+    {
+      "slug": "keychron",
+      "name": "Keychron",
+      "query": "Keychron mechanical keyboard",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 44,
+        "max": 89.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Keychron C2PX-M1 Pro 8K QMK, Full Size Layout Wired Custom Mechanical Keyboard",
+        "Keychron K8 A TKL Wireless Mechanical Keyboard Aluminum Brow Switch",
+        "Keychron K8 Wireless Mechanical Keyboard White Backlight Gateron"
+      ]
+    },
+    {
+      "slug": "kiehl-s",
+      "name": "Kiehl's",
+      "query": "Kiehl's skincare gift set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 14.99,
+        "max": 109.33
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "KIEHL'S SKINCARE GIFT SET 6pc TRAVEL SIZE (0374)",
+        "Kiehl's Iconically Kiehl's Skincare Set Mini, Hydrating Serum, Eye, Moisturizer",
+        "NEW Kiehl's Since 1851  Destination Radiant Skincare Gift Set 3pc/100%AUTHENTIC"
+      ]
+    },
+    {
+      "slug": "kindle",
+      "name": "Kindle",
+      "query": "Kindle e reader",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 1,
+        "max": 98.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Item #79 Amazon Kindle E-Reader",
+        "Item #9 Amazon Kindle E-Reader",
+        "Item #49 Amazon Kindle E-Reader"
+      ]
+    },
+    {
+      "slug": "kitchenaid",
+      "name": "KitchenAid",
+      "query": "KitchenAid stand mixer",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 23.76,
+        "max": 99.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Meat Grinder Attachment for KitchenAid Stand Mixer Food Grinder for Kitchen Aid",
+        "Pasta Attachment for Kitchenaid Stand Mixer,Gourmet Pasta Attachments for Kit...",
+        "6QT Stainless Steel Mixer Bowl for Kitchenaid Stand Mixers Kitchen Aid Mixing"
+      ]
+    },
+    {
+      "slug": "kiwico",
+      "name": "KiwiCo",
+      "query": "KiwiCo stem building kit",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 9.99,
+        "max": 42.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "*BRAND NEW* KiwiCo Record Racer STEM kit for Educational Building",
+        "KiwiCo Civil Engineer Starter Kit STEM Earthquake Shake Table Building Set 9+",
+        "KiwiCo Eureka Crate Trashketball STEM Engineering DIY Basketball Building Kit"
+      ]
+    },
+    {
+      "slug": "klutz",
+      "name": "Klutz",
+      "query": "Klutz craft kit",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 4.61,
+        "max": 30.95
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Beadlings ( Bead Kit ): Make 24 Itty-Bitty Beaded Charms (Klutz Craft Kit)",
+        "Sew Mini Animals (Klutz Craft Kit) 8\" Length x 1.5\" Width x 9\" Height, New",
+        "KLUTZ Bath Bomb Scented Bakery Craft Kit Small"
+      ]
+    },
+    {
+      "slug": "kobo",
+      "name": "Kobo",
+      "query": "Kobo e reader",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 19,
+        "max": 79
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Reader Case DM Luna Case for Kobo Clara Agave Green Case",
+        "Kobo N647 Wireless e-Book Reader, 1GB Storage",
+        "Kobo Libra Colour 7\" Color E-Ink Touchscreen Waterproof eReader 32GB Black"
+      ]
+    },
+    {
+      "slug": "kong",
+      "name": "Kong",
+      "query": "Kong dog toy bundle",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 9.99,
+        "max": 56.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "KONG Dog Toy Bundle Lot of 4 - Extreme Bone, 2x Rings & Gyro Dispenser NEW",
+        "KONG Replacement Squeakers Large Dog Toy Squeakers 3 Packs Bundle (12 Total)",
+        "Small Dog Toy Bundle Plush Squeaky Llama Owl Christmas Present Plaid Bone Kong"
+      ]
+    },
+    {
+      "slug": "la-roche-posay",
+      "name": "La Roche-Posay",
+      "query": "La Roche-Posay skincare gift set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 6,
+        "max": 115.9
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "La Roche-Posay Skincare Sample Set 6pc Lipikar AP+ Toleriane Hyalu B5 New",
+        "La Roche-Posay Travel Skincare Set",
+        "La Roche-Posay Bright & Protect Skincare Discovery Sample Set - 5 Pieces"
+      ]
+    },
+    {
+      "slug": "laneige",
+      "name": "Laneige",
+      "query": "Laneige lip sleeping mask",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 5,
+        "max": 21.9
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Laneige Lip Sleeping Mask, Berry Mini- 3g",
+        "LANEIGE Lip Sleeping Mask Mini 0.10 oz Hydrating Berry Pink HH7001",
+        "LANEIGE Lip Sleeping Mask Vanilla Hydrating for Dry/Chapped Lips 0.7 oz"
+      ]
+    },
+    {
+      "slug": "le-creuset",
+      "name": "Le Creuset",
+      "query": "Le Creuset dutch oven",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 28.2,
+        "max": 250
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        " Le Creuset Signature Enameled Cast Iron 7.25 Qt. Round Dutch Oven Nuit # 28",
+        "Le Creuset Signature 5 Qt Cerise Red Cast Iron Oval Dutch Oven",
+        "Le Creuset Dutch oven 7.25qt"
+      ]
+    },
+    {
+      "slug": "le-labo",
+      "name": "Le Labo",
+      "query": "Le Labo perfume gift set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 5.95,
+        "max": 169
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Le Labo Eau de Parfum Perfume Sample 0.75ml/0.025fl.oz Vial - Choose Your Scent",
+        "Tubereuse 40 Le Labo perfume body oil 1/3 oz. roll-on (1)",
+        "Le Labo Another 13 - Eau de Parfum - Perfume Samples"
+      ]
+    },
+    {
+      "slug": "leapfrog",
+      "name": "LeapFrog",
+      "query": "LeapFrog learning toy",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 8.5,
+        "max": 64.95
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "LeapFrog My Own Leaptop Electronic Learning Toy for Ages 2+ Years",
+        "LeapFrog Busy Learning Bot Interactive Motor-Sensory Robot Toy",
+        "LeapFrog 2-in-1 LeapTop Touch Green Educational Learning Laptop Tablet Toy 2+"
+      ]
+    },
+    {
+      "slug": "leatherman",
+      "name": "Leatherman",
+      "query": "Leatherman multitool",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 12.99,
+        "max": 199.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "3 Sidekick Leatherman Multitools",
+        "Leatherman Multi-Tool",
+        "LEATHERMAN Wingman 14 in 1 Multitool W/ Spring-Action Pliers & Scissors Silver"
+      ]
+    },
+    {
+      "slug": "lego",
+      "name": "LEGO",
+      "query": "LEGO set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 5.89,
+        "max": 124.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "LEGO SET 40889 - Ideas Build, Paint & Play! NEW SEALED",
+        "LEGO Ideas FRIENDS Central Perk lego set # 21319 sealed mint 1070 pieces",
+        "LEGO Creator 31147 Retro Camera 3-in-1 261 pcs Complete Set Ages 8+"
+      ]
+    },
+    {
+      "slug": "leuchtturm1917",
+      "name": "Leuchtturm1917",
+      "query": "Leuchtturm1917 journal",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 12,
+        "max": 41
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Ruled A5 Leuchtturm1917 Journal",
+        "A5 Leuchtturm1917 Journal - Dotted",
+        "Plain 120gsm Edition - A5 Art Leuchtturm1917 Journal"
+      ]
+    },
+    {
+      "slug": "levi-s",
+      "name": "Levi's",
+      "query": "Levi's jeans",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 15.29,
+        "max": 38.9
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Relaxed Levi's Jeans in Light Blue size S",
+        "Levi's 511 Jeans| Size S",
+        "Levi's 28 x 28 (size 6) Women's 311 Shaping Skinny Jeans, Soft Black, Mid-Rise"
+      ]
+    },
+    {
+      "slug": "lezyne",
+      "name": "Lezyne",
+      "query": "Lezyne bike lights",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 14.02,
+        "max": 44.93
+      },
+      "brandMatchShare": 0.95,
+      "sampleTitles": [
+        "LEZYNE 30cm USB-C Cable for Bike Lights & Power Packs",
+        "LEZYNE Stick + Drive Rear Bike Lights",
+        "Lezyne Bicycle Rear LED Light KTV Drive"
+      ]
+    },
+    {
+      "slug": "liforme",
+      "name": "Liforme",
+      "query": "Liforme yoga mat",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 14.99,
+        "max": 124
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Liforme Yoga Mat Shoulder Strap Travel Bag Carry 28” X 6” (no Mat) NEW",
+        "NWT Liforme Yoga Mat Shoulder Strap BAG Travel Carry 28” x 6” Bag Only",
+        "Liforme Yoga Mat Travel Carrying Case (*No Mat*) Brand New, Never Used"
+      ]
+    },
+    {
+      "slug": "lion-brand",
+      "name": "Lion Brand",
+      "query": "Lion Brand knitting kit",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 3.57,
+        "max": 50
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Lion Brand Yarn Simply Scarves All In One Scarf Knit Kit W/Knitting Needles Red",
+        "New Vintage Lion Brand Yarn-A-Round Knitting Loom Kit With Needle Tools Booklet",
+        "Lion Brand Knitting Needles (Sizes 11 to 19)"
+      ]
+    },
+    {
+      "slug": "litter-robot",
+      "name": "Litter-Robot",
+      "query": "Litter-Robot self cleaning litter box",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 3.3,
+        "max": 260
+      },
+      "brandMatchShare": 0.4,
+      "sampleTitles": [
+        "1-10X Replacement Carbon Filters For Litter-Robot 4 Self-Cleaning Cat Litter Box",
+        "15V AC Adapter For Litter-Robot III Open Air Self Cleaning Litter Box Power Cord",
+        "15V Charger Fits for Litter-Robot III Open Air Self Cleaning Litter Box"
+      ]
+    },
+    {
+      "slug": "lodge",
+      "name": "Lodge",
+      "query": "Lodge cast iron skillet",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 12.9,
+        "max": 175
+      },
+      "brandMatchShare": 0.95,
+      "sampleTitles": [
+        "New Pre Seasoned Lodge Cast Iron Skillets W/ Classic Handles 6.5 Inch  ",
+        "Lehman's Lodge Cast Iron Skillet",
+        "9” Polished Lodge Cast Iron Skillet Shallow Side Made In USA"
+      ]
+    },
+    {
+      "slug": "logitech",
+      "name": "Logitech",
+      "query": "Logitech wireless mouse",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 11.87,
+        "max": 40
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Logitech Wireless Mouse M185 - ONLINE ONLY",
+        "LOGITECH Wireless Mouse M170 - Gray",
+        "Logitech Wireless Mouse M185 (Swift Grey)"
+      ]
+    },
+    {
+      "slug": "longchamp",
+      "name": "Longchamp",
+      "query": "Longchamp leather tote bag",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 29.95,
+        "max": 299.99
+      },
+      "brandMatchShare": 0.95,
+      "sampleTitles": [
+        "Longchamp Le Pliage Burgundy Solid Tote Bag Brown Leather Top Handle Gold HW",
+        "LONGCHAMP le Pliage Original Large Tote Bag Navy w/Tan Leather Handles",
+        "Longchamp Women Bags Crossbody bags Épure XS Tote bag Brown - Leather"
+      ]
+    },
+    {
+      "slug": "lululemon",
+      "name": "Lululemon",
+      "query": "Lululemon leggings",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 10,
+        "max": 78
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Lululemon Leggings Small Black",
+        "Lululemon Leggings Swift Speed High-Rise, Plus Size Luxtreme, 28 in W5CQ5S",
+        "Lululemon Leggings Black Camo 4"
+      ]
+    },
+    {
+      "slug": "luminolite",
+      "name": "LuminoLite",
+      "query": "LuminoLite book light",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 3.96,
+        "max": 23.15
+      },
+      "brandMatchShare": 0.5,
+      "sampleTitles": [
+        "OMNIHIL 5FT High Speed USB 2.0 Cable for LuminoLite 7 LED Book Light-(BK-02)",
+        "/LuminoLite Rechargeable Book Light, Reading Lights for Books in Bed, 3 Color...",
+        "Vekkia/LuminoLite Rechargeable Book Light, Reading Lights for Books in Black"
+      ]
+    },
+    {
+      "slug": "made-in",
+      "name": "Made In",
+      "query": "Made In chef knife",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 31.7,
+        "max": 129.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "JERO 9 Inch Chef's Knife - Sandvik 12C27 Stainless Steel - MADE IN PORTUGAL",
+        "Japanese kitchen chef knife santoku made in Japan 29cm 11,4\" new",
+        "Chinese Cleaver Butcher Chef Knife (Model FG) MADE IN JAPAN - FREE US SHIPPING"
+      ]
+    },
+    {
+      "slug": "magna-tiles",
+      "name": "Magna-Tiles",
+      "query": "Magna-Tiles magnetic building tiles",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 15,
+        "max": 99.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "MAGNA-TILES Magnetic Building Tiles for Ages 3-99 32 Piece Set Multicolor 02132",
+        "Magna-Tiles microMAGS Travel Spooky 24-Pc Magnetic Building Set - New Sealed Tin",
+        "MAGNA-TILES microMAGS 24 Piece Halloween Magnetic Building Tiles Travel Set"
+      ]
+    },
+    {
+      "slug": "maison-margiela",
+      "name": "Maison Margiela",
+      "query": "Maison Margiela perfume gift set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 2.94,
+        "max": 175
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Replica Beach Walk +By The Fireplace Maison Margiela Perfume Gift Set  7ml/ 7ml",
+        "Replica Lazy Sunday Morning Maison Margiela 3.4 oz EDT Perfume Women New In Box",
+        "Maison Margiela REPLICA 4pc Mini Perfume Gift Set 7ml Each Beach Walk Jazz Club"
+      ]
+    },
+    {
+      "slug": "makita",
+      "name": "Makita",
+      "query": "Makita cordless drill",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 10,
+        "max": 159
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Makita XFD16ZMakita Cordless Drill XFD16Z 1/2 Inch 18V LXT Bare Tool (Brushless Motor 970 ",
+        "Makita BDF452 Cordless Drill Bare 11-014",
+        "Makita DDF487 18V Brushless Cordless Driver Drill Power Tool"
+      ]
+    },
+    {
+      "slug": "manduka",
+      "name": "Manduka",
+      "query": "Manduka yoga mat",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 12.99,
+        "max": 110
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Manduka Yoga Mat Sports Towel Black White Party Dot Full Length",
+        "Manduka Yoga Mat JUMBO SIZE 32oz Wash & Refresh Essential Oil Lemongrass New ",
+        "Welcome by Manduka Sport Towel For Over Yoga / Fitness Mat- 70\" x 24\"- NEW"
+      ]
+    },
+    {
+      "slug": "marc-jacobs",
+      "name": "Marc Jacobs",
+      "query": "Marc Jacobs tote bag",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 15,
+        "max": 200
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Marc by Marc Jacobs Tote Bag Black Patent PVC Orange Double Handles",
+        "Marc Jacobs Tote Bag",
+        "Marc Jacobs canvas tote bag black"
+      ]
+    },
+    {
+      "slug": "marmot",
+      "name": "Marmot",
+      "query": "Marmot sleeping bag",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 58,
+        "max": 208.5
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Marmot TRAILS Long Lightweight Packable Sleeping Bag / Liner, New, old stock",
+        "Marmot Nanowave 45F Sleeping Bag Long Synthetic Ultralight Brick",
+        "Marmot Nanowave 45 Sleeping Bag"
+      ]
+    },
+    {
+      "slug": "mattel",
+      "name": "Mattel",
+      "query": "Mattel card game",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 2.59,
+        "max": 18.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Mattel Card Games - The Classic Game of UNO - Disney Princesses Series Family Game Night",
+        "Mattel - UNO Avengers Card Game - Marvel - New",
+        "MATTEL UNO FLIP Card Game Double Sided Cards Family Fun Strategy 2 10 Players Ne"
+      ]
+    },
+    {
+      "slug": "meater",
+      "name": "MEATER",
+      "query": "MEATER wireless meat thermometer",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 23.75,
+        "max": 80
+      },
+      "brandMatchShare": 0.95,
+      "sampleTitles": [
+        "Meater Wireless Meat Thermometer RT1-MT-MP01",
+        "Meater  33ft Wireless/Bluetooth Smart Meat Thermometer MT-ME01 Apption Labs new",
+        "MEATER Pro Smart Wireless Meat Thermometer 1000°F Long Range BBQ - New, E"
+      ]
+    },
+    {
+      "slug": "mejuri",
+      "name": "Mejuri",
+      "query": "Mejuri gold necklace",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 10.98,
+        "max": 400
+      },
+      "brandMatchShare": 0.55,
+      "sampleTitles": [
+        "Mejuri Gold Flower Cosmos Necklace Chain Pendant Women’s Minimalist Jewelry NEW",
+        "Mejuri 18k Gold Vermeil Bold Letter Pendant Necklace",
+        "Mejuri Solid Gold and Blue Topaz Necklace Charm Pendant 14K Yellow Gold"
+      ]
+    },
+    {
+      "slug": "melissa-doug",
+      "name": "Melissa & Doug",
+      "query": "Melissa & Doug kids craft kit",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 4.49,
+        "max": 26.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Melissa & Doug Kids Craft Kit Red Box Model 95667",
+        "Melissa & Doug Created by Me Christmas Ornaments Kids Craft Kit Metallic Paint",
+        "Melissa & Doug Created by Me! Plane Wooden Craft Kit, Model 9518"
+      ]
+    },
+    {
+      "slug": "meta-quest",
+      "name": "Meta Quest",
+      "query": "Meta Quest vr headset",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 12.95,
+        "max": 265.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Lens Cover and 1 Pair 3.5mm Earphones Headphones for Meta Quest Pro VR Headset",
+        "Meta Quest VR Headset with Controllers and PGA TOUR Golf+",
+        "Meta Quest – All in One Wireless VR Headset"
+      ]
+    },
+    {
+      "slug": "michael-kors",
+      "name": "Michael Kors",
+      "query": "Michael Kors crossbody bag",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 8,
+        "max": 79
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Michael Kors Crossbody Bag — Navy",
+        "New Michael Kors Crossbody Bag, Jet Set Line",
+        "Michael Kors Womens Brown Signature Print Adjustable Strap Crossbody Bag"
+      ]
+    },
+    {
+      "slug": "microsoft",
+      "name": "Microsoft",
+      "query": "Microsoft xbox controller",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 12.99,
+        "max": 65.43
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Wired  S- type Controller - For The Original Microsoft XBOX multiple Colors",
+        "Wireless Controller Keyboard Chatpad for Microsoft Xbox Series X/S Controller",
+        "Wireless Controller For Microsoft Xbox 360 & 360 Slim Windows System PC Laptop"
+      ]
+    },
+    {
+      "slug": "milwaukee",
+      "name": "Milwaukee",
+      "query": "Milwaukee cordless drill",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 30.01,
+        "max": 129.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Cordless Brushless 1/2-inch Drill Driver for Milwaukee 18V Battery TOOL ONLY",
+        "Milwaukee M12 12-Volt Lithium-Ion Cordless 3/8 in. Drill/Driver Kit with Two 1.5 Ah Batter",
+        "Milwaukee M18 18V Li - Ion Compact Brushless Cordless 1/2 In. Drill/Driver Kit"
+      ]
+    },
+    {
+      "slug": "moleskine",
+      "name": "Moleskine",
+      "query": "Moleskine sketchbook",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 12,
+        "max": 46.69
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Moleskine Sketchbooks",
+        "Moleskine Sketchbook - Black",
+        "Moleskine Sketchbook & Watercolor Pencil Set Hard Cover 5 x 8.25"
+      ]
+    },
+    {
+      "slug": "monos",
+      "name": "Monos",
+      "query": "Monos carry on luggage",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 24.99,
+        "max": 330
+      },
+      "brandMatchShare": 0.65,
+      "sampleTitles": [
+        "Monos Luggage Dust Bags Set of 2 Carry-On & Check-In Drawstring Storage",
+        "NEW Monos LC-ZM Check-In Medium Clear Luggage Cover Genuine OEM",
+        "Monos × Reformation Luggage Tag"
+      ]
+    },
+    {
+      "slug": "mophie",
+      "name": "Mophie",
+      "query": "Mophie power bank",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 5,
+        "max": 39.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Mophie Power Bank Portable Charger Battery Pack Pink 5200 mAh",
+        "Mophie Power Bank Snap+ Juice Pack Mini 5K & 15W Wireless MagSafe Charger Bundle",
+        "Mophie PowerStation mini Portable Power Bank USB-C - Black (PS-2025-5K)"
+      ]
+    },
+    {
+      "slug": "msr",
+      "name": "MSR",
+      "query": "MSR camping stove",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 7.7,
+        "max": 124
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Stainless Steel Espresso burner ring for MSR Camping Stoves",
+        "Titanium Espresso Burner Ring for MSR Camping Stoves",
+        "MSR Whisperlite Camping Stove O-Rings Set - Buna-N O Ring ORing - Free Shipping!"
+      ]
+    },
+    {
+      "slug": "muji",
+      "name": "Muji",
+      "query": "Muji storage bins",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 2.9,
+        "max": 147.99
+      },
+      "brandMatchShare": 0.6,
+      "sampleTitles": [
+        "MUJI Style Cat Pattern Storage Box with Lid Containers Organizer Bins Kitchen",
+        "Muji Enameled Square 6.3\" Compact Durable Food Storage Container",
+        "Muji Linen Storage Bag, White, Medium"
+      ]
+    },
+    {
+      "slug": "nalgene",
+      "name": "Nalgene",
+      "query": "Nalgene water bottle",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 6.99,
+        "max": 89.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Nalgene Water Bottle",
+        "Outward Bound Wide-Mouth 32 oz. Nalgene Water Bottle",
+        "\"Big Boy Club\" Nalgene Water Bottle"
+      ]
+    },
+    {
+      "slug": "nanoleaf",
+      "name": "Nanoleaf",
+      "query": "Nanoleaf hexagon light panels",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 29.95,
+        "max": 152.87
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Nanoleaf Shapes Hexagons Expansion Pack 3 Panels NL42-0001HX-3PK",
+        "Nanoleaf Shapes Hexagons Expansion Pack 3 LED Light Panels NL42-0001HX-3PK New",
+        "Nanoleaf Shapes Hexagons 3-Pack Expansion Smart LED Light Panels New Sealed"
+      ]
+    },
+    {
+      "slug": "nars",
+      "name": "NARS",
+      "query": "NARS makeup gift set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 7.79,
+        "max": 60.71
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "NARS Mini Orgasm Blush & Lip Gloss Duo – Buildable Shine, Travel Makeup Set",
+        "NARS 4pc Makeup Set: Lipstick, Lip Gloss, Bronzer, Eyeshadow New in Box US Ship",
+        "Sephora VIB Rouge Gift Box Set with NARS Makeup Compact Black"
+      ]
+    },
+    {
+      "slug": "nathan",
+      "name": "Nathan",
+      "query": "Nathan running belt",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 9.99,
+        "max": 32.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Nathan Running Belt Black 5K Running Marathon Zipper Mesh Pocket NEW $30",
+        "Nathan Running Belt The Zipster Lite Waist, 2 Zippers Pocket Storage, Large Grey",
+        "Nathan Hipster Running Belt - Waist Pack Lightweight Bounce Free - 4 Pockets"
+      ]
+    },
+    {
+      "slug": "national-geographic",
+      "name": "National Geographic",
+      "query": "National Geographic stem kit",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 5,
+        "max": 20
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "NATIONAL GEOGRAPHIC Butterfly Growing Kit - Habitat & Voucher included STEM NEW",
+        "National Geographic STEM Magic Chemistry Science Lab Chemistry Kit, Ages 8+",
+        "National Geographic Rock and Starter Kit STEM Includes 15 Specimens"
+      ]
+    },
+    {
+      "slug": "nespresso",
+      "name": "Nespresso",
+      "query": "Nespresso coffee pods",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 6.66,
+        "max": 34.98
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Starbucks Ristretto Shot by Nespresso Coffee Pods Dark Roast 57g Box of 10",
+        "Starbucks Blonde Espresso Roast by Nespresso Coffee Pods, Blonde Roast, 53g box of 10",
+        "STARBUCKS Nespresso Coffee Pods Iced Brown Sugar Cinnamon flavor"
+      ]
+    },
+    {
+      "slug": "nest",
+      "name": "Nest",
+      "query": "Nest scented candle",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 11.49,
+        "max": 40
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "NEST Fragrances Sparkling Cassis Scented Candle ~ 2oz / 57g / BNIB",
+        "NEST Fragrances Birchwood Pine Scented Candle 2oz Votive New in Box",
+        "Nest Fragrances Holiday Scented Candle Ornament 2 oz"
+      ]
+    },
+    {
+      "slug": "new-balance",
+      "name": "New Balance",
+      "query": "New Balance running shoes",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 36.99,
+        "max": 74.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "New Balance Running Shoes Fresh Foam Arishi v4 Unisex M6/W7.5 Black Sneakers",
+        "New Balance Men's XC-72 Running Shoes",
+        "NEW Mens New Balance Fresh Foam Arishi v4 Running Shoes, size 9.5"
+      ]
+    },
+    {
+      "slug": "new-york-puzzle-company",
+      "name": "New York Puzzle Company",
+      "query": "New York Puzzle Company jigsaw puzzle",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 14.99,
+        "max": 29.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Christmas Attic Puzzle 1000 Piece New York Puzzle Company Sealed New! U.S.A",
+        "NEW Caroling The New Yorker 100 Piece Mini Jigsaw Puzzle New York Puzzle Company",
+        "New York Puzzle Company \"Too Good To Waste\" 1000 Piece Jigsaw Puzzle"
+      ]
+    },
+    {
+      "slug": "nike",
+      "name": "Nike",
+      "query": "Nike running shoes",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 33,
+        "max": 140
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Nike Air Zoom Structure Men's Running Shoes White DA8535 100 New",
+        "Men's Green Nike Revolution Running Shoes",
+        "Nike Quest 5 Black Bright Crimson DD0204-005 Men's Running Shoes"
+      ]
+    },
+    {
+      "slug": "nikon",
+      "name": "Nikon",
+      "query": "Nikon camera lens",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 34.34,
+        "max": 198.79
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Nikon Zoom Nikkor 35-105mm 1:3.5-4.5 Camera Lens",
+        "Nikon NIKKOR Z 24-120mm f/4 S Lens",
+        "Nikon AF-S DX 18–70mm f/3.5–4.5G ED Lens – Versatile Zoom for Nikon F Mount"
+      ]
+    },
+    {
+      "slug": "ninja",
+      "name": "Ninja",
+      "query": "Ninja air fryer",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 27.21,
+        "max": 139.99
+      },
+      "brandMatchShare": 0.95,
+      "sampleTitles": [
+        "Ninja Air Fryer Pro XL 6-in-1 with 6.5 QT Capacity, Max Crisp, Air Fry, Air Roast, Bake, R",
+        "Ninja Air Fryer Pro XL 6-in-1 with 6.5 QT Capacity, Max Crisp, Air Fry, Air Roast, Bake, R",
+        "Ninja Air Fryer Pro, 5 Qt, 4-in-1, Grey, AF141 | Air fry, roast, reheat, dehydrate, 1750W,"
+      ]
+    },
+    {
+      "slug": "nintendo",
+      "name": "Nintendo",
+      "query": "Nintendo switch controller",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 8.99,
+        "max": 24.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        " Game Controller Compatible with Nintendo Switch Controller",
+        "Game Controller Compatible with Nintendo Switch Controller,Replacement for Switc",
+        "Nintendo Switch Controller Rock Candy Mario, Bowser, Luigi, Peach Licensed By Nintendo"
+      ]
+    },
+    {
+      "slug": "nitecore",
+      "name": "Nitecore",
+      "query": "Nitecore headlamp",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 14.95,
+        "max": 54.95
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Nitecore HA11 UHE Multipurpose Lightweight AA Headlamp",
+        "NITECORE Headband for H Series Headlamps  (HC60, HC65, etc)",
+        "Nitecore NU20 Classic 360 Lumen USB-C Lightweight Outdoor Headlamp + Nitecore Sticker"
+      ]
+    },
+    {
+      "slug": "nordic-ware",
+      "name": "Nordic Ware",
+      "query": "Nordic Ware baking sheet set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 15.3,
+        "max": 35
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Nordic Ware Naturals Prep Bake & Serve Aluminum Sheet Pans Set 4 New USA Silver",
+        "Nordic Ware 3-Piece Nonstick Baking Set – Includes 2 Half Sheet Pans and 1 Crisp",
+        "Set 4 Nordic Ware Naturals Aluminum Bakeware, 8-Sheets for Prep, Baking & Serve"
+      ]
+    },
+    {
+      "slug": "oakley",
+      "name": "Oakley",
+      "query": "Oakley sunglasses",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 34,
+        "max": 52.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "oakley sunglasses",
+        "NEW Oakley Sunglasses OO9438 EYE JACKET REDUX  943801 Black/ gray",
+        "Oakley Holbrook Sunglasses - Clear Frame /Blue Sapphire Iridium Polarized Lens"
+      ]
+    },
+    {
+      "slug": "olaplex",
+      "name": "Olaplex",
+      "query": "Olaplex hair care set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 19.88,
+        "max": 150
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Olaplex Hair Care Set (shampoo, conditioner, Mask) And Black Pouch",
+        "Olaplex Hair Care Set No 7 Bonding Oil Masks Wide Tooth Comb Satin Scrunchies",
+        "Olaplex Hair Care Set No.4 Shampoo 250mL + No.5 Conditioner 100mL NEW Sealed"
+      ]
+    },
+    {
+      "slug": "on",
+      "name": "On",
+      "query": "On running shoes",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 18,
+        "max": 119.85
+      },
+      "brandMatchShare": 0.65,
+      "sampleTitles": [
+        "adidas women Runfalcon 5 Wide Running Shoes",
+        "adidas men Runfalcon 5 Running Shoes",
+        "On Women's Cloud X Shift Running Shoes Sneakers Size 5.5W"
+      ]
+    },
+    {
+      "slug": "ooni",
+      "name": "Ooni",
+      "query": "Ooni pizza oven",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 24.99,
+        "max": 71.96
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "NEW OONI Pizza Oven Koda 16 Cover",
+        "Ooni Pizza Oven Brush",
+        "Ooni Pizza Oven Toy for Kids, Pretend Cooking Playset for Children Ages 3+"
+      ]
+    },
+    {
+      "slug": "osmo",
+      "name": "Osmo",
+      "query": "Osmo stem building kit",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 8.99,
+        "max": 79.99
+      },
+      "brandMatchShare": 0.95,
+      "sampleTitles": [
+        "Osmo Coding Family Bundle iPhone iPad Fire Tablet Stem Toy Complete",
+        "Osmo Genius Starter Kit for iPad Ages 6-10 New Open Box STEM Learning",
+        "Osmo Genius Kit Start Here Base + Games STEM Learning & Gaming Ages 5-12"
+      ]
+    },
+    {
+      "slug": "osprey",
+      "name": "Osprey",
+      "query": "Osprey hiking daypack",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 19.88,
+        "max": 175
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Osprey Daylite 13L Lightweight Hiking Daypack Backpack Black NEW No Tags",
+        "Osprey Daylite 13L Beige Nylon Hiking Daypack Backpack Padded Adjustable",
+        "Osprey Daylite Plus Backpack 20L Black Laptop Travel Hiking Daypack"
+      ]
+    },
+    {
+      "slug": "ouai",
+      "name": "Ouai",
+      "query": "Ouai hair care set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 14.99,
+        "max": 35
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "OUAI Hair Care Set Detox Shampoo Leave-In Conditioner Hair Oil Scalp & Scrub",
+        "OUAI Hair Care Set 3 fl oz Detox Shampoo, Leave-In, Hair Oil, Scrub",
+        "OUAI Go All The OUAI Hair Care Set Detox Shampoo+Leave-In+Oil+Scrub 3 oz"
+      ]
+    },
+    {
+      "slug": "oura",
+      "name": "Oura",
+      "query": "Oura smart ring",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 50,
+        "max": 299.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Oura Ring Gen 4 Gold Smart Ring - Size 8",
+        "Oura Smart Ring Gen 5 - Silver - Size 8",
+        "Oura Smart Ring Gen 5 - Gold - Size 11"
+      ]
+    },
+    {
+      "slug": "owala",
+      "name": "Owala",
+      "query": "Owala insulated water bottle",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 15.63,
+        "max": 33.24
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Owala  24 oz Water Bottle Black - Brand New With Slight Blemish Scratch or Dent",
+        "Owala 24 oz Insulated water bottle multicolor New",
+        "Owala FreeSip Insulated Stainless Steel Water Bottle Straw 32 oz  NutCracker"
+      ]
+    },
+    {
+      "slug": "oxo",
+      "name": "OXO",
+      "query": "OXO kitchen scale",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 18.75,
+        "max": 69.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "OXO Kitchen Scale",
+        "OXO Kitchen Scale 5924409 New in box",
+        "OXO 5Lb Food Scale with Pull Out Display: Kitchen Scale Backlit Electronic"
+      ]
+    },
+    {
+      "slug": "panasonic",
+      "name": "Panasonic",
+      "query": "Panasonic electric shaver",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 11.88,
+        "max": 175
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Panasonic Electric Shaver for Women, Cordless 4-Blade Shaver, Bikini Attachment, Pop-Up Tr",
+        "Panasonic Electric Shaver for Men, Wet Dry 3-Blade Razor",
+        "Panasonic Electric Shaver: rechargeable, 3-blade wet/dry, LCD screen, silver &amp; black |"
+      ]
+    },
+    {
+      "slug": "pandora",
+      "name": "Pandora",
+      "query": "Pandora charm bracelet",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 24.99,
+        "max": 125
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Pandora Charm Bracelet Collection",
+        "PANDORA CHARM BRACELET MICKEY MINNIE Christmas Valentine Gift  Box",
+        "Pandora Moments Barrel Clasp Snake Chain Bracelet"
+      ]
+    },
+    {
+      "slug": "parachute",
+      "name": "Parachute",
+      "query": "Parachute throw blanket",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 30.95,
+        "max": 109
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Parachute Soft Cotton Napping Throw Bed Blanket - Cove",
+        "Parachute Stripe Cotton Beach Blanket New Without Tags No Longer Available",
+        "Parachute Patchwork Throw Blanket 50 x 70 in Cotton Multicolor"
+      ]
+    },
+    {
+      "slug": "park-tool",
+      "name": "Park Tool",
+      "query": "Park Tool bike multitool",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 9.25,
+        "max": 37.95
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Park Tool I-Beam Multitool",
+        "Multitool Park Tool I-Beam 10 funzioni",
+        "Park Tool IB-3 I-Beam Mini Multitool Fold-up with Chain Tool"
+      ]
+    },
+    {
+      "slug": "patagonia",
+      "name": "Patagonia",
+      "query": "Patagonia fleece jacket",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 50,
+        "max": 159.99
+      },
+      "brandMatchShare": 0.95,
+      "sampleTitles": [
+        "Patagonia Men's Micro D® Fleece Jacket, New Navy",
+        "Patagonia Synchilla Deep Pile Fleece Jacket Womens Size XL Oatmeal",
+        "Patagonia Men's Synchilla® Fleece Jacket"
+      ]
+    },
+    {
+      "slug": "peak-design",
+      "name": "Peak Design",
+      "query": "Peak Design camera strap",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 24.99,
+        "max": 49.95
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "2x Peak Design Anchors Black & 2x Mounts Quick Release Camera Strap Hardware",
+        "Camera Wrist Strap Handmade Rattlesnake Southwest 15\" + Peak Design Anchor",
+        "Lanyard Style Pocket Camera Strap Black + Peak Design Anchor  40\" Adjustable"
+      ]
+    },
+    {
+      "slug": "petzl",
+      "name": "Petzl",
+      "query": "Petzl headlamp",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 19.95,
+        "max": 47.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Petzl Tikkina Black Hybrid LED Headlamp 300 Lumens  Brand New!!",
+        "PETZL TIKKINA Headlamp FREE SHIPPING",
+        "Petzl Tikkina Headlamp Red"
+      ]
+    },
+    {
+      "slug": "philips-hue",
+      "name": "Philips Hue",
+      "query": "Philips Hue smart bulb",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 7.99,
+        "max": 44.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Philips Hue A19 75W Smart LED Bulb White",
+        "Philips Hue White 100W A21 LED Smart Bulb Bluetooth NEW",
+        "Philips Hue Smart LED Flood Light Bulb BR30 Bluetooth Zigbee Soft White 2 Pack"
+      ]
+    },
+    {
+      "slug": "philips-norelco",
+      "name": "Philips Norelco",
+      "query": "Philips Norelco electric shaver",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 9.99,
+        "max": 87.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Philips Norelco Electric Shaver",
+        "Philips Norelco Electric Shaver 3600 Series Wet and Dry (S3243/91)... FREE S&H!",
+        "Philips Norelco Electric Shaver 3900 Wet/Dry w Charging Stand S3341/92 -SEALED #"
+      ]
+    },
+    {
+      "slug": "picassotiles",
+      "name": "PicassoTiles",
+      "query": "PicassoTiles magnetic building tiles",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 10.99,
+        "max": 30.24
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "PicassoTiles 4 Piece Yellow Race Car Track Long Magnetic Tiles",
+        "PicassoTiles 26pc Nano Magnetic Building Tiles Construction Set",
+        "PicassoTiles Magnet Tiles Building Blocks 8 Dinosaur  Action Figures"
+      ]
+    },
+    {
+      "slug": "plano",
+      "name": "Plano",
+      "query": "Plano tackle box",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 6.62,
+        "max": 48.93
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Clear Plano StowAway Tackle Box: Waterproof & Lightweight 5-9 Compartment Design",
+        "Plano 3400 WATERPROOF FISHING TACKLE BOX 0-Ring Seal",
+        "Plano 3600 StowAway Tackle Box - Corrosion-Resistant, Stackable, Clear Lid"
+      ]
+    },
+    {
+      "slug": "playmobil",
+      "name": "Playmobil",
+      "query": "Playmobil set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 8,
+        "max": 35
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "PLAYMOBIL - Ghostbusters - Spengler - Set 9346 - NEW. G8",
+        "Playmobil Special Plus - Gymnasts",
+        "Playmobil 70291 Fire Rescue Gift Set"
+      ]
+    },
+    {
+      "slug": "playstation",
+      "name": "PlayStation",
+      "query": "PlayStation dualsense controller",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 44.99,
+        "max": 74.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "DualSense Wireless Controller Sony PlayStation 5 PS5",
+        "PlayStation Sony PS5 DualSense Edge Wireless Controller - Midnight Black",
+        "PlayStation 5 DualSense Wireless Controller Starlight Blue"
+      ]
+    },
+    {
+      "slug": "pokemon",
+      "name": "Pokemon",
+      "query": "Pokemon cards",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 1.29,
+        "max": 24.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Pokemon Card Lot 100 AUTHENTIC Pokemon Cards - Guaranteed Ultra Rare + Holos!",
+        "Pokemon Cards",
+        "100 Pokemon Cards | 25 Holos | 2 Guranteed Ultra Rare! | FREE SHIPPING"
+      ]
+    },
+    {
+      "slug": "polaroid",
+      "name": "Polaroid",
+      "query": "Polaroid instant camera",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 20,
+        "max": 134.95
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "New Sealed Polaroid 600 Color Film for Polaroid 600 & I-Type Cameras - 8 Photos",
+        "POLAROID GO GEN 2 MINI INSTANT FILM CAMERA WHITE COMPACT POCKET NEW",
+        "📸 Polaroid Go Gen 2 Instant Camera + Clip Bundle- Sealed Box, Never Used"
+      ]
+    },
+    {
+      "slug": "powerblock",
+      "name": "PowerBlock",
+      "query": "PowerBlock adjustable dumbbells",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 20,
+        "max": 277
+      },
+      "brandMatchShare": 0.75,
+      "sampleTitles": [
+        "2 Pack Dumbbell Replacement Weight for PowerBlock Elite Series Dumbbells",
+        "PowerBlock Elite EXP Adjustable Dumbbells",
+        "PowerBlock Elite EXP Adjustable Dumbbells - 50 LBS"
+      ]
+    },
+    {
+      "slug": "prismacolor",
+      "name": "Prismacolor",
+      "query": "Prismacolor colored pencils",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 1.25,
+        "max": 84.95
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Prismacolor Colored Pencils, Soft Core, Assorted Colors for Light or Dark Paper",
+        "Vintage Lot Of 29 Eagle Prismacolor Colored Pencils Unsharpened",
+        "Prismacolor Premier Soft Core Colored Pencils, White PC 938"
+      ]
+    },
+    {
+      "slug": "pura",
+      "name": "Pura",
+      "query": "Pura smart diffuser",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 12.49,
+        "max": 55
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "(10 Pack) Pura Smart Diffuser Compatible Replacement Wick ONLY",
+        "PACK OF 5 - Capri Blue Volcano Pura Smart Diffuser Fragrance Refills Scent Vials",
+        "PACK OF 2 - Capri Blue Volcano Pura Smart Diffuser Fragrance Refills Scent Vials"
+      ]
+    },
+    {
+      "slug": "ralph-lauren",
+      "name": "Ralph Lauren",
+      "query": "Ralph Lauren polo shirt",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 22.99,
+        "max": 53.1
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Polo Ralph Lauren Men’s Polo Shirt Light Blue Pony Logo NWOT Size 2XL",
+        "Polo Ralph Lauren Crew Neck Short Sleeve Men T Shirt Ink Color",
+        "Polo Ralph Lauren Orange Solid Classic Fit Knit Polo Shirt Logo Size L"
+      ]
+    },
+    {
+      "slug": "rapala",
+      "name": "Rapala",
+      "query": "Rapala fishing lure kit",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 10,
+        "max": 30
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Rapala Essentials Kit REKT Assorted Freshwater Fishing Baits & Lures, Multicolor",
+        "rapala bass trophy kit 5 lure variety pack",
+        "Rapala Blue Fox Salmon Trophy Kit KS4 5 Lures"
+      ]
+    },
+    {
+      "slug": "rare-beauty",
+      "name": "Rare Beauty",
+      "query": "Rare Beauty blush",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 5,
+        "max": 18.89
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Rare Beauty By Selena Gomez Soft Pinch Dewy Liquid Blush - 0.25oz  -  Happy",
+        "Mini Rare Beauty Soft Pinch Liquid Blush in shade Grateful (MSRP $16)",
+        "Rare Beauty Soft Pinch Liquid Blush Long Lasting Smooth Makeup Various Shades"
+      ]
+    },
+    {
+      "slug": "ravensburger",
+      "name": "Ravensburger",
+      "query": "Ravensburger jigsaw puzzle",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 8,
+        "max": 152.88
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "NEW RAVENSBURGER Jigsaw Puzzle 3000 Pieces Animal Kingdom",
+        "NEW RAVENSBURGER Jigsaw Puzzle 18000 Pieces Movie TV Theme Star Wars",
+        "Ravensburger Puzzle 1000 Piece Underwater Fun - #81359 New"
+      ]
+    },
+    {
+      "slug": "ray-ban",
+      "name": "Ray-Ban",
+      "query": "Ray-Ban sunglasses",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 34.99,
+        "max": 55.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Ray-Ban Sunglasses RB3025 Aviator Gradient Gold Frame Light Brown Lens 58mm",
+        "Ray-Ban Sunglasses RB3025 Aviator Classic Black Frame Polarized Green Lens 58mm",
+        "Ray-Ban Sunglasses RB3025 Aviator Classic Gold Frame Polarized Brown Lens 58mm"
+      ]
+    },
+    {
+      "slug": "razer",
+      "name": "Razer",
+      "query": "Razer gaming headset",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 18.85,
+        "max": 59
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Level Up Your Game with This Razer Gaming Headset and 50mm Audio Drivers",
+        "Razer - Kraken Kitty V3 X Wired Over-the-Ear Gaming Headset for PC, Mac, Play...",
+        "Razer BlackShark V2 X Wired Gaming Headset Xbox PS5 PC Switch 3.5mm"
+      ]
+    },
+    {
+      "slug": "rei-co-op",
+      "name": "REI Co-op",
+      "query": "REI Co-op hiking daypack",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 12.64,
+        "max": 149.99
+      },
+      "brandMatchShare": 0.5,
+      "sampleTitles": [
+        "REI Co-Op Flash 22 gray lightweight DayPack Hiking",
+        "REI Co-op Women’s Rucksack 28L Backpack Teal Ripstop Hiking Daypack Travel Bag",
+        "REI Co-op Trail Hydro 20L Hydration Hiking Backpack Daypack Orange"
+      ]
+    },
+    {
+      "slug": "riedel",
+      "name": "Riedel",
+      "query": "Riedel wine glass set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 19.99,
+        "max": 50
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Riedel Vivant Set 2 Stemless Clear Crystal Merlot Wine Glasses Open Box Etched",
+        "Riedel Ouverture Red Wine Glasses, Set of 2 (6408/00)",
+        "Riedel O Range Stemless Riesling / Sauvignon Blanc Glass - Set of 2 - 0414/15"
+      ]
+    },
+    {
+      "slug": "ring",
+      "name": "Ring",
+      "query": "Ring video doorbell",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 6.98,
+        "max": 215.98
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Adjustable Doorbell Angle Mount for Ring Video Doorbell 2/3/3Plus/4",
+        "Ring Video Doorbell 1080p HD Camera WI-FI Night Vision Motion Detection Wireless",
+        "Ring Chime (2nd Gen) Wi-Fi Doorbell Chime for Ring Video Doorbells & Cameras"
+      ]
+    },
+    {
+      "slug": "roborock",
+      "name": "Roborock",
+      "query": "Roborock robot vacuum",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 18.99,
+        "max": 287.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Roborock Official 480 ml Floor Cleaning Solution for Robot Vacuums",
+        "Roborock Q8 Max Robot Vacuum and Mop with Obstacle Avoidance, LiDAR Navigation, 5500Pa Suc",
+        "Roborock S8 Pro Ultra Robot Vacuum with RockDock Ultra"
+      ]
+    },
+    {
+      "slug": "ryobi",
+      "name": "Ryobi",
+      "query": "Ryobi cordless drill",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 20.5,
+        "max": 84.99
+      },
+      "brandMatchShare": 0.95,
+      "sampleTitles": [
+        "Ryobi ONE+ 18V Drill/Driver Bubble Level Attachment",
+        "Ryobi ONE+ 18V 3/8in Keyless Drill/Driver Kit 1.5Ah Li-Ion+Charger",
+        "Ryobi ONE+ 18V Cordless 3/8 in. Drill/Driver PCL201 (Tool Only) O.B."
+      ]
+    },
+    {
+      "slug": "sakura",
+      "name": "Sakura",
+      "query": "Sakura fineliner pen set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 7.95,
+        "max": 19.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Sakura Pigma Micron 6 Black Archival Ink Fineliner Pens 005-08 Set 30062 NEW",
+        "Sakura Pen Touch Marker 0.7 Extra Fine 5 colors",
+        "Sakura Pigma Micron 05 Fineliner Pen Set, 0.45mm Tip Width, 2 Pack Black"
+      ]
+    },
+    {
+      "slug": "salomon",
+      "name": "Salomon",
+      "query": "Salomon trail running shoes",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 49.95,
+        "max": 135
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Men's NEW Salomon XR Mission Gray Blue Green Quicklace Trail Running Shoes Sz 10",
+        "Salomon SpeedCross 5 Trail Running Shoes Black 475678 Mens Size 10",
+        "Salomon Mens sz 12  Speedcross 3 CS Trail Running Shoes Grey Athletic Sneaker"
+      ]
+    },
+    {
+      "slug": "samsung",
+      "name": "Samsung",
+      "query": "Samsung galaxy buds",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 36.35,
+        "max": 95
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Samsung Galaxy Buds2 PRO R510 Noise Cancelling Water Resistant Earbuds BRAND NEW",
+        "Samsung Galaxy Buds Core SM-R410  (Black)",
+        "Samsung Galaxy Buds FE White Wireless Bluetooth In-Ear Earbuds w/ Built-In Mic"
+      ]
+    },
+    {
+      "slug": "schoolhouse",
+      "name": "Schoolhouse",
+      "query": "Schoolhouse table lamp",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 6.99,
+        "max": 350
+      },
+      "brandMatchShare": 0.6,
+      "sampleTitles": [
+        "Crosby Schoolhouse Desk Lamp Black - Threshold: Adjustable Stand ETL",
+        "New  Schoolhouse Milk Glass Tall Table Lamp Vintage Bedroom Stand Light Fixture",
+        "Small Schoolhouse Milk Glass Tall Table Lamp"
+      ]
+    },
+    {
+      "slug": "seiko",
+      "name": "Seiko",
+      "query": "Seiko automatic watch",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 167,
+        "max": 299.98
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Seiko 5 Automatic 21 Jewel Black Dial Day/Date Analog SNK381K1 30M Mens Watch",
+        "Seiko 5 Automatic Blue Dial Stainless Steel Men's Watch SNXS77",
+        "Seiko Series 5 Automatic Black Dial Mens Watch SNXS79K1"
+      ]
+    },
+    {
+      "slug": "sennheiser",
+      "name": "Sennheiser",
+      "query": "Sennheiser headphones",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 24.95,
+        "max": 149.95
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Sennheiser HD 400S Black Around-Ear Headphones Noise Isolation Headset Deep Bass",
+        "Sennheiser HP 02 Stereo On-Ear Headphones with 39\" Cable",
+        "Sennheiser HD 599SE Open Back Headphones"
+      ]
+    },
+    {
+      "slug": "shark",
+      "name": "Shark",
+      "query": "Shark cordless vacuum",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 25.99,
+        "max": 199.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Shark Cordless Vacuum Cleaner, HEPA Filter, Lightweight, Portable, Rechargeable, Pet Hair ",
+        "Shark Cordless Vacuum Detect Pro Auto-Empty System with PowerFins Brushroll, Stick/Handhel",
+        "Shark PowerPro Flex Reveal Plus Cordless Vacuum - IZ382H"
+      ]
+    },
+    {
+      "slug": "shimano",
+      "name": "Shimano",
+      "query": "Shimano fishing rod",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 15.99,
+        "max": 99.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Shimano FXS-C2 Spinning Rod 2-Piece 7' 0\" Medium Heavy  FXS70MHC2",
+        "Shimano FX Series Spinning Rod",
+        "Shimano Stimula Spinning Rod STS-2C 2-Piece 7' 0\" Medium STS70M2C"
+      ]
+    },
+    {
+      "slug": "shun",
+      "name": "Shun",
+      "query": "Shun chef knife",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 79.95,
+        "max": 164.95
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Shun Sora 6-Inch Chef's Knife",
+        "Shun Sora VB0706 Knife – Chef’s Knife ",
+        "Shun 8\" Chef's Knife NEW !!"
+      ]
+    },
+    {
+      "slug": "simple-human",
+      "name": "Simple Human",
+      "query": "Simple Human trash can",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 16.8,
+        "max": 131.84
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Simple Human Custom Fit Trash Can Liners  Code J 20-Count 30-45 Liter  NEW",
+        "Simple Human Mini Counter Top Trash Can Gray Trim In The Box New 0.4 Gal",
+        "4X Simple Human Type H Trash Bags for 30-35L Cans 20 Ct Each"
+      ]
+    },
+    {
+      "slug": "singer",
+      "name": "Singer",
+      "query": "Singer sewing machine",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 11.99,
+        "max": 219.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Singer All Purpose Sewing Machine Oil, 3.38-Fluid Ounce ",
+        "Singer Sewing Machine Flat Slotted Key For Bentwood Case ",
+        "SINGER Universal Hard Case Sewing Machine Carrying Storage Heavy Duty (Black)"
+      ]
+    },
+    {
+      "slug": "smartwool",
+      "name": "Smartwool",
+      "query": "Smartwool running socks",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 13.5,
+        "max": 45.98
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "3 Pack Smartwool Cold Weather Run Merino Wool Crew Running Socks Unisex Sports L",
+        "Smartwool Men's Targeted Cushion Low Ankle Running Socks",
+        "Smartwool Women's Performance  Zero Cushion Ankle Running Socks"
+      ]
+    },
+    {
+      "slug": "sol-de-janeiro",
+      "name": "Sol de Janeiro",
+      "query": "Sol de Janeiro body mist",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 5,
+        "max": 34.9
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Sol De Janeiro Body Mist Brazilian Crush Cheirosa 71 3.0 Oz Unisex",
+        "Sol de Janeiro Brazilian Crush Cheirosa Hair & Body Mist Set 71, 40, & 62",
+        "Sol de Janeiro Refresco Paraiso Women’s Body Mist Spray 3 fl oz Regular"
+      ]
+    },
+    {
+      "slug": "solo-stove",
+      "name": "Solo Stove",
+      "query": "Solo Stove fire pit",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 16.98,
+        "max": 75.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "20'' Fire Pit Mat for Solo Stove Mesa/XL Tabletop Fire Pit,4-Layer Fireproof Hea",
+        "Tabletop Fire Pit Mat for Solo Stove Mesa XL, Heat Resistant Mat for Solo Stove",
+        "NEW Solo Stove Bonfire Shelter Round Fire Pit Cover Weather Resistant Black"
+      ]
+    },
+    {
+      "slug": "sonos",
+      "name": "Sonos",
+      "query": "Sonos bluetooth speaker",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 3,
+        "max": 339
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Sonos Move 2 - White - Wireless Portable Bluetooth Speaker",
+        "Sonos Era 100 SL - Compact, Microphone-Free Speaker with WiFi, Bluetooth - Black",
+        "Sonos Roam 2 | Leichter, mobiler und wasserdichter Speaker mit Bluetooth, WLAN, mindestens"
+      ]
+    },
+    {
+      "slug": "sony",
+      "name": "Sony",
+      "query": "Sony headphones",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 16.14,
+        "max": 86.22
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Sony WH-CH520 Wireless On-Ear Headphones Blue",
+        "Sony WH-CH520 On-Ear Wireless Bluetooth Headphones – 50H Battery, Mic, Beige",
+        "Sony MDR-ZX110 Wired On-Ear Headphones, Black"
+      ]
+    },
+    {
+      "slug": "squishmallows",
+      "name": "Squishmallows",
+      "query": "Squishmallows stuffed animal plush",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 8,
+        "max": 21.25
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Squishmallows Joldy Mini Bat Plush Halloween Washable Stuffed Animal 2023",
+        "Squishmallows Wendy Frog Plush Stuffed Animal 8\" Kellytoy Soft Plush",
+        "Squishmallows Flip A Mallows 8 inch Caedyn & Caedia Stuffed Animal Plush Toy"
+      ]
+    },
+    {
+      "slug": "staedtler",
+      "name": "Staedtler",
+      "query": "Staedtler fineliner pen set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 4.33,
+        "max": 19.95
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Staedtler Triplus Fineliner Pens Set of 6 334 SB6V Assorted Colors Fine Tip",
+        "Staedtler Triplus Fineliner Marker Pens, Pack of 12 with case",
+        "Staedtler Triplus Fineliner 0.3Mm Pens 12 Color Set"
+      ]
+    },
+    {
+      "slug": "stanley",
+      "name": "Stanley",
+      "query": "Stanley insulated tumbler",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 8.99,
+        "max": 50
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Stanley Insulated Tumbler Set 3pc 40oz Stainless Steel w/Handle Lid Straw",
+        "Water Bottle Carrier Bag with Pouch Pocket for Stanley Cup 40 Oz Tumbler Pouch",
+        "Stanley Quencher H2.0 40oz Stainless Steel Insulated Tumbler w/ Handle, Straw"
+      ]
+    },
+    {
+      "slug": "staub",
+      "name": "Staub",
+      "query": "Staub dutch oven",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 36.58,
+        "max": 185
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Staub Cast Iron Round Dutch Oven Dark Blue 7 Quarts",
+        "Staub Stoneware 0.75 qt, Pumpkin, Petite Dutch Oven, Burnt Orange",
+        "STAUB 3 Piece Mini Heart Dutch Oven Set"
+      ]
+    },
+    {
+      "slug": "steelseries",
+      "name": "SteelSeries",
+      "query": "SteelSeries gaming headset",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 10.48,
+        "max": 69.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "SteelSeries 3H USB Stereo Gaming Headset",
+        "SteelSeries ChatMix Dial and cables set For Arctis 3 5 & 7 Gaming Headset",
+        "New Open Box SteelSeries Arctis Nova 1 Over-Ear Gaming Headset"
+      ]
+    },
+    {
+      "slug": "stonemaier",
+      "name": "Stonemaier",
+      "query": "Stonemaier board game",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 10,
+        "max": 50
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Charterstone Recharge Pack STM701 - Stonemaier Board Game - Second Campaign",
+        "VITICULTURE METAL COINS Lira $1 $2 $5 Stonemaier Board Game",
+        "Smitten 2 Board Game by Stonemaier Games"
+      ]
+    },
+    {
+      "slug": "strathmore",
+      "name": "Strathmore",
+      "query": "Strathmore sketchbook",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 6.77,
+        "max": 27.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Strathmore Sketchbook 18\"x24\"",
+        "Strathmore Sketchbook 11\" x 14\" Hardbound",
+        "Strathmore 400 Series Sketch Pad, 5.5x8.5 inch, 100 Sheets - Artist Sketchbook f"
+      ]
+    },
+    {
+      "slug": "suunto",
+      "name": "Suunto",
+      "query": "Suunto running watch",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 17,
+        "max": 349
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "SUUNTO Run Running GPS Sports Watch with Silicone Strap, 1.32\" AMOLED Touchscreen w/Crown ",
+        "SUUNTO Race S GPS Sports Watch, 1.32\" AMOLED Touchscreen w/Crown, 13 Days Battery Life, Tr",
+        "Suunto n3 GPS Running Watch Black MSN Direct SS010722220 w/ Charger, Manuals, CD"
+      ]
+    },
+    {
+      "slug": "swatch",
+      "name": "Swatch",
+      "query": "Swatch wristwatch",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 15,
+        "max": 233.82
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Vintage Pop Swatch Wristwatch – Magenta & Purple Abstract Swirl Pattern Dial and Strap (In",
+        "Swatch Royal Pop Pocket Watch to Wristwatch Conversion Kit",
+        "New Swiss Limited Swatch Nature Blur SUOG119  41MM Frosted  Green Wristwatch"
+      ]
+    },
+    {
+      "slug": "t3",
+      "name": "T3",
+      "query": "T3 hair styling tool",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 11.99,
+        "max": 237.99
+      },
+      "brandMatchShare": 0.7,
+      "sampleTitles": [
+        "T3 Hair Tools Mixed Hair Care Sets",
+        "T3 Edge Heated Styling Brush Graphite Ceramic Hair Straightener Volumizer Tool",
+        "T3 Smoothing Comb Attachment Hair Styling Tool"
+      ]
+    },
+    {
+      "slug": "telfar",
+      "name": "Telfar",
+      "query": "Telfar shopping bag tote",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 67.49,
+        "max": 250
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Telfar Medium Jelly Shopping Bag Purple Clear Tote Handbag",
+        "Telfar Shopping Bag Medium Metallic Gold Vegan Leather Tote with Pouch",
+        "Telfar Bag Medium Eggplant Shopping Tote Purple NWT"
+      ]
+    },
+    {
+      "slug": "the-north-face",
+      "name": "The North Face",
+      "query": "The North Face puffer jacket",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 77.4,
+        "max": 180
+      },
+      "brandMatchShare": 0.95,
+      "sampleTitles": [
+        "THE NORTH FACE PUFFER JACKET MODEL 700 (SMALL TO 2XL)",
+        "North Face Puffer Jacket",
+        "The North Face Mens 1996 Retro Nuptse 700 Down Puffer Jacket Black"
+      ]
+    },
+    {
+      "slug": "the-ordinary",
+      "name": "The Ordinary",
+      "query": "The Ordinary skincare gift set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 13,
+        "max": 49.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "The Ordinary Mini Discovery Set Travel Size Skincare Kit Hydrating Exfoliating",
+        "The Ordinary the Daily Set, Daily Skincare Routine with Squalane Cleanser, Hyalu",
+        "THE ORDINARY  The Mini Discovery Skincare Gift 6-piece Set NEW"
+      ]
+    },
+    {
+      "slug": "therabody",
+      "name": "Therabody",
+      "query": "Therabody massage gun",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 86.98,
+        "max": 200
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Therabody ,Theragun Relief Percussion Massage Gun, Handheld Ergonomic, Sand ,NEW",
+        "Therabody Theragun Relief Quiet Massage Gun, Black",
+        "Therabody Theragun Relief Massage Gun - Seafoam"
+      ]
+    },
+    {
+      "slug": "thermopro",
+      "name": "ThermoPro",
+      "query": "ThermoPro meat thermometer",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 9.95,
+        "max": 59.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Replacement ThermoPro Meat Thermometer Probes TP25 TP20 TP08S TP829 TP17 TP16",
+        "ThermoPro Meat Thermometer",
+        "ThermoPro TP01S Instant Read Meat Thermometer"
+      ]
+    },
+    {
+      "slug": "thermoworks",
+      "name": "ThermoWorks",
+      "query": "ThermoWorks meat thermometer",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 25,
+        "max": 113.85
+      },
+      "brandMatchShare": 0.95,
+      "sampleTitles": [
+        "New ThermoWorks TW362XX Replacement Probe for TW362A TW362B Cooking Thermometer",
+        "ThermoWorks TW362B The Original Cooking Thermometer Timer New Sealed",
+        "ThermoWorks ThermoPop Digital Meat Thermometer Backlit Thermocouple Pink"
+      ]
+    },
+    {
+      "slug": "tile",
+      "name": "Tile",
+      "query": "Tile bluetooth tracker",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 14,
+        "max": 30.98
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Tile Mate Bluetooth Item Tracker for Keys, Bags and More Versatile Tracker",
+        "4 Pack for Tile Life360 Mate 2024/2022 Bluetooth Tracker Adhesive Black",
+        "Tile by Life360 Bluetooth Tracker and Item Finder (T1801A) - NEW - SEALED BOX"
+      ]
+    },
+    {
+      "slug": "timberland",
+      "name": "Timberland",
+      "query": "Timberland boots",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 24,
+        "max": 267.75
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Custom Handmade Timberland Boots - Waterproof and Stylish Men's Footwear",
+        "TIMBERLAND INSULATED WATERPROOF BOOTS MENS US SIZE 8.5 IN EXCELLENT CONDITION",
+        "New Never Worn Work Boots Men’s Size 14W Timberlands Brown Leather Boots 6 Inch"
+      ]
+    },
+    {
+      "slug": "timex",
+      "name": "Timex",
+      "query": "Timex field watch",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 35.46,
+        "max": 89
+      },
+      "brandMatchShare": 0.95,
+      "sampleTitles": [
+        "Timex Expedition Field Metal Tech Black/Brown Mens Watch T49631",
+        "Timex TW4B16000 | Men's Expedition Field | Brown Leather Wrist Watch | Blue Dial",
+        "Timex® Expedition® Field Metal Watch, Green Dial w/Brown Leather, T40051WX NIB"
+      ]
+    },
+    {
+      "slug": "tissot",
+      "name": "Tissot",
+      "query": "Tissot automatic watch",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 3,
+        "max": 207.65
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Tissot Le Locle Automatic Diamonds Mother of Pearl Black Dial Silver Steel Strap Watch For",
+        "Tissot Bellissima Automatic Silver Dial Blue Leather Strap Watch For Women - T126.207.16.0",
+        "Tissot Bellissima Automatic Silver Dial Silver Steel Strap Watch For Women - T126.207.11.0"
+      ]
+    },
+    {
+      "slug": "topeak",
+      "name": "Topeak",
+      "query": "Topeak bike multitool",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 8.9,
+        "max": 132.95
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "TOPEAK TT2506 MINI 6 Multi Function Bike Tool Hardened Micro Multitool Allen/ PH",
+        "Multitool Topeak Mini 9 Pro - Silver",
+        "Multitool Topeak Mini 9 Pro - Nero"
+      ]
+    },
+    {
+      "slug": "traeger",
+      "name": "Traeger",
+      "query": "Traeger pellet grill",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 14.4,
+        "max": 71.98
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Traeger pellet grill hot rod replacement kit",
+        "Traeger Pellet Grills SPC206 Brine and Rub Kit 13.00 oz 13 oz 1 Pack",
+        "Hot Rod Igniter Element BAC432 KIT0088 Replacement for Traeger Pellet Grill"
+      ]
+    },
+    {
+      "slug": "travelpro",
+      "name": "Travelpro",
+      "query": "Travelpro carry on luggage",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 95,
+        "max": 313.49
+      },
+      "brandMatchShare": 0.95,
+      "sampleTitles": [
+        "Travelpro WalkAbout 7 Rolling Underseat Carry-On Luggage Black NWT",
+        "Travelpro WalkAbout 7 Carry-On Spinner Luggage Black",
+        "Travelpro Luggage Flight Crew 5  18” Upright Expandable Carry-On Suitcase New"
+      ]
+    },
+    {
+      "slug": "trtl",
+      "name": "Trtl",
+      "query": "Trtl travel neck pillow",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 18,
+        "max": 39.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "NEW trtl Travel Pillow Junior Aqua for Kids 8+",
+        "NIB Trtl Travel Pillow Ergonomic Neck Support, Unisex Travel Essential, Black",
+        "trtl Travel Pillow"
+      ]
+    },
+    {
+      "slug": "trx",
+      "name": "TRX",
+      "query": "TRX suspension trainer",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 5.85,
+        "max": 279.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "TRX Suspension Trainer Adjustable Nylon Straps Black/Yellow w/ Bag & Guide",
+        "Trx Total Body Suspension Trainer",
+        "Ceiling Anchor Mount Bracket - Suspension Trainer Anchor for TRX Straps"
+      ]
+    },
+    {
+      "slug": "tumi",
+      "name": "Tumi",
+      "query": "Tumi carry on luggage",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 31.76,
+        "max": 349
+      },
+      "brandMatchShare": 0.55,
+      "sampleTitles": [
+        "TUMI Black Carry On Backpack Luggage",
+        "TUMI - Voyageur Oxford Compact Carry-On - Travel Suitcase with Wheels - Lightweight Luggag",
+        "TUMI Vapor Continental CarryOn cabin 22” Spinner Luggage suitcase NEW in Fossil"
+      ]
+    },
+    {
+      "slug": "u-turn",
+      "name": "U-Turn",
+      "query": "U-Turn turntable",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 8.98,
+        "max": 319
+      },
+      "brandMatchShare": 0.75,
+      "sampleTitles": [
+        "Acrylic Platter Upgrade for U-Turn Turntables",
+        " Liquid Bearings, BEST 100%-synthetic oil for U-Turn or any turntables, READ!!",
+        "New Original U-Turn Orbit MDF Turntable Platter Replacement Plate -New Open Box"
+      ]
+    },
+    {
+      "slug": "ue",
+      "name": "UE",
+      "query": "UE bluetooth speaker",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 8.5,
+        "max": 60
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Nautica S20 Portable Bluetooth Speaker",
+        "E5 Life Waterproof Bluetooth Stereo Speaker, with Built-in MIC & Handle, Support Hands-fre",
+        "Spark Portable Bluetooth Speaker"
+      ]
+    },
+    {
+      "slug": "ugg",
+      "name": "UGG",
+      "query": "UGG slippers",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 30,
+        "max": 109.95
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "UGG Fluff Yeah Women’s Slippers Pink Slip-On EU 8 ",
+        "UGG Coquette Stitch Slippers Suede Sheepskin Lining Lightweight Sole",
+        "UGG Scuffita Shearling Cross Strap Slippers Womens 8 Loungewear Cozy Fluffy"
+      ]
+    },
+    {
+      "slug": "ugly-stik",
+      "name": "Ugly Stik",
+      "query": "Ugly Stik fishing rod",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 23,
+        "max": 69
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Ugly Stik Vinyl Sticker/Decal -Fishing -Rod -Casting Reel -Lures -Tackle -Line",
+        "Ugly Stik Inshore Select Spinning Rod, 7' Medium Fishing Rod",
+        "Ugly Stik 3’ Dock Runner Fishing Rod and Reel Spinning Combo"
+      ]
+    },
+    {
+      "slug": "uniqlo",
+      "name": "Uniqlo",
+      "query": "Uniqlo fleece jacket",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 12,
+        "max": 225
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Mens Medium Uniqlo Fleece Jacket Sweater Button Pullover Beige",
+        "UNIQLO Fleece Jacket Men XS-4XL 486114 Bestseller From Japan",
+        "UNIQLO Fleece Jacket Full-zip XS-4XL Men 486114 Best-selling product From Japan"
+      ]
+    },
+    {
+      "slug": "usa-pan",
+      "name": "USA Pan",
+      "query": "USA Pan baking sheet set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 19.98,
+        "max": 47.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "USA Pan Half Sheet Baking Pan 17.75x12.76 Nonstick Corrugated Heavy Duty 2PK Set",
+        "USA Pan Bakeware Nonstick Quarter Sheet Pan, Baking Sheet Aluminized Steel",
+        "USA Pan Bakeware Nonstick Extra Large Sheet Pan, Aluminized Steel"
+      ]
+    },
+    {
+      "slug": "vans",
+      "name": "Vans",
+      "query": "Vans sneakers",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 29.99,
+        "max": 231
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "VANS Skate Slip-On Black Solid Logo Men's US 9.5 Slip-On Sneakers",
+        "Vans Mens Knu Skool Shoe - Fashion Sneakers Skate Shoes",
+        "Vans Old Skool Uc Shoes / Sneakers - NEW Mens Size 9 Black / Grey - #50144-OFCL"
+      ]
+    },
+    {
+      "slug": "victorinox",
+      "name": "Victorinox",
+      "query": "Victorinox chef knife",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 32.95,
+        "max": 70
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Victorinox Chef Knife Fr 10IN Fbx",
+        "Victorinox Swiss Army 5.2063.20 Fibrox Chef's Knife Black 8 in Dishwasher Safe",
+        "Victorinox 5.2063.20 8\" Fibrox Pro Chef's Knife - Black Handle"
+      ]
+    },
+    {
+      "slug": "viski",
+      "name": "Viski",
+      "query": "Viski cocktail shaker set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 14.99,
+        "max": 54.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Viski 17 oz Professional Stainless Steel Cocktail Shaker w/ Built-in Strainer ",
+        "Glenmorangie Single Malt Viski Parisian Copper Cocktail Shaker Only 4 Left NEW",
+        "Viski Silver Heavyweight Cocktail Shaker,Stainless Steel Drink Mixer 16.5oz- 1pk"
+      ]
+    },
+    {
+      "slug": "vitamix",
+      "name": "Vitamix",
+      "query": "Vitamix blender",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 45.99,
+        "max": 79.98
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "64oz Container Pitcher Jar Fit for Vitamix 5000 5200 5500 6000 Blender Classic",
+        "Blender Pitcher 64oz Low-Profile Fits Vitamix Container 4500, 5000, 5200 5300",
+        "64oz Blender Container Compatible with Vitamix Ascent Series A2300 A3300 A3500"
+      ]
+    },
+    {
+      "slug": "voluspa",
+      "name": "Voluspa",
+      "query": "Voluspa scented candle",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 15,
+        "max": 44.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "VOLUSPA SCENTED CANDLE-THE MAISON NOIR COLLECTION-12oz-NEW",
+        "Voluspa Scented Candle French Cade and Lavender Embossed Glass 9 oz. Coconut Wax",
+        "Voluspa Santiago Huckleberry Coconut Wax Candle 6.2oz Embossed Purple Glass Jar"
+      ]
+    },
+    {
+      "slug": "wahl",
+      "name": "Wahl",
+      "query": "Wahl beard trimmer",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 4.99,
+        "max": 27.95
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Wahl Beard Trimmer Kit Battery Operated Nose Ear Trimmer Grooming Set",
+        "WAHL Beard Trimmer",
+        "Wahl Beard Trimmer for Men - Battery Operated Grooming Set with Nose and Ear Trimmer - 553"
+      ]
+    },
+    {
+      "slug": "warby-parker",
+      "name": "Warby Parker",
+      "query": "Warby Parker blue light glasses",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 5.99,
+        "max": 129
+      },
+      "brandMatchShare": 0.05,
+      "sampleTitles": [
+        "Yes Sir Bluelight Glasses - Clear",
+        "Figure You Out Blue Light Glasses - Black",
+        "Executive Meeting Blue Light Glasses - Black"
+      ]
+    },
+    {
+      "slug": "weber",
+      "name": "Weber",
+      "query": "Weber grill tool set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 7.69,
+        "max": 44.43
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Fits Charcoal Grill Tool Handle With Hook Fits Weber Kettle 18”, 22”, and 26”  A",
+        "Weber 7401 Tool Hooks Set For Charcoal Grills 18.5” To 22.5” Plated Steel New",
+        "4-Pack Tool Hooks for Weber Grills, Grill Tool Holder for Weber Slate Griddle, G"
+      ]
+    },
+    {
+      "slug": "west-elm",
+      "name": "West Elm",
+      "query": "West Elm throw blanket",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 29.99,
+        "max": 80
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "NWT West Elm Honeycomb Chenille Throw Blanket 50\" x 60\" Brown / Beige Two Tone",
+        "NWT West Elm Just For You Metallic Border Fringe Throw Blanket 50 X 70” Ivory",
+        "West Elm Wool Blend 50x70 Throw Blanket Dark Brown Rayon Cotton Fringe Soft NWOT"
+      ]
+    },
+    {
+      "slug": "west-paw",
+      "name": "West Paw",
+      "query": "West Paw dog toy bundle",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 9.95,
+        "max": 24.99
+      },
+      "brandMatchShare": 0.6,
+      "sampleTitles": [
+        "NEW West Paw Large Rumbl Eggplant Purple Treat Dispensing Interactive Dog Toy",
+        "NEW West Paw Small Rumbl Jungle Green, Treat Dispensing Play Interactive Dog Toy",
+        "West Paw Stamp Large Dog Toy"
+      ]
+    },
+    {
+      "slug": "whoop",
+      "name": "Whoop",
+      "query": "Whoop fitness band",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 10.5,
+        "max": 115
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Fitbit Air to WHOOP 5 Band Adapter 3D Printed Tracker Mount Holder",
+        "Reflective Nylon Fitness Band For Whoop 5.0/MG Adjustable Elastic Wrist Strap",
+        "New! Whoop Sportflex Band Unisex One Size Adjustable for Whoop 4.0 Pink"
+      ]
+    },
+    {
+      "slug": "wilton",
+      "name": "Wilton",
+      "query": "Wilton piping tip set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 2.59,
+        "max": 40.77
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Wilton Piping Tip Set, Cupcake Decorating, 9-Piece with Carrying Case",
+        "Wilton Cake Cupcake Borders Decorating Piping Tip Set, 4 pieces NEW",
+        "Wilton Cake Decorating Set with Piping Tips, Decorating Bags, Couplers and..."
+      ]
+    },
+    {
+      "slug": "winsor-newton",
+      "name": "Winsor & Newton",
+      "query": "Winsor & Newton watercolor set",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 16.99,
+        "max": 59.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Winsor & Newton Cotman Water Colours 12 Pocket Watercolor Set w/ Brush NEW",
+        "Winsor & Newton Cotman Watercolor Paint Set, 10 Colors, 5ml (0.17-oz) Tubes",
+        "Winsor & Newton Cotman Watercolors 12 Tube Artist Quality Set LOOK 👀"
+      ]
+    },
+    {
+      "slug": "woodwick",
+      "name": "WoodWick",
+      "query": "WoodWick scented candle",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 11.99,
+        "max": 27.54
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "WoodWick Vanilla Bean Glass Jar Scented Candle, Large 22 oz.",
+        "WoodWick Café Sweets Trilogy Tri-Scented Candle, Crackling Wick, 9.7oz, New",
+        "WoodWick Trilogy Sheer Cashmere Scented Single Wick Jar Candle, Gray/White"
+      ]
+    },
+    {
+      "slug": "wusthof",
+      "name": "Wusthof",
+      "query": "Wusthof chef knife",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 38.97,
+        "max": 149.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "NEW! Wusthof Gourmet 5\" Hollow Edge Santoku Chef Knife 4188 /14cm (1025046014)",
+        "Wusthof Gourmet White 2.75\" Trimming Knife Retired Solingen Germany Genuine NEW",
+        "Wusthof Gourmet 6\" Chef Cook's Knife 16cm Grey Brand New Germany"
+      ]
+    },
+    {
+      "slug": "wyze",
+      "name": "Wyze",
+      "query": "Wyze smart plug",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 8.99,
+        "max": 51.88
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "WYZE Smart Plug 2-Pack, Works w/ Alexa & Google, Model# WLPP1CFH",
+        "Wyze Smart Plug",
+        "2-Pack WYZE Smart Plug - Works with Alexa & Google - WLPP1CFH (Pack Of 2)"
+      ]
+    },
+    {
+      "slug": "xbox",
+      "name": "Xbox",
+      "query": "Xbox wireless controller",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 35.99,
+        "max": 109.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "XBOX Elite Wireless Controller Series 2, Black for PC, Microsoft Xbox One",
+        "Microsoft - XBOX Wireless Controller for XBOX Series X, XBOX Series S, XBOX O...",
+        "Xbox Wireless Controller"
+      ]
+    },
+    {
+      "slug": "yamaha",
+      "name": "Yamaha",
+      "query": "Yamaha ukulele",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 19.99,
+        "max": 142.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Yamaha GCT1 Clip-On Chromatic Tuner -for Guitar Bass Violin Ukulele New Unopened",
+        "Used 1960s YAMAHA No.60C Soprano Ukulele Vintage Solid Wood Japan Rare Instrument 60s Musi",
+        "Yamaha GL-1TBS Guitalele 6-String Ukulele - Tobacco Sunburst"
+      ]
+    },
+    {
+      "slug": "yamazaki",
+      "name": "Yamazaki",
+      "query": "Yamazaki desk organizer",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 19.17,
+        "max": 94.93
+      },
+      "brandMatchShare": 0.95,
+      "sampleTitles": [
+        "YAMAZAKI home Desk Organizer, White From Japan",
+        "Yamazaki bureau organizer - tower - zwart",
+        "Yamazaki Home Tower Deskbar Organizer <br> 桌面收納架"
+      ]
+    },
+    {
+      "slug": "yankee-candle",
+      "name": "Yankee Candle",
+      "query": "Yankee Candle scented candle",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 3.25,
+        "max": 38
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Yankee Candle Scented Candle, 22oz Large Jar (Select Size/Color)",
+        "Yankee Candle Scented Candle - Ciderhouse Large Jar | Up to 150 Hours Burn Time | 623g",
+        "YANKEE CANDLE SINGLE CAR JARS....VARIETY OF SCENTS....YOU CHOOSE"
+      ]
+    },
+    {
+      "slug": "yeti",
+      "name": "YETI",
+      "query": "YETI insulated tumbler",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 14,
+        "max": 32.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Yeti Insulated Tumbler Rambler 12 oz Bottle Two Piece Lid Seafoam Blue Green",
+        "YETI Rambler 20 oz Black Stainless Steel Insulated Tumbler w/ Drink-Through Lid",
+        "YETI 10 oz Stainless Steel Insulated Tumbler w/ Slide Lock Lid, White"
+      ]
+    },
+    {
+      "slug": "zircon",
+      "name": "Zircon",
+      "query": "Zircon stud finder",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 9.19,
+        "max": 29.99
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Vintage 2002  Zircon Stud Finder Kit  3/4\" Scan Depth  NEW/SEALED",
+        "Zircon Corporation StudSensor HD25 Stud Finder",
+        "Zircon StudSensor Metal & Wood Stud Finder With TruCal LED New Free Shipping "
+      ]
+    },
+    {
+      "slug": "zojirushi",
+      "name": "Zojirushi",
+      "query": "Zojirushi rice cooker",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 26.99,
+        "max": 281
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Zojirushi Rice Cooker & Steamer",
+        "5.5 Cup Rice Cooker Inner Pot for Zojirushi NS-TSC10 304 Stainless Steel",
+        "Zojirushi NHS-10WB Conventional Rice Cooker and Warmer, 5.5 Cups (uncooked)"
+      ]
+    },
+    {
+      "slug": "zwilling",
+      "name": "Zwilling",
+      "query": "Zwilling chef knife",
+      "resultCount": 20,
+      "providersSearched": [
+        "walmart",
+        "bestbuy",
+        "ebay",
+        "shopify"
+      ],
+      "priceRange": {
+        "min": 24.79,
+        "max": 99.95
+      },
+      "brandMatchShare": 1,
+      "sampleTitles": [
+        "Henckels Zwilling Twin Master Kitchen  Chef's Knife 8\" Stainless Steel Blade Red Plastic H",
+        "ZWILLING J.A. HENCKELS Twin Master Fixed Blade Chef's Knife Red 32108303   - On Sale",
+        "ZWILLING Pro Slim 7-inch Chef's Knife"
+      ]
+    }
+  ]
+}

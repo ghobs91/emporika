@@ -25,14 +25,57 @@
 // `InterestProfile` plus its id in `./types.ts` INTEREST_IDS and a label in
 // `./taxonomy.ts`. `tests/search/gift-index.test.ts` enforces consistency.
 
-import type {
-  AgeBracket,
-  AgeBracketProfile,
-  InterestProfile,
+import {
+  ageFacet,
+  comboFacet,
+  genderFacet,
+  interestFacet,
+  type AgeBracket,
+  type AgeBracketProfile,
+  type FacetId,
+  type GiftIntent,
+  type IntentSpec,
+  type InterestId,
+  type InterestProfile,
 } from './types';
 
 /** Bump when intent data changes materially (surfaced in evidence reports). */
-export const GIFT_INDEX_VERSION = '1.0.0';
+export const GIFT_INDEX_VERSION = '2.0.0';
+
+// ── Authoring helpers ──────────────────────────────────────────────────
+
+/** Defaults filled in so a row only states what it actually knows. */
+function intent(slug: string, spec: IntentSpec, facets: FacetId[]): GiftIntent {
+  return {
+    id: slug,
+    query: spec.q,
+    kind: spec.k ?? 'product',
+    tier: spec.t ?? 'standard',
+    strength: spec.s ?? 0.7,
+    lean: spec.l ?? 'neutral',
+    facets,
+    ...(spec.avoid ? { avoidAgeBrackets: spec.avoid } : {}),
+    ...(spec.only ? { onlyAgeBrackets: spec.only } : {}),
+    ...(spec.b ? { brands: spec.b } : {}),
+    ...(spec.c ? { categories: spec.c } : {}),
+    why: spec.w,
+  };
+}
+
+/** Expand a spec list into intents under `<prefix>` answering `facets`. */
+function expand(prefix: string, specs: IntentSpec[], facets: FacetId[]): GiftIntent[] {
+  return specs.map((spec, index) =>
+    intent(
+      `${prefix}/${spec.q
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+        .slice(0, 40)}-${index}`,
+      spec,
+      facets
+    )
+  );
+}
 
 // ── Age gating shortcuts ───────────────────────────────────────────────
 
@@ -55,6 +98,19 @@ const SAFETY_EXCLUSIONS: string[] = [
   'e-liquid',
 ];
 
+/**
+ * Terms that make an adult listing obviously mis-targeted ("noise cancelling
+ * headphones for kids" turned up for a 52-year-old). Only applied to brackets
+ * that should not receive children's products.
+ */
+const AGE_MISMATCHED_EXCLUSIONS: string[] = [
+  'for kids',
+  'kids version',
+  'toddler',
+  'childrens',
+  'baby ',
+];
+
 const AGE_RESTRICTED_EXCLUSIONS: string[] = [
   'alcohol',
   'wine',
@@ -68,7 +124,11 @@ const AGE_RESTRICTED_EXCLUSIONS: string[] = [
 
 // ── Age brackets ───────────────────────────────────────────────────────
 
-export const AGE_BRACKET_PROFILES: AgeBracketProfile[] = [
+type RawBracket = Omit<AgeBracketProfile, 'universalIntents' | 'ageIntents'> & {
+  universalIntents: Array<Omit<GiftIntent, 'facets'>>;
+};
+
+const RAW_BRACKETS: RawBracket[] = [
   {
     id: 'infant',
     label: 'Infant (0–1)',
@@ -223,7 +283,7 @@ export const AGE_BRACKET_PROFILES: AgeBracketProfile[] = [
     minAge: 13,
     maxAge: 17,
     budgetCeiling: 250,
-    exclusions: [...SAFETY_EXCLUSIONS, ...AGE_RESTRICTED_EXCLUSIONS],
+    exclusions: [...SAFETY_EXCLUSIONS, ...AGE_RESTRICTED_EXCLUSIONS, ...AGE_MISMATCHED_EXCLUSIONS],
     universalIntents: [
       {
         id: 'universal/teen/instant-camera',
@@ -260,7 +320,7 @@ export const AGE_BRACKET_PROFILES: AgeBracketProfile[] = [
     minAge: 18,
     maxAge: 25,
     budgetCeiling: 300,
-    exclusions: [],
+    exclusions: [...AGE_MISMATCHED_EXCLUSIONS],
     universalIntents: [
       {
         id: 'universal/young_adult/water-bottle',
@@ -297,7 +357,7 @@ export const AGE_BRACKET_PROFILES: AgeBracketProfile[] = [
     minAge: 26,
     maxAge: 40,
     budgetCeiling: 400,
-    exclusions: [],
+    exclusions: [...AGE_MISMATCHED_EXCLUSIONS],
     universalIntents: [
       {
         id: 'universal/adult/electric-kettle',
@@ -334,7 +394,7 @@ export const AGE_BRACKET_PROFILES: AgeBracketProfile[] = [
     minAge: 41,
     maxAge: 60,
     budgetCeiling: 350,
-    exclusions: [],
+    exclusions: [...AGE_MISMATCHED_EXCLUSIONS],
     universalIntents: [
       {
         id: 'universal/mature_adult/chef-knife',
@@ -371,7 +431,7 @@ export const AGE_BRACKET_PROFILES: AgeBracketProfile[] = [
     minAge: 61,
     maxAge: null,
     budgetCeiling: 250,
-    exclusions: [],
+    exclusions: [...AGE_MISMATCHED_EXCLUSIONS],
     universalIntents: [
       {
         id: 'universal/senior/large-print-puzzle',
@@ -406,10 +466,266 @@ export const AGE_BRACKET_PROFILES: AgeBracketProfile[] = [
 
 // ── Interests ──────────────────────────────────────────────────────────
 
+
+// ── Age-alone intents ──────────────────────────────────────────────────
+//
+// What to buy when the *only* thing you know is how old the recipient is.
+// Every row here answers the age facet on its own, so a profile with no
+// interests and no gender still gets a specific list rather than a generic
+// "popular gifts" page.
+
+const AGE_INTENT_SPECS: Record<AgeBracket, IntentSpec[]> = {
+  infant: [
+    { q: 'baby sensory toys', t: 'stocking', s: 0.85, w: 'High-contrast toys are what an infant can actually focus on.' },
+    { q: 'organic cotton baby blanket', s: 0.8, w: 'Soft, safe, and never something a new parent has too many of.' },
+    { q: 'silicone teether set', t: 'stocking', s: 0.75, w: 'Solves teething, which is the whole first year.' },
+    { q: 'baby sleep sack', s: 0.72, w: 'A safer, better sleep routine in one item.' },
+    { q: 'tummy time play mat', s: 0.7, w: 'Gives the baby somewhere to be put down that is not the crib.' },
+    { q: 'baby board book set', t: 'stocking', s: 0.75, w: 'Chewable, short books that survive an infant.' },
+    { q: 'baby milestone photo frame', t: 'stocking', s: 0.6, w: 'A keepsake for the parents once the baby owns everything.' },
+  ],
+  toddler: [
+    { q: 'wooden stacking blocks', s: 0.85, w: 'Open-ended wooden blocks outlast the age range.' },
+    { q: 'toddler shape sorter', t: 'stocking', s: 0.75, w: 'A classic fine-motor toy that matches the developmental stage.' },
+    { q: 'balance bike', s: 0.75, w: 'The birthday-present default for a two- or three-year-old.' },
+    { q: 'toddler play kitchen', t: 'hero', s: 0.7, w: 'Big, obvious, and used for years — the gift they remember.' },
+    { q: 'magnetic drawing board', t: 'stocking', s: 0.72, w: 'Mess-free drawing that survives car trips.' },
+    { q: 'toddler backpack', t: 'stocking', s: 0.62, w: 'Something small they can carry themselves.' },
+    { q: 'toddler sippy cup set', t: 'stocking', s: 0.6, w: 'Unglamorous and used every single day.' },
+  ],
+  child: [
+    { q: 'magnetic building tiles', s: 0.85, w: 'The rare toy that holds attention for years and stores flat.' },
+    { q: 'kids art set', t: 'stocking', s: 0.78, w: 'Consumable and creative, so parents keep no shelf space for it.' },
+    { q: 'childrens book set', t: 'stocking', s: 0.72, w: 'A boxed series is low-risk when you only half know the child.' },
+    { q: 'kids scooter', s: 0.75, w: 'The outside toy that gets used every day after school.' },
+    { q: 'kids microscope', s: 0.68, w: 'A real instrument rather than another plastic toy.' },
+    { q: 'kids gardening kit', t: 'stocking', s: 0.62, w: 'A project with an outcome, which is what this age likes.' },
+    { q: 'jump rope', t: 'stocking', s: 0.55, w: 'Cheap, active, and immediately usable.' },
+  ],
+  tween: [
+    { q: 'stem building kit', s: 0.8, w: 'Build-it-yourself kits land well without reading as babyish.' },
+    { q: 'journal set', t: 'stocking', s: 0.72, w: 'Suits a tween who is starting to want private space.' },
+    { q: 'instant camera', s: 0.75, w: 'Printing a photo beats taking one at this age.' },
+    { q: 'skateboard', s: 0.68, w: 'The age where a first real board still feels like freedom.' },
+    { q: 'led strip lights', t: 'stocking', s: 0.75, w: 'Room customisation is the cheapest way to feel personal.' },
+    { q: 'slime kit', t: 'stocking', s: 0.55, w: 'Still reliably thrilling, and it disappears on its own.' },
+    { q: 'kids craft kit', t: 'stocking', s: 0.68, w: 'A finished-made project, not another object to store.' },
+  ],
+  teen: [
+    { q: 'wireless earbuds', s: 0.85, w: 'The safest teen gift that is not a gift card.' },
+    { q: 'instant camera', s: 0.78, w: 'A social object, which is what actually gets used at this age.' },
+    { q: 'skincare gift set', s: 0.75, w: 'Reads as considered and is genuinely on their list.' },
+    { q: 'gaming headset', s: 0.72, w: 'Improves both play and the group chat they live in.' },
+    { q: 'backpack', t: 'stocking', s: 0.68, w: 'Replaces the one that has been through three years of school.' },
+    { q: 'hoodie', t: 'stocking', s: 0.68, w: 'The default wearable a teenager will actually wear.' },
+    { q: 'wireless charging stand', t: 'stocking', s: 0.7, w: 'A desk upgrade that works with whatever phone they own.' },
+  ],
+  young_adult: [
+    { q: 'insulated water bottle', t: 'stocking', s: 0.72, w: 'Useful in a dorm or a first apartment and hard to get wrong.' },
+    { q: 'weighted blanket', s: 0.72, w: 'A comfort upgrade for someone moving into their own place.' },
+    { q: 'desk lamp', s: 0.68, w: 'Works for study, work, and the first desk they own.' },
+    { q: 'mini projector', t: 'hero', s: 0.68, w: 'A shared, memorable gift for a first apartment.' },
+    { q: 'dorm bedding set', s: 0.65, w: 'The unglamorous thing nobody buys themselves in year one.' },
+    { q: 'portable blender', t: 'stocking', s: 0.6, w: 'Fits a small kitchen and a gym bag at once.' },
+    { q: 'backpack', t: 'stocking', s: 0.62, w: 'School, work, and weekends in one bag.' },
+  ],
+  adult: [
+    { q: 'electric kettle', s: 0.7, w: 'A small upgrade they use every morning.' },
+    { q: 'weighted blanket', s: 0.68, w: 'A comfort gift that does not require knowing their taste.' },
+    { q: 'scented candle', t: 'stocking', s: 0.65, w: 'Consumable, low commitment, and reads as thoughtful.' },
+    { q: 'cordless vacuum', t: 'hero', s: 0.65, w: 'The expensive chore upgrade people refuse to buy for themselves.' },
+    { q: 'chef knife', s: 0.72, w: 'An upgrade to something they already use daily.' },
+    { q: 'wine glass set', s: 0.62, w: 'Better glassware is the upgrade most people never buy.' },
+    { q: 'throw blanket', s: 0.65, w: 'The safe, genuinely welcome gift for an unknown household.' },
+  ],
+  mature_adult: [
+    { q: 'chef knife', s: 0.72, w: 'An upgrade to something they use daily rather than another object.' },
+    { q: 'serving platter', s: 0.62, w: 'Entertaining gear gets used once the basics are owned.' },
+    { q: 'throw blanket', s: 0.7, w: 'Warm, low-risk, and always welcome.' },
+    { q: 'silk pillowcase', t: 'stocking', s: 0.6, w: 'A small luxury with an obvious daily benefit.' },
+    { q: 'noise cancelling headphones', t: 'hero', s: 0.65, w: 'A real upgrade on flights and commutes.' },
+    { q: 'bird feeder', t: 'stocking', s: 0.6, w: 'A quiet hobby gift that suits a settled household.' },
+    { q: 'cast iron dutch oven', s: 0.65, w: 'The pan that replaces three others and lasts decades.' },
+  ],
+  senior: [
+    { q: 'large print puzzle', t: 'stocking', s: 0.75, w: 'A screen-free activity sized for comfort.' },
+    { q: 'reading magnifier with light', t: 'stocking', s: 0.72, w: 'Solves a real daily problem, which beats decor at this age.' },
+    { q: 'heated throw blanket', s: 0.78, w: 'Warmth, easy controls, and no learning curve.' },
+    { q: 'digital photo frame', s: 0.68, w: 'Keeps the family visible without requiring a phone.' },
+    { q: 'large print book set', t: 'stocking', s: 0.68, w: 'Reading that does not need a screen or a magnifier.' },
+    { q: 'ergonomic garden tool', s: 0.62, w: 'Lets them keep a hobby that has become harder on the hands.' },
+    { q: 'easy grip kitchen utensils', t: 'stocking', s: 0.6, w: 'Independence in the kitchen, which is what they actually value.' },
+  ],
+};
+
+/**
+ * Brackets plus the age layer. Universal intents keep their authored ids;
+ * the age layer is expanded here so every row carries the age facet.
+ */
+export const AGE_BRACKET_PROFILES: AgeBracketProfile[] = RAW_BRACKETS.map((bracket) => ({
+  ...bracket,
+  universalIntents: bracket.universalIntents.map((entry) => ({
+    ...entry,
+    facets: [ageFacet(bracket.id)],
+  })),
+  ageIntents: expand(`age/${bracket.id}`, AGE_INTENT_SPECS[bracket.id], [ageFacet(bracket.id)]),
+}));
+
+// ── Gender-alone intents ───────────────────────────────────────────────
+//
+// What to buy when the only thing you know is gender. This is intentionally a
+// *merchandising* layer: it mirrors how retailers actually merchandise aisles,
+// not a claim about what a person likes. It is scored below age+interest
+// combinations and it never removes anything from the candidate set.
+
+const GENDER_SPECS: Record<'woman' | 'man', IntentSpec[]> = {
+  woman: [
+    { q: 'crossbody bag', s: 0.76, l: 'woman', w: 'The everyday bag category people upgrade rather than replace.' },
+    { q: 'gold necklace', s: 0.8, l: 'woman', w: 'The most-gifted jewelry category, and easy to size.' },
+    { q: 'skincare gift set', s: 0.78, l: 'woman', w: 'A curated routine avoids guessing at individual products.' },
+    { q: 'perfume gift set', s: 0.7, l: 'woman', w: 'Sampler sets sidestep the risk of choosing one scent.' },
+    { q: 'cashmere scarf', s: 0.72, l: 'woman', w: 'A low-commitment way to give something that feels personal.' },
+    { q: 'candle gift set', s: 0.75, l: 'woman', w: 'Consumable, understood instantly, easy to make personal.' },
+    { q: 'gold hoops', s: 0.75, l: 'woman', w: 'The earrings that get worn weekly rather than saved.' },
+    { q: 'silk pillowcase', t: 'stocking', s: 0.62, l: 'woman', w: 'A small luxury with an obvious daily payoff.' },
+    { q: 'leather tote bag', s: 0.72, l: 'woman', w: 'A work bag upgrade they will not buy themselves.' },
+    { q: 'hair styling tool', s: 0.68, l: 'woman', w: 'A real upgrade for someone who already styles daily.' },
+    { q: 'bath gift set', t: 'stocking', s: 0.68, l: 'woman', w: 'A whole ritual in a box, ready to use that evening.' },
+    { q: 'jewelry box', s: 0.6, l: 'woman', w: 'Neutral when the taste is right but the metal is unknown.' },
+    { q: 'cashmere sweater', s: 0.7, l: 'woman', w: 'An upgrade fabric that feels like a gift in the hand.' },
+    { q: 'slippers', t: 'stocking', s: 0.62, l: 'woman', w: 'Worn every day, replaced rarely, always appreciated.' },
+    { q: 'birthstone necklace', s: 0.65, l: 'woman', w: 'Personal without requiring you to know their style.' },
+    { q: 'nail care set', t: 'stocking', s: 0.55, l: 'woman', w: 'A small self-care kit that gets used at home.' },
+  ],
+  man: [
+    { q: 'leather wallet', s: 0.76, l: 'man', w: 'A worn-out wallet is the thing people never replace themselves.' },
+    { q: 'automatic watch', t: 'hero', s: 0.72, l: 'man', w: 'A classic gift with a clear upgrade story.' },
+    { q: 'beard grooming kit', s: 0.7, l: 'man', w: 'A matched set reads as considered rather than generic.' },
+    { q: 'cordless drill', s: 0.78, l: 'man', w: 'Unlocks a whole category of home projects.' },
+    { q: 'multi tool', t: 'stocking', s: 0.7, l: 'man', w: 'A pocket tool that gets used far more than expected.' },
+    { q: 'whiskey glass set', s: 0.68, l: 'man', w: 'An easy upgrade for someone who already has a favourite bottle.' },
+    { q: 'grill tool set', s: 0.72, l: 'man', w: 'Replaces the bent spatula they are still using.' },
+    { q: 'wireless earbuds', s: 0.8, l: 'man', w: 'The most reliably used tech gift at almost any age.' },
+    { q: 'hoodie', t: 'stocking', s: 0.7, l: 'man', w: 'A wearable they will reach for weekly.' },
+    { q: 'backpack', s: 0.68, l: 'man', w: 'Work, gym and travel in one bag.' },
+    { q: 'beard trimmer', s: 0.7, l: 'man', w: 'A practical replacement that is usually long overdue.' },
+    { q: 'noise cancelling headphones', t: 'hero', s: 0.78, l: 'man', w: 'A real upgrade on flights and commutes.' },
+    { q: 'travel dopp kit', t: 'stocking', s: 0.6, l: 'man', w: 'The kit that makes packing stop being a chore.' },
+    { q: 'crew neck sweater', s: 0.65, l: 'man', w: 'A safe wearable that suits almost every wardrobe.' },
+    { q: 'tactical flashlight', t: 'stocking', s: 0.6, l: 'man', w: 'Useful in a drawer and genuinely fun to own.' },
+    { q: 'desk organizer', t: 'stocking', s: 0.55, l: 'man', w: 'A small, immediately visible improvement to a desk.' },
+  ],
+};
+
+/** Gender intents, keyed by the gender they answer. */
+export const GENDER_INTENTS: Record<'woman' | 'man', GiftIntent[]> = {
+  woman: expand('gender/woman', GENDER_SPECS.woman, [genderFacet('woman')]),
+  man: expand('gender/man', GENDER_SPECS.man, [genderFacet('man')]),
+};
+
+// ── Age × gender intents ───────────────────────────────────────────────
+//
+// Combinations answer three traits at once, so they outrank any single-trait
+// row. Kept to the cells where the answer genuinely differs from "age" plus
+// "gender" separately; inventing a row for every one of the 18 cells would be
+// padding, not coverage.
+
+const COMBO_SPECS: Array<{
+  bracket: AgeBracket;
+  gender: 'woman' | 'man';
+  specs: IntentSpec[];
+}> = [
+  {
+    bracket: 'teen',
+    gender: 'woman',
+    specs: [
+      { q: 'makeup gift set', s: 0.78, l: 'woman', w: 'Makeup is the teen category where a set beats a single item.' },
+      { q: 'initial necklace', s: 0.72, l: 'woman', w: 'Personal without needing to know their taste.' },
+      { q: 'skincare minis set', s: 0.7, l: 'woman', w: 'Lets her try a routine without committing to full sizes.' },
+    ],
+  },
+  {
+    bracket: 'teen',
+    gender: 'man',
+    specs: [
+      { q: 'cologne gift set', s: 0.68, l: 'man', w: 'A first fragrance, without guessing a single bottle.' },
+      { q: 'graphic hoodie', s: 0.7, l: 'man', w: 'The wearable a teenage boy will actually put on.' },
+      { q: 'gaming gift card', t: 'stocking', s: 0.65, l: 'man', w: 'Platform credit is the one gift card that is always right.' },
+    ],
+  },
+  {
+    bracket: 'young_adult',
+    gender: 'woman',
+    specs: [
+      { q: 'mini fridge', s: 0.68, l: 'woman', w: 'A first-apartment staple that is never bought new.' },
+      { q: 'makeup organizer', t: 'stocking', s: 0.62, l: 'woman', w: 'Solves a small-space problem in a shared bathroom.' },
+      { q: 'gold bracelet', s: 0.72, l: 'woman', w: 'A stackable extra for someone already wearing jewelry.' },
+    ],
+  },
+  {
+    bracket: 'young_adult',
+    gender: 'man',
+    specs: [
+      { q: 'gaming chair', t: 'hero', s: 0.65, l: 'man', w: 'The obvious upgrade for a setup that is also a desk.' },
+      { q: 'protein shaker bottle', t: 'stocking', s: 0.55, l: 'man', w: 'Cheap, used daily, and easy to get right.' },
+      { q: 'wireless mouse', t: 'stocking', s: 0.6, l: 'man', w: 'A precise, cheap upgrade for study or play.' },
+    ],
+  },
+  {
+    bracket: 'adult',
+    gender: 'woman',
+    specs: [
+      { q: 'silk robe', s: 0.65, l: 'woman', w: 'A comfort gift that still feels like an occasion.' },
+      { q: 'gold tennis bracelet', s: 0.68, l: 'woman', w: 'A step up from the everyday stacking bracelet.' },
+      { q: 'cast iron dutch oven', s: 0.68, l: 'woman', w: 'The kitchen upgrade that replaces three other pans.' },
+    ],
+  },
+  {
+    bracket: 'adult',
+    gender: 'man',
+    specs: [
+      { q: 'whiskey decanter set', s: 0.68, l: 'man', w: 'Reads as generous without needing to know the drink.' },
+      { q: 'leather belt', t: 'stocking', s: 0.6, l: 'man', w: 'The accessory replaced once a decade.' },
+      { q: 'sous vide machine', s: 0.62, l: 'man', w: 'A gadget gift for someone who already cooks seriously.' },
+    ],
+  },
+  {
+    bracket: 'mature_adult',
+    gender: 'woman',
+    specs: [
+      { q: 'cashmere wrap', s: 0.68, l: 'woman', w: 'Warmth that still looks like something she chose.' },
+      { q: 'jewelry travel case', t: 'stocking', s: 0.6, l: 'woman', w: 'For the person who travels and owns real jewelry.' },
+      { q: 'bird bath', s: 0.55, l: 'woman', w: 'A garden gift with a daily, visible payoff.' },
+    ],
+  },
+  {
+    bracket: 'mature_adult',
+    gender: 'man',
+    specs: [
+      { q: 'garage tool organizer', s: 0.6, l: 'man', w: 'Fixes the drawer of mismatched hand-me-downs.' },
+      { q: 'leather briefcase', s: 0.65, l: 'man', w: 'A work bag upgrade that lasts decades.' },
+      { q: 'grill cover', t: 'stocking', s: 0.55, l: 'man', w: 'Unglamorous, and exactly what protects the expensive thing.' },
+    ],
+  },
+];
+
+/** Explicit age × gender intents. */
+export const COMBO_INTENTS: GiftIntent[] = COMBO_SPECS.flatMap(({ bracket, gender, specs }) =>
+  expand(`combo/${bracket}-${gender}`, specs, [
+    ageFacet(bracket),
+    genderFacet(gender),
+    comboFacet(bracket, gender),
+  ])
+);
+
 const TEEN_AND_UP: AgeBracket[] = ['teen', 'young_adult', 'adult', 'mature_adult', 'senior'];
 const ADULTS: AgeBracket[] = ['adult', 'mature_adult', 'senior'];
 
-export const INTEREST_PROFILES: InterestProfile[] = [
+type RawInterest = Omit<InterestProfile, 'intents'> & {
+  intents: Array<Omit<GiftIntent, 'facets'>>;
+};
+
+const RAW_INTERESTS: RawInterest[] = [
   {
     id: 'coffee',
     label: 'Coffee',
@@ -2209,3 +2525,70 @@ export const INTEREST_PROFILES: InterestProfile[] = [
     ],
   },
 ];
+
+// ── Prime age windows ──────────────────────────────────────────────────
+//
+// The "age + interest" signal: where the interest is most active. Gifts scored
+// inside the window get an affinity bonus, so "34 + coffee" outranks "coffee"
+// on its own without 315 hand-written age × interest rows.
+
+const PRIME_AGE: Record<InterestId, AgeBracket[]> = {
+  coffee: ['young_adult', 'adult', 'mature_adult'],
+  tea: ['adult', 'mature_adult', 'senior'],
+  cooking: ['adult', 'mature_adult'],
+  baking: ['young_adult', 'adult', 'mature_adult'],
+  grilling: ['adult', 'mature_adult'],
+  wine_spirits: ['adult', 'mature_adult'],
+  home_decor: ['young_adult', 'adult', 'mature_adult'],
+  candles_scents: ['young_adult', 'adult', 'mature_adult'],
+  gardening: ['adult', 'mature_adult', 'senior'],
+  organization: ['young_adult', 'adult', 'mature_adult'],
+  tech_gadgets: ['teen', 'young_adult', 'adult'],
+  audio: ['teen', 'young_adult', 'adult'],
+  gaming: ['tween', 'teen', 'young_adult'],
+  photography: ['tween', 'teen', 'young_adult', 'adult'],
+  smart_home: ['young_adult', 'adult', 'mature_adult'],
+  beauty_skincare: ['teen', 'young_adult', 'adult'],
+  fashion_accessories: ['teen', 'young_adult', 'adult'],
+  jewelry: ['young_adult', 'adult', 'mature_adult'],
+  watches: ['adult', 'mature_adult'],
+  camping: ['child', 'tween', 'teen', 'adult'],
+  hiking: ['child', 'tween', 'teen', 'adult'],
+  cycling: ['child', 'tween', 'teen', 'adult'],
+  fishing: ['child', 'tween', 'teen', 'adult', 'mature_adult'],
+  fitness: ['young_adult', 'adult'],
+  running: ['teen', 'young_adult', 'adult'],
+  yoga: ['young_adult', 'adult'],
+  crafts_diy: ['child', 'tween', 'adult', 'mature_adult'],
+  art_supplies: ['child', 'tween', 'teen', 'adult'],
+  reading: ['tween', 'teen', 'adult', 'mature_adult', 'senior'],
+  music: ['tween', 'teen', 'young_adult', 'adult'],
+  board_games: ['child', 'tween', 'teen', 'adult'],
+  pets: ['child', 'tween', 'teen', 'adult'],
+  toys_play: ['toddler', 'child', 'tween'],
+  travel: ['young_adult', 'adult'],
+  tools_diy: ['adult', 'mature_adult'],
+};
+
+// ── Exports ────────────────────────────────────────────────────────────
+
+/** Interest profiles with their interest facet and prime age window applied. */
+export const INTEREST_PROFILES: InterestProfile[] = RAW_INTERESTS.map((profile) => ({
+  ...profile,
+  primeAgeBrackets: PRIME_AGE[profile.id] ?? profile.giftableAgeBrackets,
+  intents: profile.intents.map((entry) => ({
+    ...entry,
+    facets: [interestFacet(profile.id)],
+  })),
+}));
+
+/** Counts surfaced in evidence reports and the docs. */
+export const GIFT_INDEX_META = {
+  version: GIFT_INDEX_VERSION,
+  interests: INTEREST_PROFILES.length,
+  interestIntents: INTEREST_PROFILES.reduce((sum, p) => sum + p.intents.length, 0),
+  ageIntents: AGE_BRACKET_PROFILES.reduce((sum, b) => sum + b.ageIntents.length, 0),
+  universalIntents: AGE_BRACKET_PROFILES.reduce((sum, b) => sum + b.universalIntents.length, 0),
+  genderIntents: GENDER_INTENTS.woman.length + GENDER_INTENTS.man.length,
+  comboIntents: COMBO_INTENTS.length,
+} as const;

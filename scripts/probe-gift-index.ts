@@ -1,29 +1,29 @@
 /**
- * Probe the gift index against the real retailers.
+ * Probe the authored gift-index layers against the real retailers.
  *
- * The index in `search/gift/index-data.ts` claims every `query` returns real
- * listings. This script is how that claim gets checked, and it is the reason
- * the index can be called researched rather than invented: it runs the actual
- * gift pipeline (plan → federated search) and records what came back.
- *
- * It deliberately bypasses intent *selection* (the per-interest cap and the
- * neutral-majority rule), because those decide what a shopper sees, not
- * whether an index entry works. Every offerable intent is probed.
+ * The index claims every query returns real listings. This runs the actual
+ * gift pipeline (plan → federated search) for every authored intent — age,
+ * gender, age×gender, interest and universal — and records what came back.
  *
  * Usage:
  *   npx tsx --env-file=.env.local scripts/probe-gift-index.ts
- *   npx tsx --env-file=.env.local scripts/probe-gift-index.ts --all
- *   npx tsx --env-file=.env.local scripts/probe-gift-index.ts --per-interest 3 --concurrency 1
+ *   npx tsx --env-file=.env.local scripts/probe-gift-index.ts --layer age --concurrency 3
+ *   npx tsx --env-file=.env.local scripts/probe-gift-index.ts --limit 20
  *
- * Exit code is non-zero when any probed intent returned nothing, so this can
- * gate a change to the index.
+ * Exit code is non-zero when any probed intent returned nothing.
  */
 
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 
-import { INTEREST_PROFILES, AGE_BRACKET_PROFILES, GIFT_INDEX_VERSION } from '../search/gift/index-data';
-import { buildGiftBrief, isIntentOfferable, scoreIntent } from '../search/gift/brief';
+import {
+  AGE_BRACKET_PROFILES,
+  COMBO_INTENTS,
+  GIFT_INDEX_META,
+  GENDER_INTENTS,
+  INTEREST_PROFILES,
+} from '../search/gift/index-data';
+import { buildGiftBrief, intentFamilies, isIntentOfferable, scoreIntent, totalScore } from '../search/gift/brief';
 import { buildGiftSearchPlan } from '../search/gift/plan';
 import { ageBracketForAge, AGE_BRACKET_LABELS } from '../search/gift/taxonomy';
 import { executeSearch } from '../search/orchestrator';
@@ -31,39 +31,37 @@ import { getAvailableProviders } from '../search/providers/adapter';
 import { mapWithConcurrency } from '../search/concurrency';
 import type {
   AgeBracket,
+  Gender,
   GiftIntent,
   GiftRecipient,
   InterestId,
   ScoredIntent,
 } from '../search/gift/types';
 
+type Layer = 'universal' | 'age' | 'gender' | 'combo' | 'interest';
+
 interface Args {
-  perInterest: number;
+  layers: Layer[];
   concurrency: number;
+  limit: number;
   out: string;
 }
 
 function parseArgs(argv: string[]): Args {
   const args: Args = {
-    perInterest: 1,
-    concurrency: 2,
+    layers: ['universal', 'age', 'gender', 'combo', 'interest'],
+    concurrency: 3,
+    limit: 0,
     out: 'docs/gift-index-evidence.json',
   };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
-    if (arg === '--all') args.perInterest = Number.POSITIVE_INFINITY;
-    else if (arg === '--per-interest') {
-      args.perInterest = Number.parseInt(argv[++i] ?? '1', 10);
-    } else if (arg === '--concurrency') {
-      args.concurrency = Number.parseInt(argv[++i] ?? '2', 10);
-    } else if (arg === '--out') args.out = argv[++i] ?? args.out;
+    if (arg === '--layer') args.layers = [argv[++i] as Layer];
+    else if (arg === '--concurrency') args.concurrency = Number.parseInt(argv[++i] ?? '3', 10);
+    else if (arg === '--limit') args.limit = Number.parseInt(argv[++i] ?? '0', 10);
+    else if (arg === '--out') args.out = argv[++i] ?? args.out;
   }
   return args;
-}
-
-/** Middle bracket of an interest's giftable window — the most representative. */
-function representativeBracket(brackets: AgeBracket[]): AgeBracket {
-  return brackets[Math.floor(brackets.length / 2)];
 }
 
 /** First age that maps into a bracket, using the real bracket mapping. */
@@ -74,49 +72,76 @@ function ageForBracket(bracket: AgeBracket): number {
   return 30;
 }
 
+function representativeBracket(brackets: AgeBracket[]): AgeBracket {
+  return brackets[Math.floor(brackets.length / 2)];
+}
+
 interface ProbeTarget {
-  /** `null` for bracket-universal fallback gifts. */
-  interestId: InterestId | null;
-  interestLabel: string;
+  layer: Layer;
+  sourceId: string;
   intent: GiftIntent;
   age: number;
+  gender: Gender;
   bracket: AgeBracket;
 }
 
-function buildTargets(perInterest: number): ProbeTarget[] {
+/**
+ * Every authored intent, probed at an age where it is actually offerable.
+ * Selection caps are bypassed on purpose: they decide what a shopper sees, not
+ * whether an index row works.
+ */
+function buildTargets(layers: Layer[]): ProbeTarget[] {
   const targets: ProbeTarget[] = [];
+  const add = (target: ProbeTarget) => {
+    if (!isIntentOfferable(target.intent, target.bracket)) return;
+    targets.push(target);
+  };
 
-  for (const profile of INTEREST_PROFILES) {
-    const bracket = representativeBracket(profile.giftableAgeBrackets);
-    const age = ageForBracket(bracket);
-    const offerable = profile.intents
-      .filter((intent) => isIntentOfferable(intent, bracket))
-      // Strongest first, so a partial run covers the most important entries.
-      .sort((a, b) => b.strength - a.strength || a.id.localeCompare(b.id));
-
-    for (const intent of offerable.slice(0, perInterest)) {
-      targets.push({
-        interestId: profile.id,
-        interestLabel: profile.label,
-        intent,
-        age,
-        bracket,
-      });
+  for (const bracket of AGE_BRACKET_PROFILES) {
+    const age = ageForBracket(bracket.id);
+    if (layers.includes('universal')) {
+      for (const intent of bracket.universalIntents) {
+        add({ layer: 'universal', sourceId: `universal:${bracket.id}`, intent, age, gender: 'unspecified', bracket: bracket.id });
+      }
+    }
+    if (layers.includes('age')) {
+      for (const intent of bracket.ageIntents) {
+        add({ layer: 'age', sourceId: `age:${bracket.id}`, intent, age, gender: 'unspecified', bracket: bracket.id });
+      }
     }
   }
 
-  // Bracket-universal fallbacks are shipped gift ideas too, so they get
-  // probed at their own bracket rather than at an interest's representative
-  // age (a toddler-intent really can only be judged at toddler age).
-  if (perInterest > 1) {
-    for (const bracket of AGE_BRACKET_PROFILES) {
-      for (const intent of bracket.universalIntents) {
-        targets.push({
-          interestId: null,
-          interestLabel: 'Everyone',
+  if (layers.includes('gender')) {
+    for (const gender of ['woman', 'man'] as const) {
+      const bracket: AgeBracket = 'adult';
+      const age = ageForBracket(bracket);
+      for (const intent of GENDER_INTENTS[gender]) {
+        add({ layer: 'gender', sourceId: `gender:${gender}`, intent, age, gender, bracket });
+      }
+    }
+  }
+
+  if (layers.includes('combo')) {
+    for (const intent of COMBO_INTENTS) {
+      const facet = intent.facets.find((entry) => entry.startsWith('combo:'));
+      if (!facet) continue;
+      const [, bracket, gender] = facet.split(':') as [string, AgeBracket, 'woman' | 'man'];
+      add({ layer: 'combo', sourceId: facet, intent, age: ageForBracket(bracket), gender, bracket });
+    }
+  }
+
+  if (layers.includes('interest')) {
+    for (const profile of INTEREST_PROFILES) {
+      const bracket = representativeBracket(profile.giftableAgeBrackets);
+      const age = ageForBracket(bracket);
+      for (const intent of profile.intents) {
+        add({
+          layer: 'interest',
+          sourceId: `interest:${profile.id}`,
           intent,
-          age: ageForBracket(bracket.id),
-          bracket: bracket.id,
+          age,
+          gender: 'unspecified',
+          bracket,
         });
       }
     }
@@ -126,15 +151,15 @@ function buildTargets(perInterest: number): ProbeTarget[] {
 }
 
 interface ProbeResult {
+  layer: Layer;
+  sourceId: string;
   intentId: string;
   interestId: InterestId | null;
-  interestLabel: string;
   query: string;
   bracket: AgeBracket;
   status: string;
   resultCount: number;
   providersSearched: string[];
-  providersUnavailable: string[];
   priceRange: { min: number; max: number } | null;
   sampleTitles: string[];
   error?: string;
@@ -144,20 +169,21 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   const providers = getAvailableProviders();
 
-  console.log(`Gift index v${GIFT_INDEX_VERSION}`);
+  console.log(`Gift index v${GIFT_INDEX_META.version} — authored layers`);
   console.log(`Providers: ${providers.join(', ') || '(none configured)'}`);
   if (providers.length === 0) {
     console.error('No providers configured — pass --env-file=.env.local.');
     process.exit(2);
   }
 
-  const targets = buildTargets(args.perInterest);
-  console.log(
-    `Probing ${targets.length} intent(s) with concurrency ${args.concurrency}` +
-      (args.perInterest === Number.POSITIVE_INFINITY
-        ? ' (every offerable intent)'
-        : ` (up to ${args.perInterest} per interest)`)
-  );
+  let targets = buildTargets(args.layers);
+  if (args.limit > 0) targets = targets.slice(0, args.limit);
+
+  const byLayer = targets.reduce<Record<string, number>>((acc, target) => {
+    acc[target.layer] = (acc[target.layer] ?? 0) + 1;
+    return acc;
+  }, {});
+  console.log(`Probing ${targets.length} intent(s): ${JSON.stringify(byLayer)}`);
 
   const started = Date.now();
   let completed = 0;
@@ -169,25 +195,26 @@ async function main() {
       const recipient: GiftRecipient = {
         id: `probe-${target.intent.id}`,
         name: 'Probe',
-        gender: 'unspecified',
+        gender: target.gender,
         age: target.age,
-        interests: target.interestId ? [target.interestId] : [],
+        interests: target.layer === 'interest' ? [target.sourceId.split(':')[1] as InterestId] : [],
         createdAt: 0,
         updatedAt: 0,
       };
 
-      // The brief supplies the real budget ceiling and age exclusions.
       const brief = buildGiftBrief(recipient, { maxIntents: 1 });
       const breakdown = scoreIntent(target.intent, {
         budgetMax: brief.budget.max,
-        gender: 'unspecified',
-        universal: target.interestId === null,
+        gender: target.gender,
+        universal: target.layer === 'universal',
       });
       const scored: ScoredIntent = {
         intent: target.intent,
-        interest: target.interestId,
-        interestLabel: target.interestLabel,
-        score: target.intent.strength,
+        interest: target.layer === 'interest' ? (target.sourceId.split(':')[1] as InterestId) : null,
+        interestLabel: target.layer,
+        sourceKey: target.sourceId,
+        families: intentFamilies(target.intent),
+        score: totalScore(breakdown),
         breakdown,
       };
 
@@ -211,21 +238,19 @@ async function main() {
 
         completed += 1;
         process.stdout.write(
-          `\r  ${completed}/${targets.length} probed — last: ${target.intent.query} → ${response.results?.length ?? 0}`
+          `\r  ${completed}/${targets.length} probed — last: [${target.layer}] ${target.intent.query} → ${response.results?.length ?? 0}`
         );
 
         return {
+          layer: target.layer,
+          sourceId: target.sourceId,
           intentId: target.intent.id,
-          interestId: target.interestId,
-          interestLabel: target.interestLabel,
+          interestId: target.layer === 'interest' ? (target.sourceId.split(':')[1] as InterestId) : null,
           query: target.intent.query,
           bracket: target.bracket,
           status: response.status,
           resultCount: response.results?.length ?? 0,
           providersSearched: response.metadata?.providersSearched ?? [],
-          providersUnavailable: (response.metadata?.providersFailed ?? []).map(
-            (entry) => entry.providerId
-          ),
           priceRange:
             prices.length > 0 ? { min: Math.min(...prices), max: Math.max(...prices) } : null,
           sampleTitles: (response.results ?? [])
@@ -235,15 +260,15 @@ async function main() {
         };
       } catch (error) {
         return {
+          layer: target.layer,
+          sourceId: target.sourceId,
           intentId: target.intent.id,
-          interestId: target.interestId,
-          interestLabel: target.interestLabel,
+          interestId: target.layer === 'interest' ? (target.sourceId.split(':')[1] as InterestId) : null,
           query: target.intent.query,
           bracket: target.bracket,
           status: 'error',
           resultCount: 0,
           providersSearched: [],
-          providersUnavailable: [],
           priceRange: null,
           sampleTitles: [],
           error: error instanceof Error ? error.message : String(error),
@@ -255,22 +280,29 @@ async function main() {
   process.stdout.write('\n');
 
   const empty = results.filter((entry) => entry.resultCount === 0);
-  const coveredInterests = new Set(
-    results.filter((r) => r.resultCount > 0 && r.interestId).map((r) => r.interestId)
+  const byLayerDone = results.reduce<Record<string, { probed: number; withResults: number }>>(
+    (acc, entry) => {
+      const bucket = acc[entry.layer] ?? { probed: 0, withResults: 0 };
+      bucket.probed += 1;
+      if (entry.resultCount > 0) bucket.withResults += 1;
+      acc[entry.layer] = bucket;
+      return acc;
+    },
+    {}
   );
 
   const report = {
     generatedAt: new Date().toISOString(),
-    indexVersion: GIFT_INDEX_VERSION,
-    mode: args.perInterest === Number.POSITIVE_INFINITY ? 'all-intents' : `per-interest-${args.perInterest}`,
+    indexVersion: GIFT_INDEX_META.version,
+    matrix: GIFT_INDEX_META,
+    layers: args.layers,
     providers,
     durationMs: Date.now() - started,
     summary: {
       probed: results.length,
       withResults: results.length - empty.length,
       empty: empty.length,
-      interestsCovered: coveredInterests.size,
-      interestsTotal: INTEREST_PROFILES.length,
+      byLayer: byLayerDone,
     },
     results,
   };
@@ -279,17 +311,14 @@ async function main() {
   writeFileSync(args.out, `${JSON.stringify(report, null, 2)}\n`);
 
   console.log(`\nWrote ${args.out}`);
-  console.log(
-    `  ${report.summary.withResults}/${report.summary.probed} intents returned results ` +
-      `(${report.summary.interestsCovered}/${report.summary.interestsTotal} interests covered)`
-  );
+  console.log(`  ${report.summary.withResults}/${report.summary.probed} intents returned results`);
   console.log(`  ${(report.durationMs / 1000).toFixed(1)}s`);
 
   if (empty.length > 0) {
     console.log('\nIntents that returned nothing:');
     for (const entry of empty) {
       console.log(
-        `  ${entry.intentId} (${AGE_BRACKET_LABELS[entry.bracket]}): "${entry.query}" → ${entry.status}${entry.error ? ` — ${entry.error}` : ''}`
+        `  [${entry.layer}] ${entry.intentId} (${AGE_BRACKET_LABELS[entry.bracket]}): "${entry.query}" → ${entry.status}${entry.error ? ` — ${entry.error}` : ''}`
       );
     }
     process.exit(1);
