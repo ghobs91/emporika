@@ -24,15 +24,20 @@ export {
   coverageOf,
 } from './brief';
 export { buildGiftSearchPlan, deriveGiftFeatures } from './plan';
-export { executeGiftSearch, mergeGiftIdeas, GIFT_DEFAULTS } from './orchestrator';
+export { executeGiftIntents, mergeGiftIdeas, GIFT_DEFAULTS } from './orchestrator';
 export {
   giftRecipientSchema,
-  giftIdeasRequestSchema,
   validateGiftIndex,
   currentGiftIndex,
   assertGiftIndexValid,
 } from './schema';
-export type { ValidatedGiftIdeasRequest, GiftIndexShape } from './schema';
+export type { ValidatedGiftRecipient, GiftIndexShape } from './schema';
+export {
+  giftIntentRequestSchema,
+  giftSearchRequestSchema,
+  GIFT_REQUEST_LIMITS,
+} from './request';
+export type { GiftIntentRequest, GiftSearchRequest, GiftSearchResponse } from './request';
 export { PROVIDER_IDS } from './recipient-schema';
 export type { GiftProviderId } from './recipient-schema';
 export { BRANDS, getBrand, brandProductQuery } from './brands';

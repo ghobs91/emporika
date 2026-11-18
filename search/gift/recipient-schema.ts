@@ -43,28 +43,6 @@ export const giftRecipientSchema = z.object({
 
 export type ValidatedGiftRecipient = z.infer<typeof giftRecipientSchema>;
 
-/** Payload accepted by `POST /api/gift/ideas`. */
-export const giftIdeasRequestSchema = z.object({
-  recipient: giftRecipientSchema,
-  destination: z
-    .object({
-      country: z.string().min(1),
-      postalCode: z.string().optional(),
-    })
-    .optional(),
-  /** Hard ceiling override; also accepted on the recipient as `budget`. */
-  maxPrice: z.number().positive().max(100_000).optional(),
-  /** How many distinct gift intents to search (one per trait layer at minimum). */
-  maxIntents: z.number().int().min(1).max(8).optional(),
-  maxResults: z.number().int().min(1).max(120).optional(),
-  /** Retailers the shopper pinned; omitted means every eligible retailer. */
-  includedProviders: z.array(providerIdSchema).optional(),
-  /** Retailers to skip for this request (merged with the recipient's list). */
-  excludedProviders: z.array(providerIdSchema).optional(),
-});
-
-export type ValidatedGiftIdeasRequest = z.infer<typeof giftIdeasRequestSchema>;
-
 /** Age brackets a recipient form will accept, for UI reuse. */
 export const RECIPIENT_AGE_MAX = 120;
 export const RECIPIENT_AGE_MIN = 0;

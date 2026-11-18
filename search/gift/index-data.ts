@@ -58,6 +58,7 @@ function intent(slug: string, spec: IntentSpec, facets: FacetId[]): GiftIntent {
     ...(spec.only ? { onlyAgeBrackets: spec.only } : {}),
     ...(spec.b ? { brands: spec.b } : {}),
     ...(spec.c ? { categories: spec.c } : {}),
+    ...(spec.pt ? { productType: spec.pt } : {}),
     why: spec.w,
   };
 }
@@ -796,6 +797,7 @@ const RAW_INTERESTS: RawInterest[] = [
       {
         id: 'tea/sampler',
         query: 'loose leaf tea sampler',
+        productType: 'consumable',
         kind: 'category',
         tier: 'stocking',
         strength: 0.8,
@@ -957,6 +959,7 @@ const RAW_INTERESTS: RawInterest[] = [
       {
         id: 'grilling/rubs',
         query: 'bbq rub gift set',
+        productType: 'consumable',
         kind: 'category',
         tier: 'stocking',
         strength: 0.7,

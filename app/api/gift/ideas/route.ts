@@ -1,21 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { giftIdeasRequestSchema } from '@/search/gift/schema';
-import { executeGiftSearch } from '@/search/gift/orchestrator';
+import { giftSearchRequestSchema } from '@/search/gift/request';
+import { executeGiftIntents } from '@/search/gift/orchestrator';
 
 /**
  * POST /api/gift/ideas
  *
- * Deterministic gift search for one saved recipient. The recipient's
- * gender/age/interests are compiled against the checked-in gift index into
- * concrete searches, which run through the normal pipeline and are
- * interleaved into one "gift ideas" list.
- *
- * No model is called here — that is the point of the feature.
+ * Runs a set of gift searches the *browser* compiled from a recipient profile.
+ * The profile itself never reaches this endpoint — only query strings, labels
+ * and per-search constraints (see `search/gift/request.ts`). No model is
+ * called here either; ranking happens client-side.
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const parsed = giftIdeasRequestSchema.safeParse(body);
+    const parsed = giftSearchRequestSchema.safeParse(body);
 
     if (!parsed.success) {
       return NextResponse.json(
@@ -28,7 +26,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await executeGiftSearch(parsed.data);
+    const result = await executeGiftIntents(parsed.data);
 
     if (result.status === 'error') {
       return NextResponse.json(result, { status: 502 });

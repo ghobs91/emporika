@@ -1,53 +1,37 @@
-// ── Gift ideas orchestrator ─────────────────────────────────────────────
+// ── Gift search orchestrator (server) ───────────────────────────────────
 //
-// One "gift ideas" request fans out into N ordinary searches — one per
-// selected gift intent — and interleaves the results. Everything below the
-// fan-out is the existing pipeline: same providers, same hard filters, same
-// entity resolution, same ranker. Gift mode changes *what we search for*,
-// never how results are scored.
+// The server is a search service here, not a profile store: it receives a
+// small set of already-compiled query intents and fans them out. It never
+// sees a recipient's name, age, gender or interests — see `./request.ts`.
 //
-// Why interleave instead of concatenating: concatenation would let the
-// highest-scoring intent fill the whole page. Round-robin guarantees every
-// intent that found something is represented in the first screenful, which
-// is what "gift ideas" needs to be useful.
+// Everything below the fan-out is the existing pipeline: same providers, same
+// hard filters, same entity resolution, same ranker. Gift mode changes *what
+// is searched*, never how results are scored. Re-ranking (semantic relevance,
+// budget proximity, learned affinity) happens in the browser.
 
 import { executeSearch } from '@/search/orchestrator';
 import { getAvailableProviders } from '@/search/providers/adapter';
 import { mapWithConcurrency } from '@/search/concurrency';
 import type { ProviderId, SearchApiResponse } from '@/search/types';
-import { PROVIDER_IDS } from './recipient-schema';
-import { momentumFor, momentumSampledAt } from './momentum';
-import { buildGiftBrief } from './brief';
-import { buildGiftSearchPlan } from './plan';
-import { assertGiftIndexValid, type ValidatedGiftIdeasRequest } from './schema';
-import type {
-  GiftIdeasResponse,
-  GiftIdea,
-  GiftIntentRun,
-  ScoredIntent,
-} from './types';
-
-// The index is checked in and unit-tested; this catches a bad edit at
-// import time in dev and test instead of at the first shopper request.
-if (process.env.NODE_ENV !== 'production') {
-  assertGiftIndexValid();
-}
+import { momentumSampledAt } from './momentum';
+import { buildPlanFromRequest } from './plan';
+import type { GiftIntentRequest, GiftSearchRequest, GiftSearchResponse } from './request';
 
 // ── Configuration ──────────────────────────────────────────────────────
 
 export const GIFT_DEFAULTS = {
-  /** Total ideas returned across all intents. */
-  maxResults: 48,
-  /** Results requested per intent before interleaving. */
-  perIntentResults: 30,
+  /** Total products returned across all intents (client re-ranks and trims). */
+  maxResults: 60,
+  /** Results requested per intent before client-side ranking. */
+  perIntentResults: 24,
   /** Intents searched in parallel. Retailer APIs are the shared resource. */
   concurrency: 2,
 } as const;
 
 // ── Merge ──────────────────────────────────────────────────────────────
 
-interface IntentRun {
-  scored: ScoredIntent;
+export interface IntentRun {
+  request: GiftIntentRequest;
   /** Absent when the intent's search threw before returning a response. */
   response?: SearchApiResponse;
   /** Set instead of `response` when the search for this intent threw. */
@@ -64,18 +48,20 @@ interface IntentRun {
  *    so far, so a marketplace with hundreds of near-identical listings cannot
  *    crowd out the other retailers.
  *
- * A product that appears under several intents keeps the position from the
- * highest-scoring intent, because `runs` is passed in brief order.
+ * Exact duplicates are also removed here for cache efficiency; near-duplicates
+ * (same product, different title) are removed in the browser, where the
+ * semantic vectors live.
  */
-export function mergeGiftIdeas(runs: IntentRun[], maxResults: number): GiftIdea[] {
+export function mergeGiftIdeas(
+  runs: IntentRun[],
+  maxResults: number
+): GiftSearchResponse['ideas'] {
   const buckets = runs.map((run) => run.response?.results ?? []);
   const cursors = buckets.map(() => 0);
   const providerUse = new Map<string, number>();
   const seen = new Set<string>();
-  const ideas: GiftIdea[] = [];
+  const ideas: GiftSearchResponse['ideas'] = [];
 
-  // Bounded so a bucket of unknown length cannot spin: each run can place at
-  // most its bucket size, and every round places at most one per run.
   const longest = buckets.reduce((max, bucket) => Math.max(max, bucket.length), 0);
 
   for (let round = 0; round < longest; round += 1) {
@@ -99,7 +85,6 @@ export function mergeGiftIdeas(runs: IntentRun[], maxResults: number): GiftIdea[
           bestUse = use;
           bestIndex = index;
         }
-        // Nothing beats an unused retailer; stop scanning.
         if (use === 0) break;
       }
 
@@ -113,16 +98,14 @@ export function mergeGiftIdeas(runs: IntentRun[], maxResults: number): GiftIdea[
       const provider = product.bestOffer?.offer.providerId ?? 'unknown';
       providerUse.set(provider, (providerUse.get(provider) ?? 0) + 1);
 
-      const entry = runs[runIndex].scored;
+      const request = runs[runIndex].request;
       ideas.push({
         product,
-        intentId: entry.intent.id,
-        intentQuery: entry.intent.query,
-        interestId: entry.interest,
-        interestLabel: entry.interestLabel,
-        why: entry.intent.why,
-        families: entry.families,
-        momentum: momentumFor(entry.intent.query),
+        intentId: request.intentId,
+        intentQuery: request.query,
+        intentLabel: request.label,
+        families: request.families,
+        why: request.why,
         position: ideas.length + 1,
       });
     }
@@ -135,24 +118,17 @@ export function mergeGiftIdeas(runs: IntentRun[], maxResults: number): GiftIdea[
 
 // ── Main entry point ───────────────────────────────────────────────────
 
-export async function executeGiftSearch(
-  request: ValidatedGiftIdeasRequest
-): Promise<GiftIdeasResponse> {
+export async function executeGiftIntents(
+  request: GiftSearchRequest
+): Promise<GiftSearchResponse> {
   const started = performance.now();
   const maxResults = request.maxResults ?? GIFT_DEFAULTS.maxResults;
+  const perIntent = request.resultsPerIntent ?? GIFT_DEFAULTS.perIntentResults;
 
-  const brief = buildGiftBrief(request.recipient, {
-    maxIntents: request.maxIntents,
-  });
-
-  const recipient = { id: request.recipient.id, name: request.recipient.name };
-
-  const providerList = getAvailableProviders();
-  if (providerList.length === 0) {
+  const availableProviders = getAvailableProviders();
+  if (availableProviders.length === 0) {
     return {
       status: 'error',
-      recipient,
-      brief,
       ideas: [],
       intents: [],
       providersSearched: [],
@@ -164,49 +140,30 @@ export async function executeGiftSearch(
     };
   }
 
-  // A shopper-supplied ceiling overrides the recipient/age-bracket one.
-  const effectiveBudget =
-    request.maxPrice !== undefined
-      ? { ...brief.budget, max: request.maxPrice, source: 'recipient' as const }
-      : brief.budget;
-
-  // Retailers the shopper never wants for this person (persisted on the
-  // recipient) plus anything excluded for this one request.
-  const excludedProviders = uniqueStrings([
-    ...(request.excludedProviders ?? []),
-    ...(request.recipient.excludedProviders ?? []),
-  ]).filter(isProviderId);
-
   const preferences = {
-    budget: { max: effectiveBudget.max, currency: 'USD' },
-    maxResults: GIFT_DEFAULTS.perIntentResults,
-    includedProviders: request.includedProviders,
-    excludedProviders: excludedProviders.length > 0 ? excludedProviders : undefined,
+    maxResults: perIntent,
+    excludedProviders: request.excludedProviders,
     // Gift searches are new-in-box; see `./plan.ts`.
     allowedConditions: ['new' as const],
   };
 
   const runs = await mapWithConcurrency(
-    brief.intents,
+    request.intents,
     GIFT_DEFAULTS.concurrency,
-    async (scored) => {
-      const plan = buildGiftSearchPlan(scored, brief, providerList, preferences);
+    async (intent): Promise<IntentRun> => {
       try {
         const response = await executeSearch({
-          query: scored.intent.query,
+          query: intent.query,
           destination: request.destination,
           preferences,
-          candidatePlan: plan,
+          candidatePlan: buildPlanFromRequest(intent, availableProviders, preferences),
           candidatePlanSource: 'gift',
+          sort: intent.sort,
         });
-        return { scored, response };
+        return { request: intent, response };
       } catch (error) {
-        // No fabricated SearchMetadata: a thrown intent is recorded as an
-        // error and every read below falls back to empty. This also keeps the
-        // module independent of metadata fields the orchestrator may not
-        // populate, instead of hand-building a structurally valid response.
         return {
-          scored,
+          request: intent,
           error: error instanceof Error ? error.message : 'Gift search failed',
         };
       }
@@ -215,26 +172,23 @@ export async function executeGiftSearch(
 
   const ideas = mergeGiftIdeas(runs, maxResults);
 
-  const intentRuns: GiftIntentRun[] = runs.map(({ scored, response, error }) => ({
-    intentId: scored.intent.id,
-    intentQuery: scored.intent.query,
-    interestId: scored.interest,
-    interestLabel: scored.interestLabel,
-    families: scored.families,
+  const intents: GiftSearchResponse['intents'] = runs.map(({ request: intent, response, error }) => ({
+    intentId: intent.intentId,
+    query: intent.query,
+    label: intent.label,
+    families: intent.families,
     status: response?.status ?? 'error',
     resultCount: response?.results?.length ?? 0,
     providersSearched: response?.metadata?.providersSearched ?? [],
     error: error ?? response?.error,
   }));
 
-  const providersSearched = unique(
-    runs.flatMap(({ response }) => response?.metadata?.providersSearched ?? [])
+  const providersSearched = Array.from(
+    new Set(runs.flatMap(({ response }) => response?.metadata?.providersSearched ?? []))
   );
 
   const seenUnavailable = new Set<string>();
-  const providersUnavailable: GiftIdeasResponse['providersUnavailable'] = [];
-  // Derived from `providersFailed`, which every search response carries, so
-  // gift reporting does not depend on richer per-provider availability detail.
+  const providersUnavailable: GiftSearchResponse['providersUnavailable'] = [];
   for (const { response } of runs) {
     for (const entry of response?.metadata?.providersFailed ?? []) {
       if (seenUnavailable.has(entry.providerId)) continue;
@@ -254,7 +208,7 @@ export async function executeGiftSearch(
       (response?.metadata?.providersFailed?.length ?? 0) > 0
   );
 
-  let status: GiftIdeasResponse['status'];
+  let status: GiftSearchResponse['status'];
   if (failed.length === runs.length) status = 'error';
   else if (ideas.length === 0) status = 'no_results';
   else if (failed.length > 0 || partial) status = 'partial_results';
@@ -262,32 +216,20 @@ export async function executeGiftSearch(
 
   return {
     status,
-    recipient,
-    brief: { ...brief, budget: effectiveBudget },
     ideas,
-    intents: intentRuns,
+    intents,
     providersSearched,
     providersUnavailable,
     momentumSampledAt,
     timingMs: Math.round(performance.now() - started),
     error:
       status === 'error'
-        ? failed[0]?.error ??
-          failed[0]?.response?.error ??
-          'Every gift search failed. Please try again.'
+        ? failed[0]?.error ?? failed[0]?.response?.error ?? 'Every gift search failed. Please try again.'
         : undefined,
   };
 }
 
-function unique<T>(values: T[]): T[] {
-  return Array.from(new Set(values));
-}
-
-function uniqueStrings(values: string[]): string[] {
-  return unique(values);
-}
-
-/** Narrow a plain string to a provider id the pipeline understands. */
-function isProviderId(value: string): value is ProviderId {
-  return (PROVIDER_IDS as readonly string[]).includes(value);
+/** Provider ids the orchestrator can search, for client-side pickers. */
+export function giftProviderIds(): ProviderId[] {
+  return getAvailableProviders();
 }

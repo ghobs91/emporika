@@ -80,10 +80,13 @@ describe('buildGiftSearchPlan', () => {
     expect(plan.hardFilters.maxPrice).toBe(45);
   });
 
-  it('applies age-bracket title exclusions', () => {
+  it('keeps age-bracket exclusions off the wire (applied client-side instead)', () => {
+    // Sending "small parts"/"alcohol" would let a reader infer the recipient's
+    // age, so the brief's exclusions never reach the plan.
     const toddler = buildGiftBrief(recipient({ age: 2, interests: ['toys_play'] }));
     const plan = buildGiftSearchPlan(toddler.intents[0], toddler, PROVIDERS);
-    expect(plan.hardFilters.exclusions).toContain('small parts');
+    expect(plan.hardFilters.exclusions ?? []).not.toContain('small parts');
+    expect(plan.hardFilters.exclusions ?? []).not.toContain('alcohol');
   });
 
   it('searches new stock only', () => {
@@ -139,8 +142,19 @@ describe('mergeGiftIdeas', () => {
     maxIntents: 3,
   });
 
+  function requestFor(index: number) {
+    const scored = brief.intents[index];
+    return {
+      intentId: scored.intent.id,
+      query: scored.intent.query,
+      label: scored.interestLabel,
+      families: scored.families,
+      why: scored.intent.why,
+    };
+  }
+
   function run(responseFor: (index: number) => SearchApiResponse) {
-    return brief.intents.map((scored, index) => ({ scored, response: responseFor(index) }));
+    return brief.intents.map((_, index) => ({ request: requestFor(index), response: responseFor(index) }));
   }
 
   it('interleaves one result from each intent instead of concatenating', () => {
@@ -158,6 +172,7 @@ describe('mergeGiftIdeas', () => {
       expect(idea.intentId).toBe(brief.intents[index].intent.id);
       expect(idea.intentQuery).toBe(brief.intents[index].intent.query);
       expect(idea.why).toBe(brief.intents[index].intent.why);
+      expect(idea.intentLabel).toBe(brief.intents[index].interestLabel);
       expect(idea.families).toEqual(brief.intents[index].families);
     }
   });
@@ -167,7 +182,7 @@ describe('mergeGiftIdeas', () => {
     // would return it. The merge must not emit four eBay items in a row.
     const runs = [
       {
-        scored: brief.intents[0],
+        request: requestFor(0),
         response: response([], {
           results: [
             product('a', 'ebay'),
@@ -206,8 +221,8 @@ describe('mergeGiftIdeas', () => {
 
   it('skips intents that returned nothing', () => {
     const runs = [
-      { scored: brief.intents[0], response: response([]) },
-      { scored: brief.intents[1], response: response(['only']) },
+      { request: requestFor(0), response: response([]) },
+      { request: requestFor(1), response: response(['only']) },
     ];
     const ideas = mergeGiftIdeas(runs, 10);
     expect(ideas).toHaveLength(1);

@@ -160,6 +160,13 @@ export type GiftTier = 'stocking' | 'standard' | 'hero';
 
 export type IntentKind = 'category' | 'brand' | 'product';
 
+/**
+ * What kind of thing an intent's results are. Authored for intents whose
+ * results are inherently one type (a pod refill is a consumable); individual
+ * listings are classified on the client by `lib/gift/product-type.ts`.
+ */
+export type ProductType = 'main' | 'accessory' | 'consumable' | 'replacement_part';
+
 export type Lean = 'neutral' | 'woman' | 'man';
 
 /** Typical USD price per tier — used to score tier fit, never to filter. */
@@ -198,6 +205,8 @@ export interface GiftIntent {
   categories?: string[];
   /** Shopper-facing explanation rendered next to the result. */
   why: string;
+  /** Optional authoring hint; the client classifier is authoritative. */
+  productType?: ProductType;
 }
 
 /** Compact authoring shape accepted by `buildIntents` in `./index-data.ts`. */
@@ -222,6 +231,8 @@ export interface IntentSpec {
   only?: AgeBracket[];
   /** Intent kind; defaults to 'product'. */
   k?: IntentKind;
+  /** Authoring hint for the result type (consumable refills etc.). */
+  pt?: ProductType;
 }
 
 export interface InterestProfile {
@@ -346,48 +357,5 @@ export interface GiftBrief {
   coverage: Record<FacetFamily, number>;
 }
 
-// ── API payloads ───────────────────────────────────────────────────────
-
-export interface GiftIdea {
-  product: import('@/search/types').RankedProduct;
-  /** The intent whose search surfaced this product. */
-  intentId: string;
-  intentQuery: string;
-  interestId: InterestId | null;
-  interestLabel: string;
-  /** Shopper-facing reason this is a fit. */
-  why: string;
-  /** Facet families the intent answers, so the UI can label coverage. */
-  families: FacetFamily[];
-  /** Measured momentum for this intent's query, in [0, 1]. */
-  momentum: number;
-  /** Round-robin position among all ideas (1-based). */
-  position: number;
-}
-
-export interface GiftIntentRun {
-  intentId: string;
-  intentQuery: string;
-  interestId: InterestId | null;
-  interestLabel: string;
-  families: FacetFamily[];
-  status: import('@/search/types').SearchStatus;
-  resultCount: number;
-  /** Providers that answered for this intent. */
-  providersSearched: string[];
-  error?: string;
-}
-
-export interface GiftIdeasResponse {
-  status: 'results' | 'partial_results' | 'no_results' | 'error';
-  recipient: { id: string; name: string };
-  brief: GiftBrief;
-  ideas: GiftIdea[];
-  intents: GiftIntentRun[];
-  providersSearched: string[];
-  providersUnavailable: Array<{ providerId: string; kind: string; detail: string }>;
-  /** ISO date of the momentum sample behind these ideas. */
-  momentumSampledAt: string;
-  timingMs: number;
-  error?: string;
-}
+// Wire types live in `./request.ts` (the client/server contract) and in
+// `@/lib/gift/rank` (the client-side ranking output).

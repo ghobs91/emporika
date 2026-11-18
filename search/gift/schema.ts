@@ -27,12 +27,8 @@ import { BRANDS } from './brands';
 
 // Recipient-boundary schemas live in a client-safe module and are re-exported
 // here so callers have one entry point.
-export {
-  giftRecipientSchema,
-  giftIdeasRequestSchema,
-  interestIdSchema,
-} from './recipient-schema';
-export type { ValidatedGiftRecipient, ValidatedGiftIdeasRequest } from './recipient-schema';
+export { giftRecipientSchema, interestIdSchema } from './recipient-schema';
+export type { ValidatedGiftRecipient } from './recipient-schema';
 
 // ── Index integrity ────────────────────────────────────────────────────
 
@@ -68,6 +64,7 @@ const giftIntentSchema = z
     onlyAgeBrackets: z.array(ageBracketSchema).optional(),
     brands: z.array(z.string()).optional(),
     categories: z.array(z.string()).optional(),
+    productType: z.enum(['main', 'accessory', 'consumable', 'replacement_part']).optional(),
     why: z.string().min(10).max(240),
   })
   .strict();
