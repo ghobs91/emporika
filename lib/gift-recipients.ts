@@ -27,6 +27,8 @@ export interface RecipientDraft {
   age: number;
   interests: InterestId[];
   budget?: number;
+  /** Retailers to skip for this person. Empty clears the restriction. */
+  excludedProviders?: string[];
 }
 
 function isRecipient(value: unknown): value is GiftRecipient {
@@ -59,6 +61,9 @@ export function createRecipient(draft: RecipientDraft, now = Date.now()): GiftRe
     ...(draft.budget !== undefined && Number.isFinite(draft.budget) && draft.budget > 0
       ? { budget: Math.round(draft.budget * 100) / 100 }
       : {}),
+    ...(draft.excludedProviders?.length
+      ? { excludedProviders: Array.from(new Set(draft.excludedProviders)) }
+      : {}),
     createdAt: now,
     updatedAt: now,
   };
@@ -80,6 +85,9 @@ export function updateRecipient(
     ...(draft.budget !== undefined && Number.isFinite(draft.budget) && draft.budget > 0
       ? { budget: Math.round(draft.budget * 100) / 100 }
       : { budget: undefined }),
+    ...(draft.excludedProviders?.length
+      ? { excludedProviders: Array.from(new Set(draft.excludedProviders)) }
+      : { excludedProviders: undefined }),
     updatedAt: now,
   };
 }

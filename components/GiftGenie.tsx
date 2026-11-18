@@ -24,6 +24,9 @@ import {
   INTERESTS,
   ageBracketForAge,
 } from '@/search/gift/taxonomy';
+import { PROVIDER_IDS } from '@/search/gift/recipient-schema';
+import { getRetailerInfo } from '@/lib/retailer';
+import type { RetailerSource } from '@/types/unified';
 import type {
   Gender,
   GiftIdeasResponse,
@@ -33,7 +36,7 @@ import type {
 } from '@/search/gift/types';
 import type { UnifiedProduct } from '@/types/unified';
 
-const MAX_INTENTS = 3;
+const MAX_INTENTS = 6;
 const MAX_RESULTS = 36;
 
 const GENDERS: Gender[] = ['woman', 'man', 'nonbinary', 'unspecified'];
@@ -44,11 +47,28 @@ interface Draft {
   age: string;
   interests: InterestId[];
   budget: string;
+  /** Retailers to skip for this person. */
+  excludedProviders: string[];
 }
 
 function emptyDraft(): Draft {
-  return { name: '', gender: 'unspecified', age: '30', interests: [], budget: '' };
+  return {
+    name: '',
+    gender: 'unspecified',
+    age: '30',
+    interests: [],
+    budget: '',
+    excludedProviders: [],
+  };
 }
+
+const FAMILY_LABELS: Record<string, string> = {
+  age: 'age',
+  gender: 'gender',
+  combo: 'age + gender',
+  interest: 'interests',
+  brand: 'brands',
+};
 
 function draftFrom(recipient: GiftRecipient): Draft {
   return {
@@ -57,6 +77,7 @@ function draftFrom(recipient: GiftRecipient): Draft {
     age: String(recipient.age),
     interests: [...recipient.interests],
     budget: recipient.budget !== undefined ? String(recipient.budget) : '',
+    excludedProviders: [...(recipient.excludedProviders ?? [])],
   };
 }
 
@@ -69,6 +90,7 @@ function parseDraft(draft: Draft) {
     age: Number.isFinite(age) ? age : 0,
     interests: draft.interests,
     budget: budget !== undefined && Number.isFinite(budget) && budget > 0 ? budget : undefined,
+    excludedProviders: draft.excludedProviders,
   };
 }
 
@@ -233,6 +255,11 @@ export default function GiftGenie() {
                           {AGE_BRACKET_LABELS[ageBracketForAge(recipient.age)]} ·{' '}
                           {GENDER_LABELS[recipient.gender]}
                           {recipient.budget ? ` · under $${recipient.budget}` : ''}
+                          {recipient.excludedProviders?.length
+                            ? ` · no ${recipient.excludedProviders
+                                .map((id) => getRetailerInfo(id as RetailerSource).label)
+                                .join(', ')}`
+                            : ''}
                         </p>
                         {recipient.interests.length > 0 && (
                           <p className="mt-1 truncate text-xs text-gray-400 dark:text-gray-500">
@@ -386,6 +413,17 @@ function IdeasResult({
         <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
           Budget ceiling ${brief.budget.max.toFixed(0)} (
           {brief.budget.source === 'recipient' ? 'your limit' : 'typical for this age'})
+          {' · '}
+          layers:{' '}
+          {Object.entries(brief.coverage)
+            .filter(([, count]) => count > 0)
+            .map(([family]) => FAMILY_LABELS[family] ?? family)
+            .join(', ')}
+          {brief.excludedProviders.length > 0
+            ? ` · skipping ${brief.excludedProviders
+                .map((id) => getRetailerInfo(id as RetailerSource).label)
+                .join(', ')}`
+            : ''}
         </p>
 
         {brief.droppedInterests.length > 0 && (
@@ -621,6 +659,42 @@ function RecipientForm({
             </div>
           ))}
         </div>
+      </fieldset>
+
+      <fieldset className="mt-4">
+        <legend className="mb-2 text-xs font-medium text-gray-600 dark:text-gray-300">
+          Leave out these retailers (optional)
+        </legend>
+        <div className="flex flex-wrap gap-1.5">
+          {PROVIDER_IDS.map((id) => {
+            const active = draft.excludedProviders.includes(id);
+            return (
+              <button
+                key={id}
+                type="button"
+                aria-pressed={active}
+                onClick={() =>
+                  setDraft((current) => ({
+                    ...current,
+                    excludedProviders: active
+                      ? current.excludedProviders.filter((entry) => entry !== id)
+                      : [...current.excludedProviders, id],
+                  }))
+                }
+                className={`rounded-full border px-2.5 py-1 text-xs transition-colors ${
+                  active
+                    ? 'border-red-400 bg-red-50 text-red-700 line-through dark:border-red-800 dark:bg-red-950/40 dark:text-red-300'
+                    : 'border-gray-200 text-gray-600 hover:border-gray-400 dark:border-[#3a3a3a] dark:text-gray-300 dark:hover:border-gray-500'
+                }`}
+              >
+                {getRetailerInfo(id as RetailerSource).label}
+              </button>
+            );
+          })}
+        </div>
+        <p className="mt-1.5 text-[11px] text-gray-400 dark:text-gray-500">
+          Saved with this person, so their gift searches stay off these retailers.
+        </p>
       </fieldset>
 
       <div className="mt-5 flex items-center gap-3">

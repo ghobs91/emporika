@@ -87,6 +87,26 @@ describe('createRecipient', () => {
     ).toBe(45);
   });
 
+  it('keeps merchant exclusions and clears them when removed', () => {
+    const created = createRecipient({
+      name: 'A',
+      gender: 'unspecified',
+      age: 30,
+      interests: [],
+      excludedProviders: ['ebay', 'ebay', 'costco'],
+    });
+    expect(created.excludedProviders).toEqual(['ebay', 'costco']);
+
+    const cleared = updateRecipient(created, {
+      name: 'A',
+      gender: 'unspecified',
+      age: 30,
+      interests: [],
+      excludedProviders: [],
+    });
+    expect(cleared.excludedProviders).toBeUndefined();
+  });
+
   it('de-duplicates interests', () => {
     const created = createRecipient({
       name: 'A',
