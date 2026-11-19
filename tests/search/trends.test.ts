@@ -365,3 +365,37 @@ describe('trend boost in the ranker', () => {
     expect(result.ideas[0].score).toBeGreaterThan(0);
   });
 });
+
+// ── Embedding model selection ──────────────────────────────────────────
+//
+// The default is a *measured* choice, not a fashion: see
+// `scripts/bench-embedding-models.ts` and `docs/embedding-bench.json`.
+
+describe('embedding model registry', () => {
+  it('defaults to the same-size model that beat MiniLM', async () => {
+    const { activeEmbeddingModel, DEFAULT_EMBEDDING_MODEL, SEMANTIC_MODEL_ID } = await import(
+      '@/lib/gift/semantic'
+    );
+    const active = activeEmbeddingModel();
+    expect(DEFAULT_EMBEDDING_MODEL).toBe('arctic-xs');
+    expect(active.key).toBe('arctic-xs');
+    expect(active.sizeMB).toBeLessThanOrEqual(23);
+    expect(SEMANTIC_MODEL_ID).toBe(active.id);
+  });
+
+  it('keeps every registered model at 384 dimensions (drop-in swap)', async () => {
+    const { EMBEDDING_MODELS } = await import('@/lib/gift/semantic');
+    for (const model of Object.values(EMBEDDING_MODELS)) {
+      expect(model.dimensions, model.key).toBe(384);
+      expect(model.id.length).toBeGreaterThan(3);
+    }
+  });
+
+  it('applies the query prefix only on the query side', async () => {
+    const { prefixedText, activeEmbeddingModel } = await import('@/lib/gift/semantic');
+    const active = activeEmbeddingModel();
+    expect(prefixedText('cozy baking', 'query')).toBe(`${active.queryPrefix}cozy baking`);
+    expect(prefixedText('cozy baking', 'doc')).toBe(`${active.docPrefix}cozy baking`);
+    expect(active.queryPrefix.length).toBeGreaterThan(0);
+  });
+});

@@ -17,8 +17,88 @@
 
 import type { FeatureExtractionPipeline } from '@huggingface/transformers';
 
-export const SEMANTIC_MODEL_ID = 'Xenova/all-MiniLM-L6-v2';
-export const SEMANTIC_DIMENSIONS = 384;
+/**
+ * Local embedding models, measured by `scripts/bench-embedding-models.ts` on
+ * this app's own task (28 free-text → intent queries, 12 product rankings).
+ *
+ * `arctic-xs` is the default because it is the *same download size* as the
+ * original MiniLM (22.6 MB) and beats it on every retrieval metric. `gte-small`
+ * is the accuracy option (+10.5 MB, best recall@3). Full numbers live in
+ * `docs/embedding-bench.json`.
+ */
+export interface EmbeddingModel {
+  /** Registry key, also the env value for NEXT_PUBLIC_GIFT_EMBEDDING_MODEL. */
+  key: string;
+  /** Transformers.js model id. */
+  id: string;
+  dtype: 'q8' | 'fp16' | 'fp32';
+  dimensions: number;
+  /** Prefix applied to *queries* only (retrieval-tuned models expect one). */
+  queryPrefix: string;
+  /** Prefix applied to documents/passages (few models need one). */
+  docPrefix: string;
+  /** Measured download size of the quantized weights, MB. */
+  sizeMB: number;
+  label: string;
+  /** Measured quality on this app's task: 0.6·recall@3 + 0.4·product top-1. */
+  quality: number;
+}
+
+export const EMBEDDING_MODELS: Record<string, EmbeddingModel> = {
+  'arctic-xs': {
+    key: 'arctic-xs',
+    id: 'Snowflake/snowflake-arctic-embed-xs',
+    dtype: 'q8',
+    dimensions: 384,
+    queryPrefix: 'Represent this sentence for searching relevant passages: ',
+    docPrefix: '',
+    sizeMB: 22.6,
+    label: 'Arctic Embed XS',
+    quality: 0.686,
+  },
+  'gte-small': {
+    key: 'gte-small',
+    id: 'Xenova/gte-small',
+    dtype: 'q8',
+    dimensions: 384,
+    queryPrefix: '',
+    docPrefix: '',
+    sizeMB: 33.1,
+    label: 'GTE Small',
+    quality: 0.762,
+  },
+  'minilm-l6': {
+    key: 'minilm-l6',
+    id: 'Xenova/all-MiniLM-L6-v2',
+    dtype: 'q8',
+    dimensions: 384,
+    queryPrefix: '',
+    docPrefix: '',
+    sizeMB: 22.6,
+    label: 'MiniLM L6 (previous default)',
+    quality: 0.621,
+  },
+};
+
+export const DEFAULT_EMBEDDING_MODEL = 'arctic-xs';
+
+/**
+ * Which model this build uses. Overridable so a deployment can opt into the
+ * larger model without a code change:
+ *   NEXT_PUBLIC_GIFT_EMBEDDING_MODEL=gte-small
+ */
+export function activeEmbeddingModel(): EmbeddingModel {
+  const requested = process.env.NEXT_PUBLIC_GIFT_EMBEDDING_MODEL;
+  return (
+    (requested ? EMBEDDING_MODELS[requested] : undefined) ??
+    EMBEDDING_MODELS[DEFAULT_EMBEDDING_MODEL]
+  );
+}
+
+const ACTIVE = activeEmbeddingModel();
+
+export const SEMANTIC_MODEL_ID = ACTIVE.id;
+export const SEMANTIC_DIMENSIONS = ACTIVE.dimensions;
 
 export type SemanticStatus = 'idle' | 'loading' | 'ready' | 'failed';
 
@@ -29,6 +109,13 @@ export interface SemanticState {
   error?: string;
   /** 'webgpu' or 'wasm' once loaded. */
   backend?: 'webgpu' | 'wasm';
+  /** Model that is (being) loaded. */
+  model?: { key: string; label: string; sizeMB: number; id: string };
+}
+
+/** The model this build will load. */
+export function activeModelSummary(): NonNullable<SemanticState['model']> {
+  return { key: ACTIVE.key, label: ACTIVE.label, sizeMB: ACTIVE.sizeMB, id: ACTIVE.id };
 }
 
 let state: SemanticState = { status: 'idle', progress: 0 };
@@ -36,8 +123,23 @@ const listeners = new Set<() => void>();
 let extractor: FeatureExtractionPipeline | null = null;
 let loading: Promise<void> | null = null;
 
+/** Keyed by model id + kind + text, so switching models cannot mix vectors. */
 const cache = new Map<string, Float32Array>();
 const MAX_CACHE_ENTRIES = 2000;
+
+function cacheKey(kind: 'query' | 'doc', text: string): string {
+  return `${SEMANTIC_MODEL_ID}\u0000${kind}\u0000${text}`;
+}
+
+/**
+ * Text as the model expects it. Retrieval-tuned models (arctic, bge, e5) were
+ * trained with an instruction on the *query* side only; embedding a question
+ * exactly like a passage measurably hurts recall.
+ */
+export function prefixedText(text: string, kind: 'query' | 'doc'): string {
+  const prefix = kind === 'query' ? ACTIVE.queryPrefix : ACTIVE.docPrefix;
+  return `${prefix}${text}`;
+}
 
 function notify(next: Partial<SemanticState>): void {
   state = { ...state, ...next };
@@ -89,9 +191,9 @@ export async function loadSemanticModel(): Promise<void> {
       const useWebGPU = await supportsWebGPU();
       const device = useWebGPU ? 'webgpu' : 'wasm';
 
-      extractor = (await pipeline('feature-extraction', SEMANTIC_MODEL_ID, {
+      extractor = (await pipeline('feature-extraction', ACTIVE.id, {
         device,
-        dtype: 'q8',
+        dtype: ACTIVE.dtype,
         progress_callback: (event: { status?: string; progress?: number }) => {
           if (event.status === 'progress' && typeof event.progress === 'number') {
             notify({ progress: Math.min(0.99, Math.max(0, event.progress / 100)) });
@@ -99,13 +201,21 @@ export async function loadSemanticModel(): Promise<void> {
         },
       })) as FeatureExtractionPipeline;
 
-      notify({ status: 'ready', progress: 1, backend: useWebGPU ? 'webgpu' : 'wasm' });
+      notify({
+        status: 'ready',
+        progress: 1,
+        backend: useWebGPU ? 'webgpu' : 'wasm',
+        model: activeModelSummary(),
+      });
     } catch (error) {
       extractor = null;
       notify({
         status: 'failed',
         progress: 0,
-        error: error instanceof Error ? error.message : 'Model failed to load',
+        error:
+          error instanceof Error
+            ? `${ACTIVE.label}: ${error.message}`
+            : `${ACTIVE.label} failed to load`,
       });
     } finally {
       loading = null;
@@ -119,25 +229,54 @@ export async function loadSemanticModel(): Promise<void> {
  * Embed texts. Returns `null` when the model is not ready, so callers can fall
  * back without branching on the state machine themselves.
  */
-export async function embedTexts(texts: string[]): Promise<Float32Array[] | null> {
+async function embedPrefixed(
+  texts: readonly string[],
+  kind: 'query' | 'doc'
+): Promise<Float32Array[] | null> {
   if (!extractor) return null;
   if (texts.length === 0) return [];
 
-  const missing = texts.filter((text) => !cache.has(text));
+  const keys = texts.map((text) => cacheKey(kind, text));
+  const missing = texts
+    .map((text, index) => ({ text, key: keys[index] }))
+    .filter((entry) => !cache.has(entry.key));
+
   if (missing.length > 0) {
-    const output = await extractor(missing, { pooling: 'mean', normalize: true });
+    const output = await extractor(
+      missing.map((entry) => prefixedText(entry.text, kind)),
+      { pooling: 'mean', normalize: true }
+    );
     const rows = output.tolist() as number[][];
-    missing.forEach((text, index) => {
+    missing.forEach((entry, index) => {
       const vector = Float32Array.from(rows[index] ?? []);
       if (cache.size >= MAX_CACHE_ENTRIES) {
         const oldest = cache.keys().next().value;
         if (oldest !== undefined) cache.delete(oldest);
       }
-      cache.set(text, vector);
+      cache.set(entry.key, vector);
     });
   }
 
-  return texts.map((text) => cache.get(text) ?? new Float32Array(SEMANTIC_DIMENSIONS));
+  return keys.map((key) => cache.get(key) ?? new Float32Array(SEMANTIC_DIMENSIONS));
+}
+
+/**
+ * Embed a shopper's query. Applies the model's query prefix, which
+ * retrieval-tuned models (arctic, bge, e5) were trained with — embedding a
+ * question the same way as a document measurably hurts recall.
+ */
+export function embedQuery(text: string): Promise<Float32Array[] | null> {
+  return embedPrefixed([text], 'query');
+}
+
+/** Embed documents/passages/titles. Applies the model's document prefix. */
+export function embedDocuments(texts: readonly string[]): Promise<Float32Array[] | null> {
+  return embedPrefixed(texts, 'doc');
+}
+
+/** @deprecated Prefer `embedDocuments`/`embedQuery` so prefixes are correct. */
+export function embedTexts(texts: readonly string[]): Promise<Float32Array[] | null> {
+  return embedPrefixed(texts, 'doc');
 }
 
 /** Dot product of two normalized vectors == cosine similarity. */

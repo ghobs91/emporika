@@ -12,7 +12,13 @@
 // browser: the manifest is a public file, and matching happens locally.
 
 import type { AgeBracket, Gender } from '@/search/gift/types';
-import { cosineSimilarity, embedTexts, isSemanticReady, tokenSimilarity } from './semantic';
+import {
+  cosineSimilarity,
+  embedDocuments,
+  embedQuery,
+  isSemanticReady,
+  tokenSimilarity,
+} from './semantic';
 
 export const TRENDS_URL = '/data/trends.json';
 export const TRENDS_STORAGE_KEY = 'emporika-trends:v1';
@@ -336,13 +342,14 @@ export async function answerFromManifest(
   let semantic = false;
 
   if (isSemanticReady()) {
-    const vectors = await embedTexts([query, ...terms.map((entry) => entry.term)]);
-    if (vectors) {
+    const queryVectors = await embedQuery(query);
+    const termVectors = await embedDocuments(terms.map((entry) => entry.term));
+    if (queryVectors && termVectors) {
       semantic = true;
       matches = terms
         .map((entry, index) => ({
           ...entry,
-          similarity: Math.max(0, cosineSimilarity(vectors[0], vectors[index + 1])),
+          similarity: Math.max(0, cosineSimilarity(queryVectors[0], termVectors[index])),
         }))
         .sort((a, b) => b.similarity - a.similarity);
     }
@@ -449,16 +456,14 @@ export async function trendAffinityForProducts(
   if (products.length === 0 || terms.length === 0) return result;
 
   if (isSemanticReady()) {
-    const vectors = await embedTexts([
-      ...terms.map((entry) => entry.term),
-      ...products.map((product) => product.title),
-    ]);
-    if (vectors) {
+    const termVectors = await embedDocuments(terms.map((entry) => entry.term));
+    const productVectors = await embedDocuments(products.map((product) => product.title));
+    if (termVectors && productVectors) {
       for (let p = 0; p < products.length; p += 1) {
-        const productVector = vectors[terms.length + p];
+        const productVector = productVectors[p];
         let best: TrendAffinity | null = null;
         for (let t = 0; t < terms.length; t += 1) {
-          const score = Math.max(0, cosineSimilarity(vectors[t], productVector));
+          const score = Math.max(0, cosineSimilarity(termVectors[t], productVector));
           if (!best || score > best.score) {
             best = { score, term: terms[t].term, category: terms[t].category };
           }
@@ -494,13 +499,14 @@ export async function trendAffinityForQueries(
   if (queries.length === 0 || terms.length === 0) return result;
 
   if (isSemanticReady()) {
-    const vectors = await embedTexts([...terms.map((entry) => entry.term), ...queries]);
-    if (vectors) {
+    const termVectors = await embedDocuments(terms.map((entry) => entry.term));
+    const queryVectors = await embedDocuments(queries);
+    if (termVectors && queryVectors) {
       for (let q = 0; q < queries.length; q += 1) {
-        const queryVector = vectors[terms.length + q];
+        const queryVector = queryVectors[q];
         let best: TrendAffinity | null = null;
         for (let t = 0; t < terms.length; t += 1) {
-          const score = Math.max(0, cosineSimilarity(vectors[t], queryVector));
+          const score = Math.max(0, cosineSimilarity(termVectors[t], queryVector));
           if (!best || score > best.score) {
             best = { score, term: terms[t].term, category: terms[t].category };
           }

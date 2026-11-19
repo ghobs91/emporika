@@ -43,6 +43,7 @@ import {
   type LedgerAction,
 } from '@/lib/gift/ledger';
 import {
+  activeModelSummary,
   getSemanticState,
   loadSemanticModel,
   subscribeSemantic,
@@ -622,12 +623,12 @@ export default function GiftGenie() {
                   >
                     <BrainCircuit size={14} />
                     {semantic.status === 'ready'
-                      ? `Semantic search on (${semantic.backend})`
+                      ? `Semantic search on · ${activeModelSummary().label} (${semantic.backend})`
                       : semantic.status === 'loading'
-                        ? `Loading model… ${Math.round(semantic.progress * 100)}%`
+                        ? `Loading ${activeModelSummary().label}… ${Math.round(semantic.progress * 100)}%`
                         : semantic.status === 'failed'
                           ? 'Semantic search unavailable — using keywords'
-                          : 'Enable semantic search (~23 MB, once)'}
+                          : `Enable semantic search · ${activeModelSummary().label} (~${activeModelSummary().sizeMB.toFixed(0)} MB, once)`}
                   </button>
 
                   <label className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 text-xs text-gray-600 dark:border-[#3a3a3a] dark:text-gray-300">

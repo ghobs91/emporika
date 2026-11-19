@@ -12,7 +12,13 @@
 
 import type { RankedProduct } from '@/search/types';
 import { giftCorpus, type CorpusEntry } from './corpus';
-import { cosineSimilarity, embedTexts, isSemanticReady, tokenSimilarity } from './semantic';
+import {
+  cosineSimilarity,
+  embedDocuments,
+  embedQuery as embedQueryVectors,
+  isSemanticReady,
+  tokenSimilarity,
+} from './semantic';
 
 export interface CorpusMatch {
   entry: CorpusEntry;
@@ -57,12 +63,13 @@ export async function matchCorpus(
   if (candidates.length === 0) return [];
 
   if (isSemanticReady()) {
-    const vectors = await embedTexts([text, ...candidates.map((entry) => entry.text)]);
-    if (vectors) {
-      const queryVector = vectors[0];
+    const queryVectors = await embedQueryVectors(text);
+    const docVectors = await embedDocuments(candidates.map((entry) => entry.text));
+    if (queryVectors && docVectors) {
+      const queryVector = queryVectors[0];
       const scored = candidates.map((entry, index) => ({
         entry,
-        similarity: cosineSimilarity(queryVector, vectors[index + 1]),
+        similarity: cosineSimilarity(queryVector, docVectors[index]),
       }));
       return scored
         .filter((match) => match.similarity >= threshold)
@@ -89,7 +96,7 @@ export async function embedProducts(
 ): Promise<Map<string, Float32Array> | null> {
   if (!isSemanticReady() || products.length === 0) return null;
 
-  const vectors = await embedTexts(products.map(productText));
+  const vectors = await embedDocuments(products.map(productText));
   if (!vectors) return null;
 
   const map = new Map<string, Float32Array>();
@@ -99,9 +106,12 @@ export async function embedProducts(
   return map;
 }
 
-/** Embed the shopper's free-text query. */
+/**
+ * Embed the shopper's free-text query, as a single vector.
+ * Uses the model's query prefix (see `./semantic`), not the document one.
+ */
 export async function embedQuery(queryText: string): Promise<Float32Array | null> {
   if (!isSemanticReady() || queryText.trim().length < 3) return null;
-  const vectors = await embedTexts([queryText.trim()]);
+  const vectors = await embedQueryVectors(queryText.trim());
   return vectors?.[0] ?? null;
 }

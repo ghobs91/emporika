@@ -50,3 +50,9 @@ next-env.d.ts
 **/public/sw.js.map
 **/public/workbox-*.js.map
 **/public/worker-*.js.map
+
+# generated Target catalog index (rebuild with scripts/target-sitemap.ts)
+/data/target-index/
+
+# Transformers.js model cache used by scripts/bench-embedding-models.ts
+/.cache/
