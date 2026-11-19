@@ -59,9 +59,49 @@ profile → buildGiftBrief() → intent requests  ───▶  buildPlanFromReq
 
 ### 1. Semantic search (Transformers.js)
 
-`lib/gift/semantic.ts` loads `Xenova/all-MiniLM-L6-v2` (384-dim, q8) on demand —
-**never automatically**, because it is a ~23 MB download. WebGPU is used when
-available, WASM otherwise.
+`lib/gift/semantic.ts` loads a small retrieval model on demand — **never
+automatically**, because it is a ~22 MB download. WebGPU is used when available,
+WASM otherwise.
+
+**The model is chosen by measurement, not reputation.** `scripts/bench-embedding-models.ts`
+downloads each candidate, runs it on this app's own task (28 free-text → intent
+queries with hand-checked answers, plus 12 "right product vs near-miss
+distractors" rankings), and reports quality per megabyte. Results are committed
+in `docs/embedding-bench.json`; the ranking tool is deterministic, so the table
+can be re-derived at any time.
+
+| Model | Download | R@1 | R@3 | MRR | Product top-1 | Quality/MB |
+|---|---|---|---|---|---|---|
+| MiniLM-L6 q8 (old default) | 22.6 MB | 0.36 | 0.54 | 0.50 | 0.75 | 0.027 |
+| **Arctic Embed XS q8 (new default)** | **22.6 MB** | **0.50** | **0.64** | **0.61** | 0.75 | **0.030** |
+| GTE Small q8 | 33.1 MB | 0.32 | **0.71** | 0.51 | **0.83** | 0.023 |
+| MiniLM-L12 q8 | 33.1 MB | 0.32 | 0.61 | 0.50 | 0.83 | 0.021 |
+| BGE small v1.5 q8 | 33.1 MB | 0.29 | 0.61 | 0.47 | 0.75 | 0.020 |
+| Jina v2 small q8 | 31.9 MB | 0.50 | 0.61 | 0.58 | 0.67 | 0.020 |
+| BGE base v1.5 q8 | 105.7 MB | 0.36 | 0.64 | 0.53 | 0.92 | 0.007 |
+| MiniLM-L6 **q4** | 52.7 MB | 0.36 | 0.61 | 0.52 | 0.75 | 0.013 |
+
+Two findings worth keeping:
+
+- **The same-size model is meaningfully better.** Arctic XS downloads the same
+  22.6 MB as the original MiniLM and wins on every retrieval metric
+  (R@1 0.50 vs 0.36, MRR 0.61 vs 0.50), so the smarter default costs the user
+  nothing extra.
+- **4-bit quantization is not a free size win.** At q4 the MiniLM ONNX file is
+  *larger* (52.7 MB) and no better than q8 — small embedding models are already
+  heavily optimized, and the q4 artifacts carry their own overhead.
+
+`gte-small` is the accuracy option: +10.5 MB for the best recall@3 (0.71) and
+product discrimination (0.83). It is a one-line deployment choice:
+
+```bash
+NEXT_PUBLIC_GIFT_EMBEDDING_MODEL=gte-small   # default: arctic-xs
+```
+
+Retrieval-tuned models expect an **instruction prefix on the query side only**.
+`embedQuery()` applies it and `embedDocuments()` does not; mixing the two
+measurably hurts recall, so the code keeps them separate instead of exposing one
+generic embed call.
 
 `lib/gift/corpus.ts` flattens the whole index (age, gender, age×gender,
 interest and brand entries) into embeddable texts, cached per session.
@@ -160,8 +200,9 @@ sequence.
 
 ## Cost and limitations
 
-- **Model download**: ~23 MB, opt-in, cached by the browser. The index itself
-  adds ~32 KB gzipped to the client bundle (139 KB source).
+- **Model download**: 22.6 MB (arctic-xs), opt-in, cached by the browser. The
+  index itself adds ~32 KB gzipped to the client bundle (139 KB source). The
+  optional `gte-small` build is 33.1 MB.
 - **WASM latency**: embedding 60 product titles took ~10 s in headless Chromium.
   WebGPU is preferred when present; ranking itself is microseconds.
 - **Heuristic classifiers**: product type is title-based. A poetic listing with
@@ -291,7 +332,8 @@ may not be the trending thing. It is a boost, never a filter.
 | `search/gift/plan.ts` | Intent → `SearchPlan` (server) |
 | `search/gift/orchestrator.ts` | Federated fan-out + provider-aware interleave |
 | `search/gift/index-data.ts`, `brands.ts`, `momentum.ts` | The index, brand catalog and measured momentum |
-| `lib/gift/semantic.ts` | Local embedding model (Transformers.js) |
+| `lib/gift/semantic.ts` | Local embedding model registry (Transformers.js), query/document prefixes |
+| `scripts/bench-embedding-models.ts` | Measures candidate models on this app's task → `docs/embedding-bench.json` |
 | `lib/gift/corpus.ts`, `semantic-search.ts` | Corpus + intent/product matching |
 | `lib/gift/product-type.ts` | Main / accessory / consumable / replacement part |
 | `lib/gift/budget.ts` | Budget sweet-spot curve |

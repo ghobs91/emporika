@@ -63,6 +63,11 @@ npx tsx --env-file=.env.local scripts/probe-gift-index.ts --concurrency 3
 # appears in the listings. Writes docs/gift-brand-evidence.json.
 npx tsx --env-file=.env.local scripts/probe-brand-catalog.ts --concurrency 3
 
+# Re-measure the local embedding models on this app's task (downloads each
+# candidate; writes docs/embedding-bench.json). Re-run before changing the
+# default model.
+npx tsx scripts/bench-embedding-models.ts
+
 # Rebuild the static trend manifest from free publication feeds (what the
 # weekly GitHub Actions job runs). Writes public/data/trends.json.
 npx tsx scripts/fetch-trends.ts --verbose

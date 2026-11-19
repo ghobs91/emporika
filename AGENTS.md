@@ -98,6 +98,7 @@ There is no Makefile/justfile and no CI workflow in this repo.
 | `SHOPIFY_BUYER_TOKEN` | Buyer-linked JWT for personalized Shopify catalog + checkout auto-discounts | optional; server-side only; preferred over client credentials when set |
 | `SHOPIFY_AGENT_PROFILE` | Shopify agent profile | fetched during MCP negotiation |
 | `NEXT_PUBLIC_WEBLLM_ENABLED` | Toggle WebLLM | optional; default enabled unless `"false"` |
+| `NEXT_PUBLIC_GIFT_EMBEDDING_MODEL` | Local embedding model for Gift Genie semantic search | optional; one of `arctic-xs` (default, 22.6 MB), `gte-small` (33.1 MB), `minilm-l6` |
 | `NEXT_PUBLIC_WEBLLM_DEFAULT_MODEL` | WebLLM model | default `Qwen3-1.7B-q4f16_1-MLC` |
 | `NEXT_PUBLIC_WEBLLM_LOW_MEMORY_MODEL` | Low-memory fallback model | default `Qwen3-4B-q4f16_1-MLC` |
 | `NEXT_PUBLIC_WEBLLM_ENHANCED_MODEL` | Enhanced model | default `Qwen3-8B-q4f16_1-MLC` |
