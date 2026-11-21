@@ -8,6 +8,7 @@ import ProductGrid, { RESULTS_GRID_CLASS } from '@/components/ProductGrid';
 import ProductCard from '@/components/ProductCard';
 import ProductModal from '@/components/ProductModal';
 import ProviderStatusBar from '@/components/ProviderStatusBar';
+import TargetCorpusToggle from '@/components/TargetCorpusToggle';
 import TrendingFeed from '@/components/TrendingFeed';
 import ThemeToggle from '@/components/ThemeToggle';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
@@ -662,6 +663,9 @@ export default function EmporikaApp() {
 
               {/* Per-retailer status — makes silent degradation visible */}
               <ProviderStatusBar statuses={providerStatus} streaming={aiState.streaming} />
+
+              {/* Opt-in: the full Target catalog, indexed in this browser */}
+              <TargetCorpusToggle />
 
               {/* AI mode: show ranked intelligent results; otherwise classic grid */}
               {aiState.aiEnabled && aiState.response?.results && aiState.response.results.length > 0 ? (

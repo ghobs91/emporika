@@ -90,7 +90,13 @@ const browserProductSchema = z
     brand: z.string().min(1).max(200).optional(),
     /** Manufacturer model, used for cross-retailer entity resolution. */
     model: z.string().min(1).max(200).optional(),
-    price: moneySchema,
+    /**
+     * Optional because Target's catalog enumeration carries no price at all
+     * (redsky.target.com is PerimeterX-blocked and the storefront HTML omits
+     * it). The pipeline already models a price-less candidate — the ranker
+     * flags `price_missing` — so requiring one here would only force a fake 0.
+     */
+    price: moneySchema.optional(),
     listPrice: moneySchema.optional(),
     // Refurbished / used are carried explicitly by the extension rather than
     // inferred per grade, so the facet counts stay honest.
@@ -167,7 +173,8 @@ function toCandidate(
     // Never assert what the extension could not actually observe.
     rawFieldAvailability: {
       name: true,
-      price: true,
+      // Target's browser corpus supplies no price; never assert one we lack.
+      price: product.price !== undefined,
       image: product.imageUrls.length > 0,
       url: true,
       brand: Boolean(product.brand),

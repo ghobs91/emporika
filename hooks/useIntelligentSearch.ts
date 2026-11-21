@@ -23,6 +23,7 @@ import type { RetailerSource } from '@/types/unified';
 import { BROWSER_PROVIDER_IDS } from '@/search/browser-providers';
 import { isProviderDisabled } from '@/search/providers/availability';
 import { requestBrowserResults } from '@/lib/extension-bridge';
+import { withTargetCorpus } from '@/lib/target-corpus-provider';
 
 export type { SearchStatusType, SearchApiResponse };
 
@@ -285,9 +286,20 @@ export function useIntelligentSearch() {
       (id) =>
         !isProviderDisabled(id) && (!selectedSources || selectedSources.includes(id))
     );
-    const browserResults = browserProviders.length
+    const extensionResults = browserProviders.length
       ? await requestBrowserResults({ query, providers: browserProviders })
       : null;
+
+    // When the shopper has opted into the local Target catalog, its results are
+    // merged into the same channel the extension uses: retrieval happens in the
+    // browser, ranking stays on the server. Without this, Target can only answer
+    // the server's precomputed vocabulary, so queries like "samsung 65 inch tv"
+    // come back empty even though the catalog holds them.
+    const browserResults = await withTargetCorpus(
+      extensionResults,
+      query,
+      selectedSources
+    );
 
     const payload = {
       query,
