@@ -136,18 +136,26 @@ export default function EmporikaApp() {
       }
     }
     const failed = new Map(response.metadata.providersFailed.map((f) => [f.providerId, f.errorType]));
+    const unavailable = new Map(
+      (response.metadata.providersUnavailable ?? []).map((u) => [u.providerId, u])
+    );
     const ids = Array.from(
       new Set<string>([
         ...response.metadata.providersSearched,
         ...response.metadata.providersFailed.map((f) => f.providerId),
+        ...(response.metadata.providersUnavailable ?? []).map((u) => u.providerId),
       ])
     );
     setProviderStatus(
-      ids.map((id) => ({
-        providerId: id as RetailerSource,
-        count: counts[id] ?? 0,
-        error: failed.get(id as RetailerSource),
-      }))
+      ids.map((id) => {
+        const entry = unavailable.get(id as RetailerSource);
+        return {
+          providerId: id as RetailerSource,
+          count: counts[id] ?? 0,
+          error: failed.get(id as RetailerSource),
+          unavailable: entry ? { kind: entry.kind, detail: entry.detail } : undefined,
+        };
+      })
     );
   }, [aiState.response]);
 
@@ -195,8 +203,10 @@ export default function EmporikaApp() {
         sources: sources.join(','),
       });
       
-      if (storeInfo) {
+      if (storeInfo?.storeId) {
         params.append('targetStoreId', storeInfo.storeId);
+      }
+      if (storeInfo?.zip) {
         params.append('targetZip', storeInfo.zip);
       }
       

@@ -21,6 +21,7 @@ import { getWebLLMClient } from '@/lib/webllm/client';
 import { derivePreferences, loadLearnedProfile, mergePreferences } from '@/lib/learning';
 import type { RetailerSource } from '@/types/unified';
 import { BROWSER_PROVIDER_IDS } from '@/search/browser-providers';
+import { isProviderDisabled } from '@/search/providers/availability';
 import { requestBrowserResults } from '@/lib/extension-bridge';
 
 export type { SearchStatusType, SearchApiResponse };
@@ -61,6 +62,7 @@ function errorResponse(query: string, message: string): SearchApiResponse {
       plannerSource: 'fallback',
       providersSearched: [],
       providersFailed: [],
+      providersUnavailable: [],
       totalCandidates: 0,
       entityResolutionCounts: { highConfidence: 0, mediumConfidence: 0, lowConfidence: 0, unmatched: 0 },
       filtersApplied: [],
@@ -75,6 +77,7 @@ function partialMetadata(frame: StreamPartialFrame): SearchMetadata {
     plannerSource: 'fallback',
     providersSearched: frame.providersDone,
     providersFailed: [],
+    providersUnavailable: [],
     totalCandidates: frame.totalCandidates,
     entityResolutionCounts: { highConfidence: 0, mediumConfidence: 0, lowConfidence: 0, unmatched: 0 },
     filtersApplied: [],
@@ -275,11 +278,12 @@ export function useIntelligentSearch() {
       maxResults: MAX_RESULTS,
     };
 
-    // Back Market listings are collected in the user's own browser by the
-    // extension. Best-effort: no extension → the provider is simply absent
-    // from the request and from the eligible set.
+    // Back Market, Target and Costco listings are collected in the user's own
+    // browser by the extension. Best-effort: no extension → the provider is
+    // simply absent from the request and from the eligible set.
     const browserProviders = BROWSER_PROVIDER_IDS.filter(
-      (id) => !selectedSources || selectedSources.includes(id)
+      (id) =>
+        !isProviderDisabled(id) && (!selectedSources || selectedSources.includes(id))
     );
     const browserResults = browserProviders.length
       ? await requestBrowserResults({ query, providers: browserProviders })

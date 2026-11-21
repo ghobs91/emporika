@@ -21,6 +21,7 @@ function makeResponse(status: SearchApiResponse['status'] = 'results'): SearchAp
       plannerSource: 'fallback',
       providersSearched: [],
       providersFailed: [],
+      providersUnavailable: [],
       totalCandidates: 0,
       entityResolutionCounts: { highConfidence: 0, mediumConfidence: 0, lowConfidence: 0, unmatched: 0 },
       filtersApplied: [],

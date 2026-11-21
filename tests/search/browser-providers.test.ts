@@ -3,6 +3,8 @@ import {
   BROWSER_PROVIDER_IDS,
   browserProviderPayloadSchema,
   browserResultsSchema,
+  isBrowserFirstProvider,
+  isBrowserOnlyProvider,
   isBrowserProvider,
   toProviderSearchResults,
 } from '@/search/browser-providers';
@@ -43,12 +45,37 @@ const results = () =>
 
 describe('browser provider identity', () => {
   it('exposes exactly the browser-collected providers', () => {
-    expect(BROWSER_PROVIDER_IDS).toEqual(['backmarket']);
+    expect(BROWSER_PROVIDER_IDS).toEqual(['backmarket', 'target', 'costco']);
   });
 
   it('narrows browser providers and rejects API-backed ones', () => {
     expect(isBrowserProvider('backmarket')).toBe(true);
+    expect(isBrowserProvider('target')).toBe(true);
+    expect(isBrowserProvider('costco')).toBe(true);
     expect(isBrowserProvider('walmart')).toBe(false);
+  });
+
+  // Target and Costco keep server adapters (for /api/deals and /api/explore),
+  // so "browser-collected" is not the same as "has no server adapter".
+  it('separates browser-only providers from browser-first ones', () => {
+    expect(isBrowserOnlyProvider('backmarket')).toBe(true);
+    expect(isBrowserOnlyProvider('target')).toBe(false);
+    expect(isBrowserOnlyProvider('costco')).toBe(false);
+
+    expect(isBrowserFirstProvider('target')).toBe(true);
+    expect(isBrowserFirstProvider('costco')).toBe(true);
+    expect(isBrowserFirstProvider('backmarket')).toBe(false);
+    expect(isBrowserFirstProvider('walmart')).toBe(false);
+  });
+
+  it('classifies every browser provider exactly once', () => {
+    for (const id of BROWSER_PROVIDER_IDS) {
+      const only = isBrowserOnlyProvider(id);
+      const first = isBrowserFirstProvider(id);
+      // Exactly one bucket — an unclassified provider would silently never be
+      // routed, and a double-classified one would be routed twice.
+      expect(only !== first).toBe(true);
+    }
   });
 });
 
@@ -217,5 +244,104 @@ describe('result cache key', () => {
     const first = buildSearchCacheKey({ query: 'iphone 15', browserResults: withProduct('a') });
     const second = buildSearchCacheKey({ query: 'iphone 15', browserResults: withProduct('b') });
     expect(second).toBe(first);
+  });
+});
+
+// ── Target and Costco (browser-first) ──────────────────────────────────
+
+const targetProduct = {
+  providerProductId: 'target-1010046012',
+  title: 'Anker USB-C Cable, 6ft',
+  brand: 'Anker',
+  price: { amount: 12.99, currency: 'USD' },
+  listPrice: { amount: 19.99, currency: 'USD' },
+  condition: 'new' as const,
+  productUrl: 'https://www.target.com/p/-/A-1010046012',
+  imageUrls: ['https://target.scene7.com/is/image/Target/1010046012'],
+  rating: 4.7,
+  reviewCount: 812,
+  category: 'Electronics',
+  availability: 'in_stock' as const,
+};
+
+const costcoProduct = {
+  providerProductId: '1646545',
+  title: 'Anker USB-C to USB-C Cable, 2-pack',
+  brand: 'Anker',
+  price: { amount: 17.99, currency: 'USD' },
+  condition: 'new' as const,
+  productUrl: 'https://www.costco.com/.product.1646545.html',
+  imageUrls: ['https://www.costco.com/wcsstore/a.jpg'],
+  availability: 'in_stock' as const,
+};
+
+const multiResults = () =>
+  browserResultsSchema.parse({
+    providers: {
+      target: { providerId: 'target', query: 'usb cable', products: [targetProduct] },
+      costco: { providerId: 'costco', query: 'usb cable', products: [costcoProduct] },
+    },
+  });
+
+describe('browser-first providers (Target, Costco)', () => {
+  it('accepts Target and Costco payloads', () => {
+    expect(
+      browserProviderPayloadSchema.safeParse({
+        providerId: 'target',
+        query: 'usb cable',
+        products: [targetProduct],
+      }).success
+    ).toBe(true);
+    expect(
+      browserProviderPayloadSchema.safeParse({
+        providerId: 'costco',
+        query: 'usb cable',
+        products: [costcoProduct],
+      }).success
+    ).toBe(true);
+  });
+
+  it('maps both retailers into pipeline candidates', () => {
+    const mapped = toProviderSearchResults(multiResults());
+    expect(mapped.target?.products).toHaveLength(1);
+    expect(mapped.costco?.products).toHaveLength(1);
+    expect(mapped.costco?.products[0].providerId).toBe('costco');
+    expect(mapped.target?.products[0].brand).toBe('Anker');
+  });
+
+  it('keeps their condition as new rather than inheriting Back Market default', () => {
+    const mapped = toProviderSearchResults(multiResults());
+    expect(mapped.target?.products[0].condition).toBe('new');
+    expect(mapped.costco?.products[0].condition).toBe('new');
+  });
+
+  it('reports per-provider unsupported filters', () => {
+    const mapped = toProviderSearchResults(multiResults());
+    // Costco's catalogue has no category facet we can push through the API.
+    expect(mapped.costco?.metadata.unsupportedFilters).toContain('categoryHints');
+    expect(mapped.target?.metadata.unsupportedFilters).not.toContain('categoryHints');
+    expect(mapped.target?.metadata.unsupportedFilters).toContain('destination');
+  });
+
+  it('reports an extension fetch failure as unavailable, not as zero matches', () => {
+    const errored = browserResultsSchema.parse({
+      providers: {
+        target: {
+          providerId: 'target',
+          query: 'usb cable',
+          products: [],
+          error: 'Target returned HTTP 435 (PerimeterX challenge)',
+        },
+      },
+    });
+    const mapped = toProviderSearchResults(errored);
+    expect(mapped.target?.unavailable?.kind).toBe('browser_required');
+    expect(mapped.target?.unavailable?.detail).toMatch(/browser/i);
+    // Still partial, so the response advertises degraded coverage.
+    expect(mapped.target?.partial).toBe(true);
+  });
+
+  it('leaves unavailable unset when the extension did succeed', () => {
+    expect(toProviderSearchResults(multiResults()).target?.unavailable).toBeUndefined();
   });
 });

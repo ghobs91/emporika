@@ -20,8 +20,13 @@ import {
 const PAGE_SOURCE = 'emporika-web';
 const EXTENSION_SOURCE = 'emporika-extension';
 
-/** Budget for the extension round-trip. Retailers are throttled server-side. */
-const SEARCH_TIMEOUT_MS = 4000;
+/**
+ * Budget for the extension round-trip. Three retailers are collected
+ * concurrently, and Target first reads the visitor's store context from their
+ * own target.com session — so this has to cover two sequential requests on that
+ * provider. Retailers are throttled per host server-side.
+ */
+const SEARCH_TIMEOUT_MS = 6000;
 
 interface ExtensionReadyInfo {
   version: string;

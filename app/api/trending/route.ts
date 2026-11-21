@@ -1,15 +1,12 @@
 import { NextResponse } from 'next/server';
 import { bestBuyAPI } from '@/lib/bestbuy';
-import { targetAPI } from '@/lib/target';
 import { walmartAPI } from '@/lib/walmart';
 import { searchShopifyProducts, convertShopifyToUnified, extractUPID } from '@/lib/shopify';
-import { normalizeBestBuyTrendingProduct, normalizeTargetProduct, normalizeWalmartProduct, UnifiedProduct } from '@/types/unified';
+import { normalizeBestBuyTrendingProduct, normalizeWalmartProduct, UnifiedProduct } from '@/types/unified';
 import { ProductCategory } from '@/types/categories';
 import { groupProductsByCategory } from '@/lib/categorize-product';
 import { BestBuyTrendingResponse } from '@/types/bestbuy';
-import { TargetSearchResponse } from '@/types/target';
 import { WalmartSearchResponse } from '@/types/walmart';
-import { TargetProduct } from '@/types/target';
 import type { ShopifySearchResponse } from '@/types/shopify';
 
 // Set runtime config for serverless function
@@ -31,7 +28,7 @@ export async function GET() {
       ]);
     };
 
-    const apiCalls: Promise<BestBuyTrendingResponse | TargetSearchResponse | WalmartSearchResponse>[] = [];
+    const apiCalls: Promise<BestBuyTrendingResponse | WalmartSearchResponse>[] = [];
     const apiSources: string[] = [];
     
     // Walmart - use bestseller search with popular queries for variety (with timeout)
@@ -50,16 +47,10 @@ export async function GET() {
     apiCalls.push(timeoutPromise(bestBuyAPI.getTrendingProducts(), 15000));
     apiSources.push('bestbuy');
     
-    // Target - use search for popular items instead of broken trending endpoint
-    const targetQueries = ['home decor', 'electronics', 'clothing', 'sports', 'toys'];
-    const randomTargetQuery = targetQueries[Math.floor(Math.random() * targetQueries.length)];
-    console.log(`Adding Target search with query: ${randomTargetQuery}`);
-    apiCalls.push(timeoutPromise(targetAPI.searchProducts({ 
-      query: randomTargetQuery,
-      count: 24
-    }), 15000));
-    apiSources.push('target');
-    
+    // Target is deliberately disabled — see search/providers/availability.ts.
+    // Its Redsky host answers server requests with an HTTP 435 PerimeterX
+    // challenge, so calling it here only added a 15s timeout and an empty row.
+
     console.log(`Total API calls to make: ${apiCalls.length}, sources: ${apiSources.join(', ')}`);
     
     // Shopify Global Catalog — searches for each trending product category
@@ -106,12 +97,6 @@ export async function GET() {
             const bestBuyItems = (bestBuyResponse.results || []).map(normalizeBestBuyTrendingProduct);
             console.log(`✓ Best Buy returned ${bestBuyItems.length} items`);
             allProducts.push(...bestBuyItems);
-          } else if (source === 'target') {
-            const targetResponse = result.value as TargetSearchResponse;
-            const targetProducts = targetResponse.data?.search?.products || [];
-            const targetItems = targetProducts.map((product: TargetProduct, index: number) => normalizeTargetProduct(product, index));
-            console.log(`✓ Target returned ${targetItems.length} items`);
-            allProducts.push(...targetItems);
           } else if (source === 'walmart') {
             const walmartResponse = result.value as WalmartSearchResponse;
             const walmartItems = (walmartResponse.items || []).map(normalizeWalmartProduct);

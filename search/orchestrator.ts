@@ -27,7 +27,9 @@ import { createFallbackPlan, resolveEligibleProviders, withCategoryIntent } from
 import { getProvider, getAvailableProviders } from './providers/adapter';
 import {
   BROWSER_PROVIDER_IDS,
+  isBrowserOnlyProvider,
   isBrowserProvider,
+  isBrowserFirstProvider,
   toProviderSearchResults,
 } from './browser-providers';
 import type { BrowserProviderId } from './browser-providers';
@@ -177,6 +179,39 @@ function partialResult(
     products: [],
     warnings: [error instanceof Error ? error.message : 'Unknown error'],
     partial: true,
+    unavailable: {
+      kind: 'network_error',
+      detail: 'This retailer did not respond in time. Try again in a moment.',
+    },
+    metadata: {
+      receivedAt: new Date().toISOString(),
+      latencyMs: 0,
+      resultCount: 0,
+      appliedFilters: [],
+      unsupportedFilters: [],
+    },
+  };
+}
+
+/**
+ * A browser-first retailer the extension could not collect. This is not a
+ * "no matches" outcome — the shopper needs to know the retailer was skipped.
+ */
+function browserUnavailableResult(
+  providerId: ProviderId,
+  query: string
+): ProviderSearchResult {
+  return {
+    providerId,
+    query,
+    products: [],
+    warnings: ['The browser extension returned no listings for this retailer.'],
+    partial: true,
+    unavailable: {
+      kind: 'browser_required',
+      detail:
+        'This retailer can only be searched from your browser. Install or reload the Emporika extension and try again.',
+    },
     metadata: {
       receivedAt: new Date().toISOString(),
       latencyMs: 0,
@@ -207,8 +242,8 @@ async function searchProviders(
     async (providerId) => {
       let outcome: ProviderOutcome;
 
-      // Browser-collected providers arrive pre-fetched; never route them to
-      // a server adapter.
+      // Browser-collected listings arrive pre-fetched. When present they are
+      // authoritative — never re-fetch them server-side.
       const supplied = isBrowserProvider(providerId)
         ? browserResults?.[providerId]
         : undefined;
@@ -217,11 +252,26 @@ async function searchProviders(
         onProviderDone?.(outcome);
         return outcome;
       }
-      if (isBrowserProvider(providerId)) {
+
+      // Back Market has no server adapter at all.
+      if (isBrowserOnlyProvider(providerId)) {
         outcome = {
           ok: false,
           providerId,
           error: new Error('No browser results were supplied for this provider'),
+        };
+        onProviderDone?.(outcome);
+        return outcome;
+      }
+
+      // Target and Costco are edge-blocked server-side. If the extension was
+      // present but produced nothing for them, report the retailer as
+      // unavailable rather than spending a request the edge will reject anyway.
+      if (isBrowserFirstProvider(providerId) && browserResults) {
+        outcome = {
+          ok: true,
+          providerId,
+          results: [browserUnavailableResult(providerId, queryVariants[0]?.query ?? '')],
         };
         onProviderDone?.(outcome);
         return outcome;
@@ -272,6 +322,7 @@ async function searchProviders(
 interface AggregatedOutcomes {
   providerSearched: ProviderId[];
   providerFailed: Array<{ providerId: ProviderId; errorType: string }>;
+  providersUnavailable: SearchMetadata['providersUnavailable'];
   allOffers: NormalizedOffer[];
   allWarnings: string[];
   hasPartial: boolean;
@@ -285,6 +336,7 @@ function aggregateOutcomes(
 ): AggregatedOutcomes {
   const providerSearched: ProviderId[] = [];
   const providerFailed: Array<{ providerId: ProviderId; errorType: string }> = [];
+  const providersUnavailable: SearchMetadata['providersUnavailable'] = [];
   const allOffers: NormalizedOffer[] = [];
   const allWarnings: string[] = [];
   let hasPartial = false;
@@ -302,6 +354,17 @@ function aggregateOutcomes(
         );
         allOffers.push(...normalized);
 
+        // A retailer that could not be reached at all is reported separately
+        // from one that was reached and simply had no matches.
+        if (searchResult.unavailable) {
+          providersUnavailable.push({
+            providerId,
+            kind: searchResult.unavailable.kind,
+            detail: searchResult.unavailable.detail,
+          });
+          hasPartial = true;
+        }
+
         if (searchResult.partial) {
           hasPartial = true;
           allWarnings.push(...searchResult.warnings);
@@ -317,7 +380,7 @@ function aggregateOutcomes(
     }
   }
 
-  return { providerSearched, providerFailed, allOffers, allWarnings, hasPartial };
+  return { providerSearched, providerFailed, providersUnavailable, allOffers, allWarnings, hasPartial };
 }
 
 export interface AssembledRanking {
@@ -463,7 +526,7 @@ export async function executeSearch(request: SearchRequest): Promise<SearchApiRe
   );
   timing.search = Math.round(performance.now() - searchStart);
 
-  const { providerSearched, providerFailed, allOffers } = aggregateOutcomes(
+  const { providerSearched, providerFailed, providersUnavailable, allOffers } = aggregateOutcomes(
     outcomes,
     eligibleProviders,
     telemetry
@@ -474,7 +537,7 @@ export async function executeSearch(request: SearchRequest): Promise<SearchApiRe
     return {
       status: 'error',
       query: request.query,
-      metadata: buildMetadata(telemetry, timing, providerSearched, providerFailed, allOffers.length, { highConfidence: 0, mediumConfidence: 0, lowConfidence: 0, unmatched: 0 }, []),
+      metadata: buildMetadata(telemetry, timing, providerSearched, providerFailed, allOffers.length, { highConfidence: 0, mediumConfidence: 0, lowConfidence: 0, unmatched: 0 }, [], providersUnavailable),
       error: 'All retailer providers failed to return results. Please try again later.',
     };
   }
@@ -495,7 +558,7 @@ export async function executeSearch(request: SearchRequest): Promise<SearchApiRe
       status: 'no_results',
       query: request.query,
       suggestionForNoResults: generateRelaxationSuggestions(plan, assembled.filterReasons),
-      metadata: buildMetadata(telemetry, timing, providerSearched, providerFailed, allOffers.length, assembled.entityCounts, ['price', 'condition', 'availability', 'brand']),
+      metadata: buildMetadata(telemetry, timing, providerSearched, providerFailed, allOffers.length, assembled.entityCounts, ['price', 'condition', 'availability', 'brand'], providersUnavailable),
     };
     defaultSearchCache.set(cacheKey, response);
     return response;
@@ -517,7 +580,8 @@ export async function executeSearch(request: SearchRequest): Promise<SearchApiRe
       providerFailed,
       allOffers.length,
       assembled.entityCounts,
-      ['price', 'condition', 'availability', 'brand']
+      ['price', 'condition', 'availability', 'brand'],
+      providersUnavailable
     ),
   };
   defaultSearchCache.set(cacheKey, response);
@@ -628,7 +692,7 @@ export async function executeSearchStream(
   timing.search = Math.round(performance.now() - searchStart);
 
   const settled = outcomes.filter((o): o is ProviderOutcome => o !== null);
-  const { providerSearched, providerFailed, allOffers } = aggregateOutcomes(
+  const { providerSearched, providerFailed, providersUnavailable, allOffers } = aggregateOutcomes(
     settled,
     eligibleProviders,
     telemetry
@@ -638,7 +702,7 @@ export async function executeSearchStream(
     const response: SearchApiResponse = {
       status: 'error',
       query: request.query,
-      metadata: buildMetadata(telemetry, timing, providerSearched, providerFailed, allOffers.length, { highConfidence: 0, mediumConfidence: 0, lowConfidence: 0, unmatched: 0 }, []),
+      metadata: buildMetadata(telemetry, timing, providerSearched, providerFailed, allOffers.length, { highConfidence: 0, mediumConfidence: 0, lowConfidence: 0, unmatched: 0 }, [], providersUnavailable),
       error: 'All retailer providers failed to return results. Please try again later.',
     };
     onEvent({ type: 'final', response });
@@ -660,7 +724,7 @@ export async function executeSearchStream(
       status: 'no_results',
       query: request.query,
       suggestionForNoResults: generateRelaxationSuggestions(plan, assembled.filterReasons),
-      metadata: buildMetadata(telemetry, timing, providerSearched, providerFailed, allOffers.length, assembled.entityCounts, ['price', 'condition', 'availability', 'brand']),
+      metadata: buildMetadata(telemetry, timing, providerSearched, providerFailed, allOffers.length, assembled.entityCounts, ['price', 'condition', 'availability', 'brand'], providersUnavailable),
     };
     defaultSearchCache.set(cacheKey, response);
     onEvent({ type: 'final', response });
@@ -683,7 +747,8 @@ export async function executeSearchStream(
       providerFailed,
       allOffers.length,
       assembled.entityCounts,
-      ['price', 'condition', 'availability', 'brand']
+      ['price', 'condition', 'availability', 'brand'],
+      providersUnavailable
     ),
   };
   defaultSearchCache.set(cacheKey, response);
@@ -709,7 +774,8 @@ function buildMetadata(
   providersFailed: Array<{ providerId: ProviderId; errorType: string }>,
   totalCandidates: number,
   erCounts: SearchMetadata['entityResolutionCounts'],
-  filtersApplied: string[]
+  filtersApplied: string[],
+  providersUnavailable: SearchMetadata['providersUnavailable'] = []
 ): SearchMetadata {
   // Track timing for remaining phases
   const summary = telemetry.finish();
@@ -718,6 +784,7 @@ function buildMetadata(
     plannerSource: 'fallback',
     providersSearched,
     providersFailed,
+    providersUnavailable,
     totalCandidates,
     entityResolutionCounts: erCounts,
     filtersApplied,

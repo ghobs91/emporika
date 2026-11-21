@@ -2,11 +2,15 @@
   "manifest_version": 3,
   "name": "Emporika Browser Search",
   "version": "0.1.0",
-  "description": "Fetches refurbished-electronics listings from Back Market inside your own browser, on Emporika's behalf.",
-  "permissions": ["declarativeNetRequest", "storage"],
-  "host_permissions": ["https://www.backmarket.com/*"],
+  "description": "Fetches listings from Back Market and Costco inside your own browser, on Emporika's behalf.",
+  "permissions": ["declarativeNetRequest", "scripting"],
+  "host_permissions": [
+    "https://www.backmarket.com/*",
+    "https://www.costco.com/*",
+    "https://gdx-api.costco.com/*"
+  ],
   "action": {
-    "default_title": "Emporika: test Back Market"
+    "default_title": "Emporika: open provider harness"
   },
   "background": {
     "service_worker": "src/background.js",

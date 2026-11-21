@@ -2,6 +2,22 @@ import { CostcoSearchParams, CostcoSearchResponse } from '@/types/costco';
 import { costcoCookieCache } from './costco-cookie-cache';
 import { fetchCostcoCookies } from './costco-cookie-fetcher';
 
+/**
+ * DEPRECATED ENDPOINT — kept only because `/api/deals` and `/api/explore`
+ * still import this client.
+ *
+ * Costco moved search to a GRS API (`https://gdx-api.costco.com/catalog/search/
+ * api/v1/search`, POST). This Lucidworks host now answers every request with
+ * HTTP 403 and a zero-byte body from Varnish. The replacement is also
+ * unreachable from a server: it returns HTTP 429 with Kasada challenge headers
+ * and echoing the challenge cookie back does not clear it, because Kasada
+ * requires a JS-computed per-request token.
+ *
+ * Costco is therefore collected in the user's browser by `extension/` (see
+ * `extension/src/providers/costco.js`). Requests failing here are classified as
+ * `blocked_by_edge` and surfaced through `metadata.providersUnavailable` rather
+ * than silently returning no products.
+ */
 const COSTCO_API_BASE = 'https://search.costco.com/api/apps/www_costco_com/query/www_costco_com_search';
 
 export class CostcoAPI {

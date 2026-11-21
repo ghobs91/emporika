@@ -1,14 +1,12 @@
 import { NextResponse } from 'next/server';
 import { walmartAPI } from '@/lib/walmart';
 import { bestBuyAPI } from '@/lib/bestbuy';
-import { targetAPI } from '@/lib/target';
 import { ebayAPI } from '@/lib/ebay';
 import { costcoAPI } from '@/lib/costco';
 import { searchShopifyProducts, convertShopifyToUnified } from '@/lib/shopify';
 import {
   normalizeWalmartProduct,
   normalizeBestBuyTrendingProduct,
-  normalizeTargetProduct,
   normalizeEbayProduct,
   normalizeCostcoProduct,
   UnifiedProduct,
@@ -50,7 +48,6 @@ const WALMART_QUERIES = [
   'electronics', 'kitchen', 'home decor', 'toys', 'fashion',
   'fitness', 'beauty', 'patio & garden', 'office', 'auto',
 ];
-const TARGET_QUERIES = ['home decor', 'electronics', 'clothing', 'sports', 'toys', 'kitchen'];
 const EBAY_QUERIES = ['electronics', 'home', 'fashion', 'sporting goods', 'toys'];
 const COSTCO_QUERIES = ['electronics', 'home', 'appliances', 'furniture', 'outdoor'];
 // The Shopify Global Catalog has no on-sale filter and returns no
@@ -129,7 +126,9 @@ function interleaveBySource(deals: Deal[]): Deal[] {
 async function fetchCandidates(): Promise<UnifiedProduct[]> {
   const hour = new Date().getHours();
   const walmartQueries = rotate(WALMART_QUERIES, hour).slice(0, 4);
-  const targetQueries = rotate(TARGET_QUERIES, hour).slice(0, 2);
+  // Target is disabled (search/providers/availability.ts): its Redsky host
+  // answers server requests with an HTTP 435 PerimeterX challenge, so querying
+  // it here only added a 15s timeout and an empty deals row.
   const ebayQueries = rotate(EBAY_QUERIES, hour).slice(0, 2);
   const costcoQueries = rotate(COSTCO_QUERIES, hour).slice(0, 2);
   const shopifyQueries = rotate(SHOPIFY_QUERIES, hour).slice(0, 3);
@@ -142,13 +141,6 @@ async function fetchCandidates(): Promise<UnifiedProduct[]> {
     ),
     withTimeout(bestBuyAPI.getTrendingProducts(), 15000).then((response) =>
       (response.results || []).map(normalizeBestBuyTrendingProduct)
-    ),
-    ...targetQueries.map((query) =>
-      withTimeout(targetAPI.searchProducts({ query, count: 24 }), 15000).then((response) =>
-        (response.data?.search?.products || []).map((product, index) =>
-          normalizeTargetProduct(product, index)
-        )
-      )
     ),
     ...ebayQueries.map((query) =>
       withTimeout(

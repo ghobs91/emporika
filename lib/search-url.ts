@@ -12,6 +12,7 @@
 import { z } from 'zod';
 import type { ProductFilters } from '@/lib/filters';
 import type { RetailerSource } from '@/types/unified';
+import { withoutDisabledProviders } from '@/search/providers/availability';
 
 export const SEARCH_RESULTS_PATH = '/search/results';
 
@@ -126,13 +127,15 @@ function parseEnum<T extends string>(
 }
 
 /**
- * `sources` narrows the result set. Unknown ids are dropped; an empty or
- * fully invalid value falls back to every retailer so a bad link still shows
- * results instead of an empty page.
+ * `sources` narrows the result set. Unknown and disabled ids are dropped; an
+ * empty result falls back to every *enabled* retailer, so a shared link that
+ * names only an unavailable retailer still shows results instead of an empty
+ * page.
  */
 function parseSources(value: string | null): RetailerSource[] {
   const parsed = parseEnumList(value, sourceSchema);
-  return parsed && parsed.length > 0 ? parsed : [...RETAILER_SOURCES];
+  const enabled = withoutDisabledProviders(parsed ?? []);
+  return enabled.length > 0 ? enabled : withoutDisabledProviders([...RETAILER_SOURCES]);
 }
 
 // ── Public API ─────────────────────────────────────────────────────────
@@ -213,14 +216,17 @@ export function buildSearchParams(state: SearchUrlState): URLSearchParams {
   }
 
   // Retailers are written in canonical order, and only when narrowed.
-  const sources = state.sources
+  const sources = withoutDisabledProviders(state.sources)
     .filter((source): source is RetailerSource =>
       (RETAILER_SOURCES as readonly RetailerSource[]).includes(source)
     )
     .sort(
       (a, b) => RETAILER_SOURCES.indexOf(a) - RETAILER_SOURCES.indexOf(b)
     );
-  if (sources.length > 0 && sources.length < RETAILER_SOURCES.length) {
+  // Compare against the *enabled* set, so "all retailers" stays implicit even
+  // while some are disabled.
+  const enabledSources = withoutDisabledProviders([...RETAILER_SOURCES]);
+  if (sources.length > 0 && sources.length < enabledSources.length) {
     params.set(SEARCH_URL_KEYS.sources, sources.join(','));
   }
 

@@ -5,6 +5,7 @@
 // hand-edited URL must never crash the result set.
 
 import { describe, it, expect } from 'vitest';
+import { withoutDisabledProviders } from '@/search/providers/availability';
 import {
   SEARCH_RESULTS_PATH,
   RETAILER_SOURCES,
@@ -19,6 +20,9 @@ function parse(href: string) {
   return parseSearchParams(new URLSearchParams(href.split('?')[1] ?? ''));
 }
 
+/** Disabled retailers are never selectable, so they are not part of "all". */
+const ENABLED_SOURCES = withoutDisabledProviders([...RETAILER_SOURCES]);
+
 const DEFAULT_STATE: SearchUrlState = {
   query: '',
   filters: {},
@@ -32,7 +36,7 @@ describe('parseSearchParams', () => {
 
     expect(state.query).toBe('mac mini');
     expect(state.filters).toEqual({ availableOnline: true, maxPrice: 990 });
-    expect(state.sources).toEqual([...RETAILER_SOURCES]);
+    expect(state.sources).toEqual(ENABLED_SOURCES);
     expect(state.sort).toBe('most-popular');
   });
 
@@ -76,12 +80,8 @@ describe('parseSearchParams', () => {
   });
 
   it('falls back to every retailer when `sources` is unknown or empty', () => {
-    expect(parse('/search/results?query=desk&sources=sears').sources).toEqual([
-      ...RETAILER_SOURCES,
-    ]);
-    expect(parse('/search/results?query=desk&sources=').sources).toEqual([
-      ...RETAILER_SOURCES,
-    ]);
+    expect(parse('/search/results?query=desk&sources=sears').sources).toEqual(ENABLED_SOURCES);
+    expect(parse('/search/results?query=desk&sources=').sources).toEqual(ENABLED_SOURCES);
     // Unknown ids mixed with known ones keep only the known ones.
     expect(parse('/search/results?query=desk&sources=ebay,sears').sources).toEqual([
       'ebay',

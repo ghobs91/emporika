@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { X, Star, Check } from 'lucide-react';
 import Image from 'next/image';
 import { UnifiedProduct, RetailerSource } from '@/types/unified';
+import { isProviderDisabled } from '@/search/providers/availability';
 import {
   ProductFilters,
   FacetValue,
@@ -166,8 +167,16 @@ export default function SearchFilters({
 
   const activeCount = countActiveFilters(filters);
 
+  // Retailers that are deliberately disabled are not offered, and are dropped
+  // from a stale selection so they cannot keep the "All stores" pill inactive.
+  const enabledRetailerIds = ENABLED_RETAILERS.map((retailer) => retailer.source);
+  const selectedEnabled = (selectedSources ?? []).filter((source) =>
+    enabledRetailerIds.includes(source)
+  );
   const allSelected =
-    !!selectedSources && selectedSources.length === RETAILERS.length;
+    !!selectedSources &&
+    enabledRetailerIds.length > 0 &&
+    enabledRetailerIds.every((id) => selectedEnabled.includes(id));
 
   const setPriceRange = (nextMin: number, nextMax: number) => {
     if (!priceBounds) return;
@@ -195,7 +204,7 @@ export default function SearchFilters({
     onChange({});
     // "Reset" clears the whole panel, retailer selection included.
     if (selectedSources && onSourcesChange) {
-      onSourcesChange(RETAILERS.map((retailer) => retailer.source));
+      onSourcesChange(enabledRetailerIds);
     }
   };
 
@@ -380,22 +389,20 @@ export default function SearchFilters({
             <div className="flex flex-wrap gap-2">
               <Pill
                 active={allSelected}
-                onClick={() =>
-                  onSourcesChange(RETAILERS.map((retailer) => retailer.source))
-                }
+                onClick={() => onSourcesChange(enabledRetailerIds)}
               >
                 All stores
               </Pill>
-              {RETAILERS.map((retailer) => {
-                const active = selectedSources.includes(retailer.source);
+              {ENABLED_RETAILERS.map((retailer) => {
+                const active = selectedEnabled.includes(retailer.source);
                 return (
                   <Pill
                     key={retailer.source}
                     active={active}
                     onClick={() => {
                       const next = active
-                        ? selectedSources.filter((s) => s !== retailer.source)
-                        : [...selectedSources, retailer.source];
+                        ? selectedEnabled.filter((s) => s !== retailer.source)
+                        : [...selectedEnabled, retailer.source];
                       // Never leave the result set with zero stores.
                       onSourcesChange(next.length > 0 ? next : [retailer.source]);
                     }}
@@ -675,6 +682,11 @@ const RETAILERS: {
   { source: 'shopify', label: 'Shopify', icon: '/shopify-logo.svg' },
   { source: 'backmarket', label: 'Back Market', icon: '/backmarket-favicon.svg' },
 ];
+
+/** Disabled retailers are not offered in the picker. */
+const ENABLED_RETAILERS = RETAILERS.filter(
+  ({ source }) => !isProviderDisabled(source)
+);
 
 interface ActiveFilterChipProps {
   label: string;

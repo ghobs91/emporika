@@ -1,6 +1,7 @@
 'use client';
 
 import { RetailerSource } from '@/types/unified';
+import { isProviderDisabled } from '@/search/providers/availability';
 import Image from 'next/image';
 
 interface RetailerToggleProps {
@@ -18,32 +19,41 @@ const RETAILERS: { source: RetailerSource; label: string; color: string; icon: s
   { source: 'backmarket', label: 'Back Market', color: 'bg-neutral-900', icon: '/backmarket-favicon.svg' },
 ];
 
+/** Retailers offered in the picker — disabled ones are not selectable. */
+const ENABLED_RETAILERS = RETAILERS.filter(({ source }) => !isProviderDisabled(source));
+const ENABLED_IDS = ENABLED_RETAILERS.map(({ source }) => source);
+
 export default function RetailerToggle({ selected, onChange }: RetailerToggleProps) {
+  // A stale link or previous state can still name a disabled retailer; drop it
+  // so it never inflates the counts or survives a toggle.
+  const selectedEnabled = selected.filter((source) => ENABLED_IDS.includes(source));
+  const allSelected =
+    ENABLED_RETAILERS.length > 0 &&
+    ENABLED_RETAILERS.every(({ source }) => selectedEnabled.includes(source));
+
   const toggle = (source: RetailerSource) => {
     // If all retailers are currently selected, first tap narrows to just that one
-    if (selected.length === RETAILERS.length) {
+    if (allSelected) {
       onChange([source]);
       return;
     }
-    if (selected.includes(source)) {
+    if (selectedEnabled.includes(source)) {
       // Don't allow deselecting the last retailer
-      if (selected.length <= 1) return;
-      onChange(selected.filter((s) => s !== source));
+      if (selectedEnabled.length <= 1) return;
+      onChange(selectedEnabled.filter((s) => s !== source));
     } else {
-      onChange([...selected, source]);
+      onChange([...selectedEnabled, source]);
     }
   };
 
   const toggleAll = () => {
-    if (selected.length === RETAILERS.length) {
+    if (allSelected) {
       // Keep at least one (first)
-      onChange([RETAILERS[0].source]);
+      onChange([ENABLED_IDS[0]]);
     } else {
-      onChange(RETAILERS.map((r) => r.source));
+      onChange(ENABLED_IDS);
     }
   };
-
-  const allSelected = selected.length === RETAILERS.length;
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
@@ -56,11 +66,11 @@ export default function RetailerToggle({ selected, onChange }: RetailerTogglePro
             : 'bg-transparent text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:border-gray-500'
         }`}
       >
-        {allSelected ? 'All' : `${selected.length}/${RETAILERS.length}`}
+        {allSelected ? 'All' : `${selectedEnabled.length}/${ENABLED_RETAILERS.length}`}
       </button>
 
-      {RETAILERS.map(({ source, label, color, icon }) => {
-        const active = selected.includes(source);
+      {ENABLED_RETAILERS.map(({ source, label, color, icon }) => {
+        const active = selectedEnabled.includes(source);
         return (
           <button
             key={source}

@@ -36,19 +36,28 @@ export function useTargetStore() {
         }
 
         if (zipCode) {
-          // Fetch nearest store from API
-          const response = await fetch(`/api/target/nearest-store?zip=${zipCode}`);
-          
-          if (response.ok) {
-            const data = await response.json();
-            if (data.storeId && data.zip) {
+          // The nearest-store lookup goes through Target's Redsky host, which is
+          // edge-blocked (see search/providers/availability.ts). The ZIP is still
+          // the shopper's destination and drives shipping/pickup filtering for
+          // every other retailer, so it must not be discarded along with it.
+          const fallback = { storeId: '', zip: zipCode };
+
+          try {
+            const response = await fetch(`/api/target/nearest-store?zip=${zipCode}`);
+            const data = response.ok ? await response.json() : null;
+
+            if (data?.storeId && data?.zip) {
               const info = { storeId: data.storeId, zip: data.zip };
               setStoreInfo(info);
-              
+
               // Cache the result
               localStorage.setItem('target_store_id', data.storeId);
               localStorage.setItem('target_store_zip', data.zip);
+            } else {
+              setStoreInfo(fallback);
             }
+          } catch {
+            setStoreInfo(fallback);
           }
         }
       } catch (err) {
@@ -74,16 +83,22 @@ export function useTargetStore() {
       const zipCode = await getUserZipCode();
       
       if (zipCode) {
-        const response = await fetch(`/api/target/nearest-store?zip=${zipCode}`);
-        
-        if (response.ok) {
-          const data = await response.json();
-          if (data.storeId && data.zip) {
+        const fallback = { storeId: '', zip: zipCode };
+
+        try {
+          const response = await fetch(`/api/target/nearest-store?zip=${zipCode}`);
+          const data = response.ok ? await response.json() : null;
+
+          if (data?.storeId && data?.zip) {
             const info = { storeId: data.storeId, zip: data.zip };
             setStoreInfo(info);
             localStorage.setItem('target_store_id', data.storeId);
             localStorage.setItem('target_store_zip', data.zip);
+          } else {
+            setStoreInfo(fallback);
           }
+        } catch {
+          setStoreInfo(fallback);
         }
       }
     } catch (err) {

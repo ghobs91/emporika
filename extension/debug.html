@@ -43,6 +43,23 @@
       <button data-save="backmarket">Save BM HTML</button>
     </div>
 
+    <div class="controls">
+      <button data-run="costco">Costco</button>
+      <button data-capture="costco">Capture Costco</button>
+    </div>
+
+    <p class="hint">
+      Costco's GRS search API is Kasada-guarded, so only a real browser session
+      can reach it. If the buttons fail, the app reports Costco as unavailable
+      rather than pretending there were no matches.
+    </p>
+
+    <p class="hint">
+      Target is deliberately disabled (search/providers/availability.ts). Its
+      Redsky host answers every non-navigation request with an HTTP 435
+      PerimeterX challenge, which a background fetch cannot satisfy.
+    </p>
+
     <div id="output" role="log" aria-live="polite"></div>
 
     <script type="module" src="./src/debug.js"></script>

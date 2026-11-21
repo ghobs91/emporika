@@ -15,8 +15,15 @@
 // Requires: providers/*.js export `search(query, options)`.
 
 import * as backmarket from './providers/backmarket.js';
+import * as costco from './providers/costco.js';
+// Target is deliberately not registered — see search/providers/availability.ts.
+// `providers/target.js` is kept, unregistered, because its research (Redsky
+// field names, store discovery from __TGT_DATA__) is the starting point for a
+// navigation-based collector. Uncommenting the import and the entry below is
+// what re-enables it.
+// import * as target from './providers/target.js';
 
-const PROVIDERS = { backmarket };
+const PROVIDERS = { backmarket, costco };
 
 /** Minimum gap between requests to the same host (politeness / rate signal). */
 const MIN_HOST_INTERVAL_MS = 1200;
@@ -49,6 +56,22 @@ const REFERER_RULES = [
     condition: {
       initiatorDomains: [chrome.runtime.id],
       requestDomains: ['backmarket.com'],
+      resourceTypes: ['xmlhttprequest'],
+    },
+  },
+  {
+    // Costco's GRS search API is Kasada-guarded and expects a storefront referer.
+    id: 3,
+    priority: 1,
+    action: {
+      type: 'modifyHeaders',
+      requestHeaders: [
+        { header: 'Referer', operation: 'set', value: 'https://www.costco.com/' },
+      ],
+    },
+    condition: {
+      initiatorDomains: [chrome.runtime.id],
+      requestDomains: ['gdx-api.costco.com'],
       resourceTypes: ['xmlhttprequest'],
     },
   },

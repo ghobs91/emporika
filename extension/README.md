@@ -1,8 +1,12 @@
-# Emporika Browser Search (Back Market)
+# Emporika Browser Search (Back Market · Costco)
 
-Fetches refurbished-electronics listings from **Back Market** using the user's
-own browser, on Emporika's behalf — no server-side browser, no proxy pool, no
+Fetches listings from **Back Market** and **Costco** using the user's own
+browser, on Emporika's behalf — no server-side browser, no proxy pool, no
 headless Chrome.
+
+All of these retailers are unreachable from a server: Back Market has no public
+search API, and Costco's search endpoint is Kasada-guarded. **Target is disabled**
+— see its section below. Verified details for each are below.
 
 ## Why this shape
 
@@ -54,14 +58,15 @@ Web Store review risk.
 ## Test it
 
 Click the **Emporika** toolbar button. It opens `debug.html`, a page on the
-extension origin where the provider module runs directly — host permissions
+extension origin where the provider modules run directly — host permissions
 apply and CORS is bypassed, the same network path the worker uses.
 
-| Button | What it does |
+| Buttons | What they do |
 |---|---|
-| **Back Market** | runs `search()`; prints parsed products, or the exact error |
-| **Capture Back Market** | reports which data layers the page actually has, plus markup around product links |
-| **Save BM HTML** | downloads the raw response as `.txt` for offline inspection |
+| **Back Market** / **Capture** / **Save** | runs `search()`; prints parsed products, or the exact error; capture reports which data layers the page actually has |
+| **Costco** / **Capture Costco** | posts to the GRS API and prints products. Capture reports status, body size, the response **structure**, and a verdict (`ok` / `kasada-challenge (429)` / `bad-client-identifier`) |
+
+Target is not listed because it is disabled; see its section below.
 
 **Do not try this from the service-worker console.** Two MV3 constraints make
 it impossible, and both produce misleading errors:
@@ -90,6 +95,173 @@ real value to the wrong meaning, which is worse than returning nothing.
 from an 840 kB response.** If a result set suddenly goes empty, check the
 framework assumption before checking selectors.
 
+## Target — DISABLED
+
+**Target is turned off.** It is listed in `search/providers/availability.ts`, and
+that entry is the whole switch — the orchestrator, `?sources=`, the retailer
+pickers and this extension all read it.
+
+Redsky answers **every** non-navigation request with **HTTP 435** and a
+PerimeterX challenge body (`captcha.px-cdn.net/…`). It is not a key problem: the
+same request fails identically with no `key` parameter at all. PX mints a
+per-request token from its sensor script, which only runs in a real page, so a
+`fetch()` from the service worker cannot satisfy it.
+
+Measured evidence:
+
+| Finding | Consequence |
+|---|---|
+| `redsky…/plp_search_v2` → 435 from Node **and** from the extension | No fetch-based path exists |
+| `__TGT_DATA__` store discovery fell back to the default store | The storefront fetch was challenged too, not just Redsky |
+| `/s/<term>` returns 200 but ships **no products** (`pageProps` is only `{ statusCode, pageContentQuerySSRPreloadVars }`) | Scraping the HTML is not an option either |
+
+`providers/target.js` is **kept but unregistered**: its Redsky field mapping and
+`__TGT_DATA__` store discovery are exactly what a navigation-based collector
+would reuse.
+
+### The only remaining route (Tier B)
+
+Open `target.com/s/<query>` in a real tab, let PX's script run so the page's own
+Redsky calls succeed, then read the result — either by intercepting the page's
+own `plp_search_v2` response or by scraping the rendered tiles.
+
+Costs a tab per search. That is a product decision, not a technical one, which is
+why it is not built. To do it, register `providers/target.js` again, add a
+content script on `https://www.target.com/*`, and delete the entry in
+`availability.ts`.
+
+## Costco
+
+Costco **replaced** its old Lucidworks endpoint with a GRS (Google Retail
+Search) API. Both the old and new hosts refuse a server request, for different
+reasons — which is why "Costco is blocked" was only half the story:
+
+| Host | Status from Node | Cause |
+|---|---|---|
+| `search.costco.com/api/apps/…` (retired) | **403**, zero-byte body | Varnish edge block |
+| `gdx-api.costco.com/catalog/search/api/v1/search` (current) | **429**, empty body | **Kasada** challenge (`x-kpsdk-ct`, `KP_UIDz` cookies) |
+
+The endpoint, method, headers and body shape in `costco.js` were read from
+costco.com's own `keyword_search_api_service_config` in the live page payload —
+not guessed:
+
+```
+POST https://gdx-api.costco.com/catalog/search/api/v1/search
+client-identifier: 168287ea-1201-45f6-9b45-5bbea49f8ee7
+client_id: USBC   locale: en-US   searchResultProvider: GRS
+body: { visitorId, query, pageSize, offset, orderBy, searchMode,
+        personalizationEnabled, warehouseId, shipToPostal, shipToState,
+        deliveryLocations[], filterBy[] }
+```
+
+Kasada wants a **JS-computed per-request token**. Echoing its challenge cookie
+back to a second request does not clear the 429 — verified. The sibling
+`…/search/completeQuery` GET is *unprotected* and returns live catalogue data,
+so the host itself is fine; only the search POST is challenged.
+
+That is why the request is issued from **costco.com's own page context** rather
+than from the worker — see "Transport: page context" below.
+
+### Transport: page context
+
+Kasada's token is computed by the retailer's script inside the page, so the
+request runs in the page's **main world**, where Kasada has patched
+`window.fetch`. `page-fetch.js` does this with
+`chrome.scripting.executeScript({ world: 'MAIN' })`.
+
+A `world: 'ISOLATED'` injection would **not** work: an isolated world gets the
+plain `fetch`, so it is challenged exactly like the worker's request.
+
+**There is no fully headless option.** Chrome gives an extension no way to create
+a `costco.com` origin without a tab:
+
+| Context | Origin | Kasada cookies / patched fetch | Works? |
+|---|---|---|---|
+| Service worker | extension | cookies only, no patch | ❌ 429 (verified) |
+| Offscreen document | `chrome-extension://` | cookies only, no patch | ❌ same 429 |
+| Sandboxed page | extension | cookies only, no patch | ❌ same 429 |
+| Content script, isolated world | page | but plain `fetch` | ❌ 429 |
+| **`executeScript`, MAIN world** | page | **full page context** | ✅ the accepted path |
+
+So "unseen" is achieved as closely as the platform allows, in this order. **Every
+strategy is validated before it is accepted** — "created" is not the same as
+"loaded the URL we asked for":
+
+1. **Reuse** an open costco.com tab — nothing is created.
+2. **Minimised, unfocused popup window** — never in the user's tab strip, never
+   takes focus, closed as soon as the response arrives (typically 1–3 s). It can
+   still flash in the OS window list, and Chrome may throttle a minimised window
+   hard enough that it never commits the navigation — if it does not reach the
+   page, it is closed and step 3 runs.
+3. Inactive tab in the current window — briefly visible in the tab strip, but
+   reliable. This is the fallback that actually works when a minimised window
+   will not load.
+
+A tab the user opened is never closed; only windows/tabs the extension created
+are removed.
+
+`status === 'complete'` is **not** a sufficient readiness signal: a new tab
+reports it for its initial `about:blank` before the requested navigation
+commits, and injecting there yields an opaque origin whose cross-origin `fetch`
+throws. The extension waits for `complete` **at the expected origin** before
+injecting, and the injected script re-checks `location.origin` and reports the
+mismatch instead of burning the retry budget.
+
+Because a redirect can replace the frame between the readiness check and the
+injection (*"Frame with ID 0 was removed"*), acquisition + injection is retried
+once.
+
+Kasada's patch lands after the page's own scripts boot, so the injected fetch
+legitimately sees early `429`s and **retries for up to 12 s**. Background and
+minimised windows have throttled timers, hence the generous interval.
+
+If Costco ever stops challenging, the direct worker fetch is still attempted as a
+fallback, so nothing here has to be undone.
+
+### Reading the capture
+
+**Capture Costco** reports the transport as well as the status, because the two
+failure modes need opposite responses:
+
+| Field | Why it matters |
+|---|---|
+| `transport: page` + `verdict: ok` | Costco works. `topLevelKeys` / `firstProductKeys` confirm the field names |
+| `pageUrl` | The page the script actually ran in. Should be a `costco.com` URL; `about:blank` means the navigation never committed |
+| `verdict: kasada-challenge (429) even from the page context` | The page patch did not cover this call. Costco is out of reach without Tier B |
+| `verdict: kasada-challenge (429) — page context unavailable` | `transport: worker`, i.e. injection never ran. Read `pageFailure` |
+| `verdict: page context could not be used` | `status: 0` — no HTTP answer at all. `bodySample` carries the throw message (`injected into the wrong origin: …`, `fetch threw: …`) |
+| `resultCount: 0` with `verdict: ok` | The envelope shape differs — read `topLevelKeys` and extend `extractResults()` |
+| `parsedProductCount: 0` with `resultCount > 0` | The *field* names differ — read `firstProductKeys` and narrow the aliases in `parseResult()` |
+
+`costco.js` deliberately probes several envelope placements (`results`, `data.results`,
+`items`, `searchResult.results`, …) and rejects GRS resource paths
+(`projects/…/products/…`) as titles. Narrow the aliases **only** from captured
+evidence.
+
+### The old cookie bootstrap
+
+The previous `costco-cookie-fetcher.ts` only accepted `ak_bmsc` / `bm_sz`, which
+`www.costco.com` no longer issues — it now sets `BCO`, `C_LOC`, `f_as` and
+`client-zip-short`. That filter is why the fetcher always returned `null`. It now
+captures every cookie and reports the names it actually received.
+
+## Reintroducing a provider
+
+Target and Costco are wired into the same places Back Market already was. The
+full checklist is: `search/providers/availability.ts` (clear any disablement
+entry), `search/browser-providers.ts` (`BROWSER_PROVIDER_IDS` plus a bucket in
+`BROWSER_ONLY_PROVIDER_IDS` or `BROWSER_FIRST_PROVIDER_IDS`),
+`search/providers/adapter.ts`, `search/providers/capabilities.ts`,
+`extension/manifest.json` (host permissions **and** the matching Referer rule in
+`background.js`), `extension/src/background.js` and `extension/src/debug.js`,
+the retailer lists in `app/api/search/route.ts`, `lib/retailer.ts`,
+`components/RetailerToggle.tsx`, `components/SearchFilters.tsx`, and
+`lib/search-url.ts`.
+
+`browser-first` (Target, Costco) means a server adapter still exists and is used
+as a fallback and by `/api/deals` / `/api/explore`. `browser-only` (Back Market)
+means there is no server adapter and the id must never be routed to one.
+
 ## Capture flow (when search returns nothing)
 
 Use **Capture Back Market** and read it like this:
@@ -106,8 +278,15 @@ Use **Capture Back Market** and read it like this:
 
 ## Privacy / scope
 
-- `host_permissions` is limited to `https://www.backmarket.com/*` — not `<all_urls>`
-- No analytics, no telemetry, no remote code. Everything runs locally
+- `host_permissions` is limited to the three retailers actually used —
+  `backmarket.com`, `costco.com` and `gdx-api.costco.com` — plus `target.com` and
+  `redsky.target.com` only for the parked Target provider. Never `<all_urls>`
+- `scripting` is used for exactly one thing: issuing Costco's search request from
+  a costco.com page's main world so Kasada's own token is applied. It targets a
+  single tab the extension created (or an already-open costco.com tab) and is
+  never used against other origins
+- No analytics, no telemetry, no remote code. Everything runs locally. Kasada's
+  script is executed by the retailer's own page, not bundled or `eval`'d here
 - Requests are throttled per host (`MIN_HOST_INTERVAL_MS`, default 1.2s) so a
   single user's browsing never looks like a crawl
 

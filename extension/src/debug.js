@@ -9,8 +9,11 @@
 // Open it from the toolbar button (`chrome.action` → debug.html).
 
 import * as backmarket from './providers/backmarket.js';
+import * as costco from './providers/costco.js';
+// Target is not registered — see search/providers/availability.ts.
+// `providers/target.js` is kept for the future navigation-based collector.
 
-const PROVIDERS = { backmarket };
+const PROVIDERS = { backmarket, costco };
 
 const output = document.getElementById('output');
 const queryInput = document.getElementById('query');

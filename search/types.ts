@@ -1,6 +1,7 @@
 // ── Core domain types for federated shopping search ─────────────────────
 
 import { RetailerSource } from '@/types/unified';
+import type { ProviderUnavailability, ProviderUnavailabilityKind } from '@/types/unified';
 import type { BrowserResults } from './browser-providers';
 
 // ── Provider identity ──────────────────────────────────────────────────
@@ -127,6 +128,12 @@ export interface ProviderSearchResult {
   products: ProviderProductCandidate[];
   warnings: string[];
   partial: boolean;
+  /**
+   * Set when the retailer could not be reached at all, as opposed to being
+   * reached and returning no matches. Reported to the shopper rather than
+   * silently dropping the retailer from the result set.
+   */
+  unavailable?: ProviderUnavailability;
   metadata: {
     receivedAt: string;
     latencyMs: number;
@@ -135,6 +142,9 @@ export interface ProviderSearchResult {
     unsupportedFilters: string[];
   };
 }
+
+/** Why a retailer produced no candidates this request. */
+export type { ProviderUnavailabilityKind };
 
 // ── Retailer search provider interface ────────────────────────────────
 
@@ -409,6 +419,16 @@ export interface SearchMetadata {
   cacheHit?: boolean;
   providersSearched: ProviderId[];
   providersFailed: Array<{ providerId: ProviderId; errorType: string }>;
+  /**
+   * Retailers that could not be searched at all this request, with a
+   * shopper-facing reason. Lets the UI explain a missing retailer instead of
+   * silently returning a shorter list.
+   */
+  providersUnavailable: Array<{
+    providerId: ProviderId;
+    kind: ProviderUnavailabilityKind;
+    detail: string;
+  }>;
   totalCandidates: number;
   entityResolutionCounts: {
     highConfidence: number;

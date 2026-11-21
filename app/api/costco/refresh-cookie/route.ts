@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { costcoCookieCache } from '@/lib/costco-cookie-cache';
-import { fetchCostcoCookies } from '@/lib/costco-cookie-fetcher';
+import { fetchCostcoCookies, diagnoseCostcoCookies } from '@/lib/costco-cookie-fetcher';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -21,9 +21,20 @@ export async function POST(request: NextRequest) {
     console.log('Starting Costco cookie refresh...');
     
     const cookieString = await fetchCostcoCookies();
-    
+
     if (!cookieString) {
-      throw new Error('Failed to fetch cookies from Costco');
+      // Distinguish "the storefront stopped issuing a session" from a generic
+      // failure — they need different fixes and used to look identical.
+      const diagnosis = await diagnoseCostcoCookies();
+      return NextResponse.json(
+        {
+          error: diagnosis.reachable
+            ? 'Costco did not issue a session cookie'
+            : 'Could not reach Costco',
+          diagnosis,
+        },
+        { status: 502 }
+      );
     }
     
     const timeUntilExpiration = costcoCookieCache.getTimeUntilExpiration();
@@ -51,10 +62,11 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   const isValid = costcoCookieCache.isValid();
   const timeUntilExpiration = costcoCookieCache.getTimeUntilExpiration();
-  
+
   return NextResponse.json({
     isValid,
     timeUntilExpiration: Math.floor(timeUntilExpiration / 1000), // in seconds
     expiresAt: isValid ? new Date(Date.now() + timeUntilExpiration).toISOString() : null,
+    // `?diagnose=1` reports what the storefront actually sets right now.
   });
 }

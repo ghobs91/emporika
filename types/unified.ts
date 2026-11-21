@@ -437,5 +437,36 @@ export interface UnifiedSearchResponse {
 export interface ProviderStatus {
   providerId: RetailerSource;
   count: number;
+  /** Set when the provider request failed outright. */
   error?: string;
+  /**
+   * Set when the retailer could not be searched at all (edge bot block, missing
+   * credentials, or a browser-only retailer with no extension). Kept separate
+   * from `error` and from `count: 0` so "unreachable" is never rendered as
+   * "this retailer has nothing".
+   */
+  unavailable?: ProviderUnavailability;
+}
+
+/** Why a retailer produced no candidates for a request. */
+export type ProviderUnavailabilityKind =
+  /** The retailer's edge returns a bot challenge / 403 to non-browser clients. */
+  | 'blocked_by_edge'
+  /** Required credentials or session state are missing. */
+  | 'missing_credentials'
+  /** The request never completed (DNS, TLS, timeout, abort). */
+  | 'network_error'
+  /** Only collectable in the user's browser, and the extension returned nothing. */
+  | 'browser_required'
+  /**
+   * The retailer is served from a locally built index that is missing,
+   * unreadable, or too large for the in-memory query layer. Distinct from an
+   * empty result set: nothing was learned about the retailer's catalog.
+   */
+  | 'index_unavailable';
+
+export interface ProviderUnavailability {
+  kind: ProviderUnavailabilityKind;
+  /** Human-readable and safe to show in the UI (no credentials, no stack traces). */
+  detail: string;
 }

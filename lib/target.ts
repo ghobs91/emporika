@@ -1,5 +1,14 @@
 import { TargetSearchParams, TargetSearchResponse, TargetNearbyStoresResponse } from '@/types/target';
 
+/**
+ * PARKED CLIENT — Target is disabled in `search/providers/availability.ts`.
+ *
+ * `redsky.target.com` answers every non-navigation request with HTTP 435 and a
+ * PerimeterX challenge body. This client is kept because its request shape and
+ * response field names are what a navigation-based collector would reuse, and
+ * because `/api/deals`, `/api/explore` and the search adapter still import it.
+ * Those callers are all gated, so no request is issued while Target is off.
+ */
 const TARGET_API_BASE = 'https://redsky.target.com/redsky_aggregations/v1/web/plp_search_v2';
 const TARGET_STORES_API = 'https://redsky.target.com/redsky_aggregations/v1/web/nearby_stores_v1';
 const TARGET_FEATURED_DEALS_API = 'https://redsky.target.com/redsky_aggregations/v1/web/general_recommendations_placement_v1';

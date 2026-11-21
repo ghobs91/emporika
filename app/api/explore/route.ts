@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { walmartAPI } from '@/lib/walmart';
 import { bestBuyAPI } from '@/lib/bestbuy';
-import { targetAPI } from '@/lib/target';
 import { ebayAPI } from '@/lib/ebay';
 import { costcoAPI } from '@/lib/costco';
 import { searchShopifyProducts, convertShopifyToUnified } from '@/lib/shopify';
 import {
   normalizeWalmartProduct,
   normalizeBestBuyProduct,
-  normalizeTargetProduct,
   normalizeEbayProduct,
   normalizeCostcoProduct,
   UnifiedProduct,
@@ -30,7 +28,8 @@ import { categorizeProduct } from '@/lib/categorize-product';
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
-const ALL_SOURCES: RetailerSource[] = ['walmart', 'bestbuy', 'target', 'ebay', 'costco', 'shopify'];
+// Target is disabled — see search/providers/availability.ts.
+const ALL_SOURCES: RetailerSource[] = ['walmart', 'bestbuy', 'ebay', 'costco', 'shopify'];
 const VALID_CATEGORIES: ProductCategory[] = ['electronics', 'home', 'fashion', 'sports', 'toys', 'all'];
 const MAX_RESULTS = 60;
 const QUERIES_PER_SOURCE = 2;
@@ -94,18 +93,6 @@ async function fetchFromSource({ source, queries, merchantDomain }: SourceParams
       return results.flatMap((result) =>
         result.status === 'fulfilled'
           ? (result.value.products || []).map(normalizeBestBuyProduct)
-          : []
-      );
-    }
-    case 'target': {
-      const results = await Promise.allSettled(
-        queries.map((query) => withTimeout(targetAPI.searchProducts({ query, count: 24 }), 15000))
-      );
-      return results.flatMap((result) =>
-        result.status === 'fulfilled'
-          ? (result.value.data?.search?.products || []).map((product, index) =>
-              normalizeTargetProduct(product, index)
-            )
           : []
       );
     }

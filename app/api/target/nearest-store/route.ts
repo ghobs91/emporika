@@ -1,8 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { targetAPI } from '@/lib/target';
+import { getDisablement } from '@/search/providers/availability';
 
 export async function GET(request: NextRequest) {
   try {
+    // Target's store lookup goes through the same edge-blocked Redsky host, so
+    // while Target is disabled there is nothing to gain from the request and a
+    // 15s timeout to lose. `useTargetStore` degrades to the ZIP alone, which is
+    // what every other retailer actually needs.
+    const disablement = getDisablement('target');
+    if (disablement) {
+      return NextResponse.json(
+        { error: disablement.reason, blockedBy: disablement.blockedBy },
+        { status: 503 }
+      );
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const zip = searchParams.get('zip');
 

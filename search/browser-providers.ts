@@ -1,9 +1,12 @@
-// ── Browser-supplied providers (Back Market) ───────────────────────────
+// ── Browser-supplied providers (Back Market, Target, Costco) ───────────
 //
-// Back Market exposes no public search API, and the architecture is
-// deliberately server-browser-free: the fetch happens in the *user's* own
-// browser via the extension in `extension/`, and the resulting listings are
-// posted back to /api/search.
+// Some retailers cannot be searched from a server at all. Back Market exposes
+// no public search API; Target and Costco each answer server-side requests with
+// an edge bot challenge (HTTP 435 from PerimeterX on redsky.target.com, HTTP 403
+// from Varnish on search.costco.com — both verified).
+//
+// The fetch therefore happens in the *user's* own browser via the extension in
+// `extension/`, and the resulting listings are posted back to /api/search.
 //
 // The server then treats them as ordinary provider results — they go through
 // the same normalize → entity-resolution → filter → rank pipeline as every
@@ -22,14 +25,46 @@ import type {
 
 // ── Provider identity ──────────────────────────────────────────────────
 
-/** Providers whose data can only be collected in the browser. */
-export const BROWSER_PROVIDER_IDS = ['backmarket'] as const;
+/** Providers the web app may ask the extension for. */
+export const BROWSER_PROVIDER_IDS = ['backmarket', 'target', 'costco'] as const;
 
 export type BrowserProviderId = (typeof BROWSER_PROVIDER_IDS)[number];
 
-/** Narrowing guard — use this before handing an id to a server adapter. */
+/**
+ * Providers with no server adapter at all. These must never be routed to the
+ * server — there is nothing there to call.
+ */
+export const BROWSER_ONLY_PROVIDER_IDS = [
+  'backmarket',
+] as const satisfies readonly BrowserProviderId[];
+
+export type BrowserOnlyProviderId = (typeof BROWSER_ONLY_PROVIDER_IDS)[number];
+
+/**
+ * Providers that DO have a server adapter, but whose retailer currently rejects
+ * server requests at the edge. The browser is the preferred path; the server
+ * adapter is retained as a fallback and for the deals/explore feeds.
+ */
+export const BROWSER_FIRST_PROVIDER_IDS = [
+  'target',
+  'costco',
+] as const satisfies readonly BrowserProviderId[];
+
+export type BrowserFirstProviderId = (typeof BROWSER_FIRST_PROVIDER_IDS)[number];
+
+/** True for any provider the extension can collect. */
 export function isBrowserProvider(id: ProviderId): id is BrowserProviderId {
   return (BROWSER_PROVIDER_IDS as readonly ProviderId[]).includes(id);
+}
+
+/** True for providers that have no server-side implementation whatsoever. */
+export function isBrowserOnlyProvider(id: ProviderId): id is BrowserOnlyProviderId {
+  return (BROWSER_ONLY_PROVIDER_IDS as readonly ProviderId[]).includes(id);
+}
+
+/** True for providers whose server adapter is currently edge-blocked. */
+export function isBrowserFirstProvider(id: ProviderId): id is BrowserFirstProviderId {
+  return (BROWSER_FIRST_PROVIDER_IDS as readonly ProviderId[]).includes(id);
 }
 
 // ── Wire schemas (what the extension is allowed to send) ───────────────
@@ -106,8 +141,8 @@ function toCandidate(
   return {
     providerId,
     providerProductId: product.providerProductId,
-    // Back Market exposes the manufacturer model, which lets entity
-    // resolution join these listings to the same device elsewhere.
+    // Back Market and Target both expose a manufacturer brand/model, which lets
+    // entity resolution join these listings to the same product elsewhere.
     canonicalProductHints: product.model || product.brand
       ? { brand: product.brand, model: product.model }
       : undefined,
@@ -144,6 +179,41 @@ function toCandidate(
 }
 
 /**
+ * Filters each browser provider cannot honour, reported rather than silently
+ * dropped — the same contract the API-backed adapters follow.
+ *
+ * None of these retailers can filter server-side from an extension fetch, and
+ * store/destination context is whatever the user's own browser session has.
+ */
+const BROWSER_UNSUPPORTED_FILTERS: Record<BrowserProviderId, readonly string[]> = {
+  backmarket: [
+    'minPrice',
+    'maxPrice',
+    'preferredBrands',
+    'excludedBrands',
+    'destination',
+    'availabilityRequired',
+  ],
+  target: [
+    'minPrice',
+    'maxPrice',
+    'preferredBrands',
+    'excludedBrands',
+    'destination',
+    'availabilityRequired',
+  ],
+  costco: [
+    'minPrice',
+    'maxPrice',
+    'preferredBrands',
+    'excludedBrands',
+    'categoryHints',
+    'destination',
+    'availabilityRequired',
+  ],
+};
+
+/**
  * Convert a validated extension payload into `ProviderSearchResult`s the
  * orchestrator can merge as pre-supplied results.
  *
@@ -175,19 +245,21 @@ export function toProviderSearchResults(
       // so the response advertises degraded coverage instead of pretending
       // "no matches".
       partial: payload.partial === true || Boolean(payload.error),
+      // The extension is the only path to these retailers, so a failed browser
+      // fetch means the retailer is genuinely unavailable this request.
+      unavailable: payload.error
+        ? {
+            kind: 'browser_required',
+            detail:
+              'This retailer can only be searched from your browser, and the extension could not fetch it.',
+          }
+        : undefined,
       metadata: {
         receivedAt: new Date().toISOString(),
         latencyMs: Math.round(payload.latencyMs ?? 0),
         resultCount: payload.products.length,
         appliedFilters: ['keyword'],
-        unsupportedFilters: [
-          'minPrice',
-          'maxPrice',
-          'preferredBrands',
-          'excludedBrands',
-          'destination',
-          'availabilityRequired',
-        ],
+        unsupportedFilters: [...BROWSER_UNSUPPORTED_FILTERS[payload.providerId]],
       },
     };
   }

@@ -17,6 +17,7 @@ import {
   RetailerSource,
 } from '@/types/unified';
 import { searchRequestSchema } from '@/search/schemas';
+import { withoutDisabledProviders } from '@/search/providers/availability';
 import { executeSearch, executeSearchStream } from '@/search/orchestrator';
 
 const VALID_SORT_VALUES = ['relevance', 'price', 'title', 'bestseller', 'customerRating', 'new'] as const;
@@ -37,11 +38,18 @@ function parseSources(param: string | null): RetailerSource[] {
   const valid: RetailerSource[] = [
     'walmart', 'bestbuy', 'target', 'ebay', 'costco', 'shopify', 'backmarket',
   ];
-  if (!param) return ['walmart', 'bestbuy', 'target', 'ebay', 'costco', 'shopify'];
-  return param
+  // Disabled retailers are never searched, even when a caller names them.
+  const enabled = withoutDisabledProviders(valid);
+  if (!param) {
+    return withoutDisabledProviders(['walmart', 'bestbuy', 'target', 'ebay', 'costco', 'shopify']);
+  }
+  const requested = param
     .split(',')
     .map((s) => s.trim().toLowerCase())
-    .filter((s): s is RetailerSource => valid.includes(s as RetailerSource));
+    .filter((s): s is RetailerSource => enabled.includes(s as RetailerSource));
+  // A request that only names unavailable retailers falls back to the default
+  // set rather than running zero providers.
+  return requested.length > 0 ? requested : enabled;
 }
 
 // ── POST: Intelligent natural-language search with planning ────────────
