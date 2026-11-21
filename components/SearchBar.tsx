@@ -60,14 +60,17 @@ export default function SearchBar({
   return (
     <form onSubmit={handleSubmit} className="w-full min-w-0">
       <div
-        className={`relative flex min-w-0 items-center gap-3 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-700 shadow-sm hover:border-gray-300 dark:hover:border-gray-600 focus-within:border-blue-500 dark:focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-500/20 transition-all ${
+        className={`relative flex min-w-0 items-center gap-2 sm:gap-3 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-700 shadow-sm hover:border-gray-300 dark:hover:border-gray-600 focus-within:border-blue-500 dark:focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-500/20 transition-all ${
           isLarge
             ? 'rounded-3xl px-6 py-4 shadow-lg dark:border-gray-600'
             : 'rounded-xl px-3.5 py-2'
         }`}
       >
+        {/* On a 390px viewport the leading icon plus the submit button and gaps
+            were eating ~100px of a 220px bar. The magnifier is decoration; the
+            submit arrow keeps the affordance. */}
         <Search
-          className="text-gray-400 dark:text-gray-500 shrink-0"
+          className={`text-gray-400 dark:text-gray-500 shrink-0 ${isLarge ? '' : 'hidden sm:block'}`}
           size={isLarge ? 24 : 18}
         />
         {isLarge ? (
