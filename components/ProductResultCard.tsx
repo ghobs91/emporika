@@ -82,9 +82,22 @@ export default function ProductResultCard({ ranked, rank }: ProductResultCardPro
           <div className="ml-9 space-y-2">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-lg font-bold text-gray-900 dark:text-white">
-                  {formatPrice(bestOffer.offer.price?.amount, bestOffer.offer.price?.currency)}
-                </span>
+                {bestOffer.offer.price !== undefined ? (
+                  <span className="text-lg font-bold text-gray-900 dark:text-white">
+                    {formatPrice(bestOffer.offer.price.amount, bestOffer.offer.price.currency)}
+                  </span>
+                ) : bestOffer.offer.productUrl ? (
+                  <a
+                    href={bestOffer.offer.productUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-medium text-blue-600 underline-offset-2 hover:underline dark:text-blue-400"
+                  >
+                    Check price at {sourceLabel(bestOffer.offer.providerId)}
+                  </a>
+                ) : (
+                  <span className="text-sm text-gray-400 dark:text-gray-500">Price unavailable</span>
+                )}
                 {bestOffer.offer.listPrice && bestOffer.offer.listPrice.amount > (bestOffer.offer.price?.amount ?? 0) && (
                   <span className="text-xs text-gray-400 dark:text-gray-500 line-through">
                     {formatPrice(bestOffer.offer.listPrice.amount)}

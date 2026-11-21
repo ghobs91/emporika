@@ -84,6 +84,9 @@ export default function ProductCard({ product, rank, ranked, onClick }: ProductC
     .filter((amount): amount is number => amount !== undefined);
   const minPrice = priceValues.length > 0 ? Math.min(...priceValues) : undefined;
   const multipleStores = storeCount > 1;
+  // A product with no published price (Target's catalog has none) should still
+  // be actionable: link out to the retailer rather than showing a bare dash.
+  const canLinkOut = /^https?:\/\//i.test(product.productUrl ?? '');
 
   const handleExternalLinkClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -200,14 +203,33 @@ export default function ProductCard({ product, rank, ranked, onClick }: ProductC
         <RatingRow rating={product.customerRating} count={product.reviewCount} />
 
         <div className="mt-0.5 flex items-baseline gap-2">
-          <span className="text-[15px] font-semibold text-gray-900 dark:text-white">
-            {multipleStores && minPrice !== undefined && typeof product.price === 'number' && minPrice < product.price
-              ? `from ${formatPrice(minPrice)}`
-              : formatPrice(product.price)}
-          </span>
-          {discount > 0 && product.originalPrice && (
-            <span className="text-[12px] text-gray-400 line-through dark:text-gray-500">
-              {formatPrice(product.originalPrice)}
+          {typeof product.price === 'number' ? (
+            <>
+              <span className="text-[15px] font-semibold text-gray-900 dark:text-white">
+                {multipleStores && minPrice !== undefined && minPrice < product.price
+                  ? `from ${formatPrice(minPrice)}`
+                  : formatPrice(product.price)}
+              </span>
+              {discount > 0 && product.originalPrice && (
+                <span className="text-[12px] text-gray-400 line-through dark:text-gray-500">
+                  {formatPrice(product.originalPrice)}
+                </span>
+              )}
+            </>
+          ) : canLinkOut ? (
+            // Not a fake $0.00 and not a meaningless dash: send them to the shelf.
+            <a
+              href={product.productUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={handleExternalLinkClick}
+              className="text-[13px] font-medium text-blue-600 underline-offset-2 hover:underline dark:text-blue-400"
+            >
+              Check price at {sourceLabel}
+            </a>
+          ) : (
+            <span className="text-[13px] text-gray-400 dark:text-gray-500">
+              Price unavailable
             </span>
           )}
         </div>
