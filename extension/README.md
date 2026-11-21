@@ -97,38 +97,29 @@ framework assumption before checking selectors.
 
 ## Target — DISABLED
 
-**Target is turned off.** It is listed in `search/providers/availability.ts`, and
-that entry is the whole switch — the orchestrator, `?sources=`, the retailer
-pickers and this extension all read it.
-
-Redsky answers **every** non-navigation request with **HTTP 435** and a
-PerimeterX challenge body (`captcha.px-cdn.net/…`). It is not a key problem: the
-same request fails identically with no `key` parameter at all. PX mints a
-per-request token from its sensor script, which only runs in a real page, so a
-`fetch()` from the service worker cannot satisfy it.
-
-Measured evidence:
+**Target is now collected live, like Costco.** The server-side paths were
+measured exhaustively and none carries price:
 
 | Finding | Consequence |
 |---|---|
-| `redsky…/plp_search_v2` → 435 from Node **and** from the extension | No fetch-based path exists |
-| `__TGT_DATA__` store discovery fell back to the default store | The storefront fetch was challenged too, not just Redsky |
-| `/s/<term>` returns 200 but ships **no products** (`pageProps` is only `{ statusCode, pageContentQuerySSRPreloadVars }`) | Scraping the HTML is not an option either |
+| `redsky…/plp_search_v2` → 435 from Node **and** from the extension worker | No worker-based path exists |
+| `/s/<term>` returns 200 but ships **no products** | Scraping the HTML is not an option |
+| The PDP shell ships images/ratings but the price module is **empty** | Price hydrates through Redsky only |
+| The storefront's own client chunks fetch `redsky_aggregations` from a `www.target.com` page | CORS + the PX sensor are already set up for that origin |
 
-`providers/target.js` is **kept but unregistered**: its Redsky field mapping and
-`__TGT_DATA__` store discovery are exactly what a navigation-based collector
-would reuse.
+So `providers/target.js` is registered again, with one change from the parked
+attempt: the Redsky request is issued from a real target.com page's **main
+world**, where PX's sensor runs and its patched fetch mints valid tokens — the
+same mechanism `page-fetch.js` provides for Costco's Kasada. Store discovery
+reads `__TGT_DATA__` through the same page context.
 
-### The only remaining route (Tier B)
+This satisfies the challenge the way any human browsing Target does, under the
+user's own session, in a page the collector acquires (their open tab when one
+exists, else a minimised popup). It does not defeat PX.
 
-Open `target.com/s/<query>` in a real tab, let PX's script run so the page's own
-Redsky calls succeed, then read the result — either by intercepting the page's
-own `plp_search_v2` response or by scraping the rendered tiles.
-
-Costs a tab per search. That is a product decision, not a technical one, which is
-why it is not built. To do it, register `providers/target.js` again, add a
-content script on `https://www.target.com/*`, and delete the entry in
-`availability.ts`.
+The server keeps its fallbacks for when no extension is present: the
+corpus/precomputed catalog (`lib/target-index.ts`). Extension listings win when
+supplied — they are the only ones carrying price.
 
 ## Costco
 
@@ -280,7 +271,7 @@ Use **Capture Back Market** and read it like this:
 
 - `host_permissions` is limited to the three retailers actually used —
   `backmarket.com`, `costco.com` and `gdx-api.costco.com` — plus `target.com` and
-  `redsky.target.com` only for the parked Target provider. Never `<all_urls>`
+  `redsky.target.com` for the Target collector. Never `<all_urls>`
 - `scripting` is used for exactly one thing: issuing Costco's search request from
   a costco.com page's main world so Kasada's own token is applied. It targets a
   single tab the extension created (or an already-open costco.com tab) and is

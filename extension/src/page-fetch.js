@@ -48,11 +48,13 @@ async function injectedFetch({ url, body, headers, deadline, expectedOrigin }) {
     new Promise((resolve) => {
       const step = async () => {
         try {
+          // GET when there is no body (Redsky is query-parameter driven);
+          // POST otherwise, matching the Kasada-guarded JSON APIs.
           const response = await window.fetch(url, {
-            method: 'POST',
+            method: body === undefined ? 'GET' : 'POST',
             credentials: 'include',
             headers,
-            body,
+            ...(body === undefined ? {} : { body }),
           });
           const text = await response.text();
 

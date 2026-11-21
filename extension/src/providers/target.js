@@ -1,21 +1,20 @@
 // ── Target ────────────────────────────────────────────────────────────
 //
 // ⚠ PARKED — NOT REGISTERED. Target is disabled in
-// `search/providers/availability.ts` as of 2026-11.
+// Re-enabled 2026-11 as a Tier B collector: the fetch is issued from a real
+// target.com page's MAIN world, where PerimeterX's own sensor is running and
+// its patched fetch mints valid tokens. Verified paths, 2026-11:
 //
-// A service-worker `fetch()` cannot satisfy PerimeterX: every request to
-// `redsky.target.com` returns HTTP 435 with a captcha challenge body, and the
-// storefront fetch used for store discovery is challenged too (the adapter
-// falls back to the default store, which is how the block was observable).
-// PX mints a per-request token from its sensor script, which only runs in a
-// real page. The only remaining route is opening a real tab and collecting the
-// rendered results (Tier B).
+//   service-worker fetch        -> 435 on every request (the parked attempt)
+//   www.target.com pages        -> 200, but the HTML carries no products
+//   redsky from the page        -> the storefront's own client does exactly
+//                                  this, so CORS and the sensor are already
+//                                  set up for it
 //
-// This module is kept, unregistered, because the field mapping and the
-// `__TGT_DATA__` store-discovery logic below are exactly what a
-// navigation-based collector would reuse. To re-enable: register it in
-// `extension/src/background.js`, restore the host permissions and Referer rule
-// in the manifest/background, and delete the entry in `availability.ts`.
+// The visible cost, by design: the collector acquires a real target.com page
+// (the user's own tab when one is open, else a minimised popup) and the
+// request runs in the open, under the user's own session. It does not defeat
+// the challenge; it satisfies it the way any human browsing Target does.
 //
 // Target's Redsky aggregation API answers server requests with an HTTP 435
 // PerimeterX challenge (`blockScript: captcha.px-cdn.net/…`). It answers a real
@@ -38,6 +37,8 @@
 //
 // The payload field names below mirror `lib/target.ts` exactly. They are not
 // publicly documented, so `capture()` exists to replace guesses with evidence.
+
+import { fetchInPageContext } from '../page-fetch.js';
 
 export const HOST = 'redsky.target.com';
 
@@ -119,13 +120,17 @@ function extractTgtData(html) {
  */
 async function discoverStore({ signal } = {}) {
   try {
-    const response = await fetch(STOREFRONT, {
-      credentials: 'include',
+    // Page-context, like the search fetch: the service worker's direct fetch
+    // of the storefront was challenged when this provider was first built.
+    const viaPage = await fetchInPageContext({
+      pageUrl: STOREFRONT,
+      url: STOREFRONT,
       headers: { Accept: 'text/html,application/xhtml+xml' },
-      signal,
     });
-    const html = await response.text();
-    const data = extractTgtData(html);
+    if (!viaPage || viaPage.transport !== 'page' || viaPage.status !== 200) {
+      return { storeId: FALLBACK_STORE_ID, zip: FALLBACK_ZIP };
+    }
+    const data = extractTgtData(viaPage.text);
     const vars = data?.serverLocationVariables;
 
     const storeId = vars?.primaryStore?.id ?? vars?.store_id;
@@ -177,17 +182,32 @@ export async function raw(query, { limit = 24, offset = 0, storeId, zip, signal 
     useragent: USER_AGENT,
   });
 
-  const response = await fetch(`${API_BASE}?${params.toString()}`, {
-    credentials: 'include',
+  // Issued from the page's MAIN world, not the service worker: the worker's
+  // fetch is challenged on every request, while the storefront's own client
+  // fetches this exact URL from this exact origin in the open.
+  const viaPage = await fetchInPageContext({
+    pageUrl: STOREFRONT,
+    url: `${API_BASE}?${params.toString()}`,
     headers: {
       Accept: 'application/json',
       'Accept-Language': 'en-US,en;q=0.9',
       'x-requested-with': 'XMLHttpRequest',
     },
-    signal,
   });
 
-  const text = await response.text();
+  let status = 0;
+  let finalUrl = `${API_BASE}`;
+  let text = '';
+  if (viaPage && viaPage.transport === 'page') {
+    status = viaPage.status;
+    finalUrl = viaPage.finalUrl;
+    text = viaPage.text;
+  } else {
+    // No page could be acquired. Report it distinctly from a challenge so the
+    // caller does not tell the shopper "blocked" when it was "not attempted".
+    text = viaPage?.text ?? 'page context could not be created';
+  }
+
   let json = null;
   try {
     json = text ? JSON.parse(text) : null;
@@ -196,8 +216,8 @@ export async function raw(query, { limit = 24, offset = 0, storeId, zip, signal 
   }
 
   return {
-    status: response.status,
-    finalUrl: response.url,
+    status,
+    finalUrl,
     text,
     json,
     storeId: context.storeId,

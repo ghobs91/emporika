@@ -3,11 +3,16 @@
   "name": "Emporika Browser Search",
   "version": "0.1.0",
   "description": "Fetches listings from Back Market and Costco inside your own browser, on Emporika's behalf.",
-  "permissions": ["declarativeNetRequest", "scripting"],
+  "permissions": [
+    "declarativeNetRequest",
+    "scripting"
+  ],
   "host_permissions": [
     "https://www.backmarket.com/*",
     "https://www.costco.com/*",
-    "https://gdx-api.costco.com/*"
+    "https://gdx-api.costco.com/*",
+    "https://www.target.com/*",
+    "https://redsky.target.com/*"
   ],
   "action": {
     "default_title": "Emporika: open provider harness"
@@ -18,8 +23,13 @@
   },
   "content_scripts": [
     {
-      "matches": ["http://localhost:3000/*", "https://emporika.netlify.app/*"],
-      "js": ["src/bridge.js"],
+      "matches": [
+        "http://localhost:3000/*",
+        "https://emporika.netlify.app/*"
+      ],
+      "js": [
+        "src/bridge.js"
+      ],
       "run_at": "document_idle"
     }
   ]

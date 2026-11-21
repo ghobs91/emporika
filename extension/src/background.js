@@ -16,14 +16,9 @@
 
 import * as backmarket from './providers/backmarket.js';
 import * as costco from './providers/costco.js';
-// Target is deliberately not registered — see search/providers/availability.ts.
-// `providers/target.js` is kept, unregistered, because its research (Redsky
-// field names, store discovery from __TGT_DATA__) is the starting point for a
-// navigation-based collector. Uncommenting the import and the entry below is
-// what re-enables it.
-// import * as target from './providers/target.js';
+import * as target from './providers/target.js';
 
-const PROVIDERS = { backmarket, costco };
+const PROVIDERS = { backmarket, costco, target };
 
 /** Minimum gap between requests to the same host (politeness / rate signal). */
 const MIN_HOST_INTERVAL_MS = 1200;
@@ -56,6 +51,23 @@ const REFERER_RULES = [
     condition: {
       initiatorDomains: [chrome.runtime.id],
       requestDomains: ['backmarket.com'],
+      resourceTypes: ['xmlhttprequest'],
+    },
+  },
+  {
+    // Redsky expects a storefront referer; the page-context fetch originates
+    // from the extension's scripting, so restore it explicitly.
+    id: 4,
+    priority: 1,
+    action: {
+      type: 'modifyHeaders',
+      requestHeaders: [
+        { header: 'Referer', operation: 'set', value: 'https://www.target.com/' },
+      ],
+    },
+    condition: {
+      initiatorDomains: [chrome.runtime.id],
+      requestDomains: ['redsky.target.com'],
       resourceTypes: ['xmlhttprequest'],
     },
   },
