@@ -41,7 +41,7 @@ The search engine works without WebLLM. WebLLM is **progressive enhancement**, n
 - **Icons**: Lucide React
 - **Validation**: Zod
 - **Testing**: Vitest
-- **API Integration**: Walmart, Best Buy, Target, eBay, Costco, Shopify Global Catalog MCP
+- **API Integration**: Walmart, Best Buy, eBay, Shopify Global Catalog MCP (server-side) + Back Market, Costco (collected in the user's browser by `extension/`). Target is temporarily disabled.
 - **AI**: WebLLM architecture (progressive enhancement, currently mock fallback)
 
 ## Retailer API Access
@@ -52,20 +52,51 @@ All retailer API credentials are **server-side only**. The browser never receive
 - **Server**: The only layer allowed to access retailer APIs, Shopify MCP, and credentials
 - **WebLLM**: Runs locally in browser; never transmits prompts or user search text to any server
 
+### Retailers that cannot be searched from a server
+
+Costco's search endpoint is Kasada-guarded (`gdx-api.costco.com` returns HTTP 429 with challenge headers) and Back Market has never had a public search API, so both are collected in the user's own browser.
+
+**Target is served from a locally built catalog index** instead of being searched live. `redsky.target.com` returns an HTTP 435 PerimeterX challenge to every non-navigation request, and the storefront HTML is a Next.js shell on every URL form — a canonical product page returns 200 but carries no price, availability or `schema.org` `Product`. What Target *does* publish for crawlers is its product sitemap (`sitemap_pdp-index.xml.gz`: ~106 shards, ~2.5M product URLs), so two scripts turn that into a local catalog:
+
+```bash
+npx tsx scripts/target-sitemap.ts --all   # download all shards (ETag-incremental, ~920MB once)
+npx tsx scripts/target-index-build.ts     # build the SQLite FTS5 index (~1GB)
+npx tsx scripts/target-precompute.ts      # generate the runtime artifact (~0.6MB)
+```
+
+`lib/target-index.ts` can query the SQLite database in-process via the built-in `node:sqlite` (Node ≥ 22.5) — arbitrary queries, full 2.6M-product recall. The retailer is never contacted at search time. Re-running the first script HEADs every shard and downloads only those whose ETag moved, so a scheduled refresh costs a few MB rather than ~920MB.
+
+**A ~1GB database cannot run on a host with no persistent disk**, so production serves from `data/target-precomputed.json` instead: `scripts/target-precompute.ts` runs the real index over a curated query vocabulary (observed trends + the brand catalogue + common shopping seeds) and commits the results, which `lib/target-precomputed.ts` answers from with an in-memory object lookup (~1ms, no I/O). The artifact is ~1,000 queries / ~8,000 hits / 0.6MB.
+
+The adapter prefers whichever backend is present: SQLite when there is a filesystem, the precomputed map otherwise. Coverage is explicit — a query outside the vocabulary reports *"Target results are precomputed for N curated searches and this query is not one of them"* rather than claiming Target has no matching products.
+
+**The published sitemap is not Target's whole assortment.** It covers Target's own brands densely (`a new day` 2,768 titles, `wild fable` 1,849, `universal thread` 1,091) and the long marketplace tail, but at least some licensed brands are absent or near-absent: `nike` appears as a leading word in 43 of 2.6M titles and `adidas` in 29. So 2.6M is the size of the *enumeration*, not of Target's real catalogue, and Target results will systematically miss those brands. Fixing that would need a source Target does not publish.
+
+**Netlify note:** `netlify.toml` pins `NODE_VERSION = "20"`, which has no `node:sqlite`. The precomputed path does not need it, so production works on Node 20; only the build-time index commands require ≥22.5.
+
+The consequence is a deliberate capability limit: Target answers "does Target carry something matching these words, and where do I link to it" — and **not** price, availability, shipping, ratings or images. Those are reported as unavailable rather than guessed.
+
+The browser-collected retailers are fetched by the extension in `extension/`, then posted to `/api/search` as pre-supplied results and passed through the same normalize → entity-resolution → filter → rank pipeline as every API-backed provider. Ranking never moves to the client. See `extension/README.md` for the verification details and the capture harness.
+
+Retailers that are entirely off are declared once, in `search/providers/availability.ts`, and honoured by the orchestrator, `?sources=`, the retailer pickers and the extension. That registry is currently empty.
+
+A retailer that cannot be reached is reported in `metadata.providersUnavailable` with a shopper-facing reason, and rendered by `ProviderStatusBar`. It is never reported as "this retailer has no matches".
+
 ## Provider Adapter Architecture
 
 Each retailer has a dedicated adapter implementing `RetailerSearchProvider`:
 
-| Provider | Capabilities |
-|----------|-------------|
-| **Walmart** | Keyword search, shipping data, availability |
-| **Best Buy** | Keyword search, brand/price filters, rich category/manufacturer data |
-| **Target** | Keyword search, store-level pricing, pickup availability |
-| **eBay** | Keyword search, GTIN lookup, condition/price filters, marketplace seller data |
-| **Costco** | Keyword search, availability (requires session cookies) |
-| **Shopify** | Full keyword search, category/brand/price/destination filters, variants, seller data (Global Catalog MCP) |
+| Provider | Transport | Capabilities |
+|----------|-----------|-------------|
+| **Walmart** | server | Keyword search, shipping data, availability |
+| **Best Buy** | server | Keyword search, brand/price filters, rich category/manufacturer data |
+| **Target** | server (local index) | Keyword match over the locally built catalog index; catalog presence + product link only — no price, availability, shipping, ratings or images |
+| **eBay** | server | Keyword search, GTIN lookup, condition/price filters, marketplace seller data |
+| **Costco** | browser extension (server fallback) | Keyword search, availability |
+| **Shopify** | server | Full keyword search, category/brand/price/destination filters, variants, seller data (Global Catalog MCP) |
+| **Back Market** | browser extension only | Keyword search, refurbished condition, brand/model |
 
-Unsupported filters are explicitly reported in `metadata.unsupportedFilters`. Adapters never pretend an unsupported filter was applied.
+Unsupported filters are explicitly reported in `metadata.unsupportedFilters`. Adapters never pretend an unsupported filter was applied. Unreachable retailers are reported in `metadata.providersUnavailable`, and deliberately disabled ones in `search/providers/availability.ts`. A retailer whose data source is missing on this deployment reports `index_unavailable`, so "not built here" is never shown as "has no matches".
 
 ## Entity Resolution
 
@@ -120,7 +151,9 @@ WALMART_KEY_VERSION=1
 # Best Buy API
 BESTBUY_API_KEY=
 
-# Target API
+# Target store context (INERT — Target is disabled)
+# Redsky answers every non-navigation request with an HTTP 435 PerimeterX
+# challenge, so Target is disabled in search/providers/availability.ts.
 TARGET_STORE_ID=
 TARGET_ZIP=
 
@@ -129,7 +162,8 @@ EBAY_CLIENT_ID=
 EBAY_CLIENT_SECRET=
 EBAY_SANDBOX=false   # set true when using eBay sandbox keys
 
-# Costco
+# Costco (enables the server-side fallback path; the API is edge-blocked)
+# Costco is normally collected by the browser extension instead.
 COSTCO_COOKIES=
 COSTCO_API_KEY=
 COSTCO_REFRESH_SECRET=

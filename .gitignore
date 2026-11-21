@@ -56,3 +56,10 @@ next-env.d.ts
 
 # Transformers.js model cache used by scripts/bench-embedding-models.ts
 /.cache/
+
+# generated Target corpus (~93MB, rebuilt weekly by .github/workflows/update-target-index.yml)
+# served at runtime, never committed: committing it would add 93MB to history per refresh
+/public/data/target-corpus.bin
+
+# local agent tool state
+/.serena/
