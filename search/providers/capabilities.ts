@@ -56,19 +56,23 @@ export const PROVIDER_CAPABILITIES: Record<ProviderId, ProviderCapabilities> = {
     supportsCategorySearch: false,
     supportsBrandFilters: false,
     supportsPriceFilters: false,
-    supportsAvailabilityFilters: true,
-    supportsDestinationFiltering: true,
+    supportsAvailabilityFilters: false,
+    supportsDestinationFiltering: false,
     supportsVariantLookup: false,
     supportsProductDetailLookup: false,
     supportsGTINLookup: false,
     supportsShippingData: false,
-    supportsPickupData: true,
+    supportsPickupData: false,
     supportsReturnPolicyData: false,
     maxQueriesPerRequest: 5,
     maxResultsPerQuery: 24,
     maxConcurrentRequests: 2,
     supportedCountries: ['US'],
-    notes: ['Store-level pricing and pickup availability via store_id/zip'],
+    notes: [
+      'Keyword match over a locally built catalog index (lib/target-index.ts)',
+      'Catalog presence and a product link only — no price, availability, shipping, ratings or images',
+      'Redsky is PerimeterX-guarded and the storefront HTML carries no price, so richer data cannot be fetched',
+    ],
   },
 
   ebay: {
@@ -114,7 +118,11 @@ export const PROVIDER_CAPABILITIES: Record<ProviderId, ProviderCapabilities> = {
     maxResultsPerQuery: 24,
     maxConcurrentRequests: 1,
     supportedCountries: ['US'],
-    notes: ['Requires session cookies for API access', 'Filters are limited to ShipIt eligibility'],
+    notes: [
+      'Served by Costco\'s GRS (Google Retail Search) API at gdx-api.costco.com',
+      'The search endpoint is Kasada-guarded; the browser extension is the only working path',
+      'Filters are limited to ShipIt eligibility',
+    ],
   },
 
   shopify: {

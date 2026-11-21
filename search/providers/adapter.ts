@@ -10,11 +10,19 @@ import type {
   ProviderCapabilities,
   Money,
 } from '../types';
+import type { ProviderUnavailability } from '@/types/unified';
 import { getCapabilities } from './capabilities';
-import type { BrowserProviderId } from '../browser-providers';
+import { withoutDisabledProviders } from './availability';
+import type { BrowserProviderId, BrowserOnlyProviderId } from '../browser-providers';
 import { walmartAPI } from '@/lib/walmart';
 import { bestBuyAPI } from '@/lib/bestbuy';
-import { targetAPI } from '@/lib/target';
+import { isTargetIndexAvailable, loadTargetIndex } from '@/lib/target-index';
+import { targetProductUrl } from '@/lib/target-deep-links';
+import {
+  isPrecomputedTargetAvailable,
+  lookupPrecomputedTarget,
+  precomputedTargetStats,
+} from '@/lib/target-precomputed';
 import { ebayAPI } from '@/lib/ebay';
 import { costcoAPI } from '@/lib/costco';
 import { searchShopifyProducts } from '@/lib/shopify';
@@ -34,6 +42,44 @@ function nowISO(): string {
 function toMoney(amount: number, currency = 'USD'): Money | undefined {
   if (typeof amount !== 'number' || !Number.isFinite(amount)) return undefined;
   return { amount, currency };
+}
+
+/**
+ * Classify a provider failure so the UI can say *why* a retailer is missing
+ * instead of quietly returning a shorter list.
+ *
+ * 403 and 435 are what an edge bot manager (Varnish, PerimeterX, Akamai)
+ * returns to non-browser clients. Retrying does not help, so these must not be
+ * reported as a transient "try again".
+ */
+function classifyProviderError(error: unknown): ProviderUnavailability {
+  const message = error instanceof Error ? error.message : String(error);
+  const status = Number(/\b(4\d{2}|5\d{2})\b/.exec(message)?.[1] ?? NaN);
+
+  if (
+    status === 403 ||
+    status === 435 ||
+    status === 429 ||
+    /perimeterx|px-cdn|captcha|bot challenge|access denied|kasada/i.test(message)
+  ) {
+    return {
+      kind: 'blocked_by_edge',
+      detail:
+        'This retailer blocks automated requests from servers. It can only be searched from your own browser.',
+    };
+  }
+
+  if (status === 401 || status === 407) {
+    return {
+      kind: 'missing_credentials',
+      detail: 'This retailer rejected the configured credentials.',
+    };
+  }
+
+  return {
+    kind: 'network_error',
+    detail: 'This retailer did not respond. Try again in a moment.',
+  };
 }
 
 // ── Walmart adapter ────────────────────────────────────────────────────
@@ -220,81 +266,151 @@ const bestbuyAdapter: RetailerSearchProvider = {
 
 // ── Target adapter ─────────────────────────────────────────────────────
 
+/** Map a catalog row to a provider candidate. Shared by both Target backends. */
+function targetCandidate(
+  tcin: string,
+  title: string,
+  url: string,
+  sourceQuery: string
+): ProviderProductCandidate {
+  return {
+    providerId: 'target' as ProviderId,
+    providerProductId: `target-${tcin}`,
+    title: title || `Target item ${tcin}`,
+    productUrl: url,
+    condition: 'unknown',
+    availability: 'unknown',
+    rawFieldAvailability: {
+      name: title.length > 0,
+      price: false,
+      image: false,
+      url: true,
+      brand: false,
+      rating: false,
+      reviews: false,
+      description: false,
+      availability: false,
+      shipping: false,
+    },
+    sourceSearches: [sourceQuery],
+  };
+}
+
 const targetAdapter: RetailerSearchProvider = {
   id: 'target',
   capabilities: getCapabilities('target'),
 
+  /**
+   * Two backends, in preference order:
+   *
+   *  1. The local SQLite catalog (`lib/target-index.ts`) when it exists on disk
+   *     — arbitrary queries, full 2.6M-product recall. Local/dev, or any host
+   *     with a persistent volume.
+   *  2. The precomputed artifact (`lib/target-precomputed.ts`) — an object
+   *     lookup over a curated vocabulary, which is all a host without
+   *     persistent disk can support.
+   *
+   * Neither can supply price, availability, rating, image or brand: Target's
+   * storefront HTML carries none of it and Redsky is PerimeterX-guarded. That is
+   * recorded in `rawFieldAvailability` rather than filled with plausible
+   * defaults — the ranker penalises a missing price and the UI labels it.
+   */
   async search(request: ProviderSearchRequest): Promise<ProviderSearchResult> {
     const start = performance.now();
     const unsupported: string[] = [];
+    const warnings: string[] = [];
 
     if (request.categoryHints) unsupported.push('categoryHints');
     if (request.preferredBrands) unsupported.push('preferredBrands');
     if (request.excludedBrands) unsupported.push('excludedBrands');
     if (request.minPrice) unsupported.push('minPrice');
     if (request.maxPrice) unsupported.push('maxPrice');
+    if (request.destination) unsupported.push('destination');
+    if (request.availabilityRequired) unsupported.push('availabilityRequired');
+    if (request.minPrice || request.maxPrice) {
+      warnings.push('Target prices are not indexed, so price filters do not apply.');
+    }
+
+    const finish = (
+      products: ProviderProductCandidate[]
+    ): ProviderSearchResult => ({
+      providerId: 'target',
+      query: request.query,
+      products,
+      warnings,
+      partial: false,
+      metadata: {
+        receivedAt: nowISO(),
+        latencyMs: Math.round(performance.now() - start),
+        resultCount: products.length,
+        appliedFilters: ['keyword'],
+        unsupportedFilters: unsupported,
+      },
+    });
 
     try {
-      const response = await targetAPI.searchProducts({
-        query: request.query,
-        count: Math.min(request.resultLimit, 24),
-        // Use destination if provided for store-level pricing
-        zip: request.destination?.postalCode,
-      });
+      let products: ProviderProductCandidate[];
 
-      const products: ProviderProductCandidate[] = (response.data?.search?.products || []).map(
-        (product, index) => ({
-          providerId: 'target' as ProviderId,
-          providerProductId: `target-${product.tcin}-${index}`,
-          canonicalProductHints: {
-            brand: product.item?.primary_brand?.name,
-          },
-          title: product.item?.product_description?.title || 'Untitled',
-          description: (product.item?.product_description as { bullet_descriptions?: string[] })?.bullet_descriptions?.join(' ') || undefined,
-          categoryPath: product.item?.product_classification?.product_type_name
-            ? [product.item.product_classification.product_type_name]
-            : undefined,
-          imageUrls: [product.item?.enrichment?.images?.primary_image_url].filter(Boolean) as string[],
-          productUrl: `https://www.target.com/p/-/A-${product.tcin}`,
-          price: toMoney(product.price?.current_retail ?? 0),
-          listPrice: product.price?.reg_retail ? toMoney(product.price.reg_retail) : undefined,
-          condition: 'new',
-          availability: product.fulfillment?.shipping_options?.availability_status === 'IN_STOCK'
-            ? 'in_stock' : 'unknown',
-          rating: product.ratings_and_reviews?.statistics?.rating?.average,
-          reviewCount: product.ratings_and_reviews?.statistics?.rating?.count,
-          rawFieldAvailability: {
-            name: true, price: true, image: true, url: true,
-            rating: !!product.ratings_and_reviews?.statistics?.rating?.average,
-            reviews: !!product.ratings_and_reviews?.statistics?.rating?.count,
-            availability: true, fulfillment: true,
-          },
-          sourceSearches: [request.query],
-        })
-      );
+      if (isTargetIndexAvailable()) {
+        const index = await loadTargetIndex();
+        const hits = index.query(request.query, Math.min(request.resultLimit, 24));
+        const partialMatches = hits.filter((hit) => hit.matchMode === 'partial').length;
+        if (partialMatches > 0) {
+          warnings.push(`${partialMatches} Target result(s) matched only some of your terms.`);
+        }
+        products = hits.map((hit) =>
+          targetCandidate(hit.record.tcin, hit.record.title, hit.record.url, request.query)
+        );
+      } else if (isPrecomputedTargetAvailable()) {
+        const hits = lookupPrecomputedTarget(request.query);
 
-      return {
-        providerId: 'target',
-        query: request.query,
-        products,
-        warnings: [],
-        partial: false,
-        metadata: {
-          receivedAt: nowISO(),
-          latencyMs: Math.round(performance.now() - start),
-          resultCount: products.length,
-          appliedFilters: ['keyword'],
-          unsupportedFilters: unsupported,
-        },
-      };
+        if (hits === undefined) {
+          // Not a miss on Target's side — this deployment simply does not
+          // precompute this query. Saying "no matches" here would be a lie.
+          const stats = precomputedTargetStats();
+          warnings.push(
+            `Target results are precomputed for ${stats.queryCount.toLocaleString()} curated ` +
+              `searches on this deployment, and this query is not one of them.`
+          );
+          return finish([]);
+        }
+
+        products = hits
+          .slice(0, Math.min(request.resultLimit, 24))
+          .map((hit) =>
+            targetCandidate(
+              hit.tcin,
+              hit.title,
+              // Bare product URLs resolve and Target canonicalises them, so the
+              // artifact does not need to carry a slug.
+              targetProductUrl(hit.tcin) ?? `https://www.target.com/p/-/A-${hit.tcin}`,
+              request.query
+            )
+          );
+      } else {
+        throw new Error(
+          'Target has neither a catalog index nor a precomputed artifact on this deployment.'
+        );
+      }
+
+      return finish(products);
     } catch (error) {
+      // A missing data source is a build condition, not "no matches":
+      // reporting it as an empty result set would tell a shopper Target does not
+      // carry the thing, which is not what we know.
       const message = error instanceof Error ? error.message : 'Unknown error';
       return {
         providerId: 'target',
         query: request.query,
         products: [],
-        warnings: [message],
+        warnings: [...warnings, message],
         partial: true,
+        unavailable: {
+          kind: 'index_unavailable',
+          detail:
+            'Target is served from a locally built catalog index, which is not ' +
+            'available on this server. Other retailers are unaffected.',
+        },
         metadata: {
           receivedAt: nowISO(),
           latencyMs: Math.round(performance.now() - start),
@@ -306,7 +422,6 @@ const targetAdapter: RetailerSearchProvider = {
     }
   },
 };
-
 // ── eBay adapter ───────────────────────────────────────────────────────
 
 const ebayAdapter: RetailerSearchProvider = {
@@ -494,6 +609,7 @@ const costcoAdapter: RetailerSearchProvider = {
         products: [],
         warnings: [message],
         partial: true,
+        unavailable: classifyProviderError(error),
         metadata: {
           receivedAt: nowISO(),
           latencyMs: Math.round(performance.now() - start),
@@ -665,11 +781,13 @@ function extractUPID(shopifyId: string): string {
 // ── Provider registry ──────────────────────────────────────────────────
 
 /**
- * Providers callable from the server. Back Market has no server
- * adapter: it is collected in the user's browser and arrives as
- * pre-supplied results (see `search/browser-providers.ts`).
+ * Providers callable from the server. Back Market has no server adapter: it is
+ * collected in the user's browser and arrives as pre-supplied results (see
+ * `search/browser-providers.ts`). Target and Costco keep their server adapters
+ * (used as a fallback and by /api/deals and /api/explore) even though the
+ * browser is now their primary path.
  */
-export type ServerProviderId = Exclude<ProviderId, BrowserProviderId>;
+export type ServerProviderId = Exclude<ProviderId, BrowserOnlyProviderId>;
 
 /** All provider adapters in a lookup map. */
 export const providerAdapters: Record<ServerProviderId, RetailerSearchProvider> = {
@@ -692,6 +810,12 @@ export function getProvider(id: ServerProviderId): RetailerSearchProvider {
  * Provider IDs that can serve this request: API-backed providers configured
  * with credentials, plus browser-collected providers the caller actually
  * supplied listings for.
+ *
+ * Target and Costco are edge-blocked server-side, so configuring their env vars
+ * only enables the *fallback* path. When the extension supplies their listings
+ * they are available regardless of env — see `search/browser-providers.ts`.
+ * Target additionally has a server-side path that never touches the retailer's
+ * edge: the locally built catalog index (`lib/target-index.ts`).
  */
 export function getAvailableProviders(
   browserProviders: readonly BrowserProviderId[] = []
@@ -704,7 +828,13 @@ export function getAvailableProviders(
   if (process.env.BESTBUY_API_KEY) {
     available.push('bestbuy');
   }
-  if (process.env.TARGET_STORE_ID || process.env.TARGET_ZIP) {
+  // Target is served from data we build ourselves, so the artifact — not
+  // credentials — decides availability. Two shapes exist: the local SQLite
+  // catalog (arbitrary queries, needs a filesystem) and the precomputed map
+  // (curated vocabulary, bundled into the deployment). When neither is present
+  // the adapter still answers, but with `index_unavailable`, so the retailer is
+  // only offered when it can actually produce something.
+  if (isTargetIndexAvailable() || isPrecomputedTargetAvailable()) {
     available.push('target');
   }
   if (process.env.EBAY_CLIENT_ID && process.env.EBAY_CLIENT_SECRET) {
@@ -724,5 +854,7 @@ export function getAvailableProviders(
     if (!available.includes(id)) available.push(id);
   }
 
-  return available;
+  // Deliberately disabled retailers are never eligible, regardless of
+  // credentials or browser results. See `./availability.ts`.
+  return withoutDisabledProviders(available);
 }
