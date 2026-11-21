@@ -11,6 +11,7 @@ vi.mock('@/lib/target-corpus-client', () => ({
 import {
   getTargetCorpusResult,
   isTargetCorpusEnabled,
+  isTargetCorpusSupported,
   setTargetCorpusEnabled,
   withTargetCorpus,
 } from '@/lib/target-corpus-provider';
@@ -153,5 +154,48 @@ describe('withTargetCorpus', () => {
     });
     // A broken download must not fail the whole search.
     expect(await withTargetCorpus(null, 'usb cable')).toBeNull();
+  });
+});
+
+describe('device support gate', () => {
+  const withViewport = (narrow: boolean) => {
+    (globalThis as unknown as { window: unknown }).window = {
+      localStorage: {
+        getItem: (k: string) => store.get(k) ?? null,
+        setItem: (k: string, v: string) => void store.set(k, v),
+        removeItem: (k: string) => void store.delete(k),
+      },
+      matchMedia: (query: string) => ({ matches: narrow, media: query }),
+    };
+  };
+  const store = new Map<string, string>();
+
+  it('is unsupported on a narrow (phone) viewport', async () => {
+    store.clear();
+    withViewport(true);
+    expect(isTargetCorpusSupported()).toBe(false);
+  });
+
+  it('refuses to write the preference on an unsupported device', () => {
+    store.clear();
+    withViewport(true);
+    setTargetCorpusEnabled(true);
+    expect(store.has('emporika.target-corpus.enabled')).toBe(false);
+  });
+
+  it('ignores an already-persisted flag on an unsupported device', async () => {
+    // A flag set on another device — or before this gate existed — must not
+    // start the download that crashes the tab.
+    store.clear();
+    store.set('emporika.target-corpus.enabled', 'true');
+    withViewport(true);
+    expect(isTargetCorpusEnabled()).toBe(false);
+    expect(await getTargetCorpusResult('usb cable')).toBeNull();
+  });
+
+  it('is supported on a desktop viewport', () => {
+    store.clear();
+    withViewport(false);
+    expect(isTargetCorpusSupported()).toBe(true);
   });
 });

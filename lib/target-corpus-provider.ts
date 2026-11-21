@@ -21,6 +21,35 @@ import type { RetailerSource } from '@/types/unified';
 
 const STORAGE_KEY = 'emporika.target-corpus.enabled';
 
+/**
+ * Whether this device can hold the index at all.
+ *
+ * The corpus is ~98MB on the wire, and indexing it needs roughly 250MB resident
+ * (the buffer, a 26M-entry postings array, and 396k vocabulary strings). iOS
+ * Safari's per-tab budget is below that: the process is killed, Safari reloads,
+ * the persisted flag re-triggers the download, and the result is an endless
+ * crash/reload loop — observed on a phone.
+ *
+ * So this is a desktop feature. Narrow viewports and low-memory devices are
+ * excluded, and the toggle is not rendered for them at all.
+ */
+export function isTargetCorpusSupported(): boolean {
+  if (typeof window === 'undefined') return false;
+
+  // Layout is the reliable signal: the index is offered in the desktop results
+  // header, and every phone viewport is below this breakpoint.
+  const narrow =
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(max-width: 1023px)').matches;
+  if (narrow) return false;
+
+  // Chrome-only hint; Firefox/Safari omit it, so absence is not disqualifying.
+  const memory = (navigator as { deviceMemory?: number }).deviceMemory;
+  if (typeof memory === 'number' && memory > 0 && memory < 4) return false;
+
+  return true;
+}
+
 /** Default hit count per query; the server caps provider results anyway. */
 const DEFAULT_HITS = 24;
 
@@ -36,7 +65,9 @@ const ENRICH_CONCURRENCY = 4;
 
 /** True when the shopper has opted into the local Target catalog. */
 export function isTargetCorpusEnabled(): boolean {
-  if (typeof window === 'undefined') return false;
+  // Unsupported devices must never see this as "on", or a reload would restart
+  // the download that crashed the tab in the first place.
+  if (!isTargetCorpusSupported()) return false;
   try {
     return window.localStorage.getItem(STORAGE_KEY) === 'true';
   } catch {
@@ -47,6 +78,7 @@ export function isTargetCorpusEnabled(): boolean {
 
 export function setTargetCorpusEnabled(enabled: boolean): void {
   if (typeof window === 'undefined') return;
+  if (enabled && !isTargetCorpusSupported()) return;
   try {
     if (enabled) window.localStorage.setItem(STORAGE_KEY, 'true');
     else window.localStorage.removeItem(STORAGE_KEY);
@@ -168,6 +200,9 @@ export async function withTargetCorpus(
       providers: { ...(results?.providers ?? {}), target: payload },
     };
   } catch (error) {
+    // A failed load must not survive to the next reload, or every reload repeats
+    // it. Clearing the flag makes the failure terminal instead of a loop.
+    setTargetCorpusEnabled(false);
     // Fall back to the server's precomputed map rather than failing the search.
     console.warn(
       'Target corpus unavailable; falling back to server results:',

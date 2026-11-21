@@ -74,6 +74,8 @@ export function SearchModeToggle({ aiEnabled, onToggle }: SearchModeToggleProps)
     <button
       type="button"
       onClick={onToggle}
+      aria-label={aiEnabled ? 'AI search on. Turn off AI search' : 'Fast search. Turn on AI search'}
+      aria-pressed={aiEnabled}
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-all duration-200 ${
         aiEnabled
           ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800'
@@ -81,7 +83,9 @@ export function SearchModeToggle({ aiEnabled, onToggle }: SearchModeToggleProps)
       }`}
     >
       {aiEnabled ? <Brain size={14} /> : <Zap size={14} />}
-      <span>{aiEnabled ? 'AI search on' : 'Fast search'}</span>
+      {/* Text label costs ~90px, which on a phone squeezes the search field to
+          a sliver. Icon-only there; the aria-label keeps it announced. */}
+      <span className="hidden sm:inline">{aiEnabled ? 'AI search on' : 'Fast search'}</span>
     </button>
   );
 }

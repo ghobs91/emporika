@@ -2,10 +2,19 @@
 
 // ── Opt-in toggle for the local Target catalog ─────────────────────────
 //
-// The corpus is ~53MB gzipped. Downloading that without asking would be
-// indefensible, so it is behind an explicit, persisted choice. Once loaded, the
-// index lives in memory for the session and Target answers arbitrary queries
-// from the browser instead of the server's curated precomputed vocabulary.
+// The corpus is ~98MB on the wire and needs roughly 250MB resident once
+// indexed. Downloading or holding that would be indefensible on a phone, and on
+// iOS Safari it kills the tab — which reloads, re-reads the persisted flag, and
+// downloads again: a crash loop.
+//
+// Two independent guards stop that:
+//   • `isTargetCorpusEnabled()` returns false on unsupported devices, so no
+//     download can start even if the flag was set elsewhere on this origin.
+//   • this control is hidden below `lg` via CSS, so it is never offered there.
+//     CSS rather than state, so server and client markup stay identical.
+//
+// A failed load also clears the preference, so a reload cannot silently retry
+// the thing that just failed.
 
 import { useCallback, useEffect, useState } from 'react';
 import { DatabaseZap, Loader2 } from 'lucide-react';
@@ -21,16 +30,27 @@ export default function TargetCorpusToggle() {
   const [status, setStatus] = useState<Status>('off');
   const [error, setError] = useState<string | null>(null);
 
-  // Reflect an already-enabled session, and warm the index if it was on.
+  // Warm the index if the shopper already opted in. No synchronous setState:
+  // the first state change happens when the promise settles.
   useEffect(() => {
     if (!isTargetCorpusEnabled()) return;
-    setStatus('loading');
+
+    let cancelled = false;
     loadTargetCorpusIndex()
-      .then(() => setStatus('ready'))
+      .then(() => {
+        if (!cancelled) setStatus('ready');
+      })
       .catch((cause: unknown) => {
+        if (cancelled) return;
+        // Terminal, not retried on the next load.
+        setTargetCorpusEnabled(false);
         setError(cause instanceof Error ? cause.message : 'Could not load');
         setStatus('error');
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const toggle = useCallback(async () => {
@@ -40,6 +60,7 @@ export default function TargetCorpusToggle() {
       setError(null);
       return;
     }
+
     setTargetCorpusEnabled(true);
     setStatus('loading');
     setError(null);
@@ -47,7 +68,7 @@ export default function TargetCorpusToggle() {
       await loadTargetCorpusIndex();
       setStatus('ready');
     } catch (cause) {
-      // Leave the preference on so a retry is one click, but say what failed.
+      setTargetCorpusEnabled(false);
       setError(cause instanceof Error ? cause.message : 'Could not load');
       setStatus('error');
     }
@@ -63,7 +84,7 @@ export default function TargetCorpusToggle() {
           : 'Load full Target catalog (53MB)';
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="hidden flex-wrap items-center gap-2 lg:flex">
       <button
         type="button"
         onClick={toggle}
@@ -78,9 +99,7 @@ export default function TargetCorpusToggle() {
         {label}
       </button>
       {error && (
-        <span className="text-[11px] text-amber-700 dark:text-amber-400">
-          {error}
-        </span>
+        <span className="text-[11px] text-amber-700 dark:text-amber-400">{error}</span>
       )}
     </div>
   );
