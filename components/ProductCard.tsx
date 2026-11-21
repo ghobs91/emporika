@@ -57,7 +57,7 @@ export default function ProductCard({ product, rank, ranked, onClick }: ProductC
   const formatPrice = (price: number | null | undefined) =>
     typeof price === 'number' && Number.isFinite(price) ? `$${price.toFixed(2)}` : '—';
 
-  const discount = product.originalPrice && product.originalPrice > product.price
+  const discount = product.originalPrice && typeof product.price === 'number' && product.originalPrice > product.price
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
 
@@ -201,7 +201,7 @@ export default function ProductCard({ product, rank, ranked, onClick }: ProductC
 
         <div className="mt-0.5 flex items-baseline gap-2">
           <span className="text-[15px] font-semibold text-gray-900 dark:text-white">
-            {multipleStores && minPrice !== undefined && minPrice < product.price
+            {multipleStores && minPrice !== undefined && typeof product.price === 'number' && minPrice < product.price
               ? `from ${formatPrice(minPrice)}`
               : formatPrice(product.price)}
           </span>

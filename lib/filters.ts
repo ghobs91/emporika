@@ -63,10 +63,13 @@ export function matchesProductFilters(
   product: UnifiedProduct,
   filters: ProductFilters
 ): boolean {
-  if (filters.minPrice !== undefined && product.price < filters.minPrice) {
+  // A product with no published price cannot satisfy a price filter. Treating
+  // it as -Infinity/Infinity excludes it when a bound is active, which is the
+  // honest outcome: we cannot claim it is within budget.
+  if (filters.minPrice !== undefined && (product.price ?? -Infinity) < filters.minPrice) {
     return false;
   }
-  if (filters.maxPrice !== undefined && product.price >= filters.maxPrice) {
+  if (filters.maxPrice !== undefined && (product.price ?? Infinity) >= filters.maxPrice) {
     return false;
   }
   if (
@@ -77,7 +80,7 @@ export function matchesProductFilters(
   }
   if (
     filters.onSale &&
-    (!product.originalPrice || product.originalPrice <= product.price)
+    (!product.originalPrice || product.originalPrice <= (product.price ?? Infinity))
   ) {
     return false;
   }
@@ -145,6 +148,7 @@ export function getAvailablePriceBuckets(
 ): PriceBucket[] {
   return PRICE_BUCKETS.filter((bucket) =>
     products.some((product) => {
+      if (product.price === undefined) return false;
       if (product.price < bucket.min) return false;
       if (bucket.max === undefined) return true;
       return product.price < bucket.max;
@@ -158,7 +162,7 @@ export function getAvailablePriceBuckets(
 export function getFilterCounts(products: UnifiedProduct[]) {
   return {
     onSale: products.filter(
-      (p) => p.originalPrice && p.originalPrice > p.price
+      (p) => p.originalPrice && p.originalPrice > (p.price ?? Infinity)
     ).length,
     freeShipping: products.filter(
       (p) => p.freeShipping || p.shipping?.freeShipping

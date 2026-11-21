@@ -28,8 +28,10 @@ interface DealCardProps {
  */
 export default function DealCard({ product, className }: DealCardProps) {
   const { label: sourceLabel, favicon: sourceFavicon } = getRetailerInfo(product.source);
+  // Target publishes no price, so `price` is optional; without one there is no
+  // saving to compute.
   const savings =
-    product.originalPrice && product.originalPrice > product.price
+    product.originalPrice && typeof product.price === 'number' && product.originalPrice > product.price
       ? product.originalPrice - product.price
       : 0;
 
@@ -127,7 +129,7 @@ export default function DealCard({ product, className }: DealCardProps) {
         {/* Price */}
         <div className="mt-auto pt-2 flex items-baseline gap-2">
           <span className="text-xl font-bold text-gray-900 dark:text-white">
-            ${product.price.toFixed(2)}
+            {typeof product.price === 'number' ? `$${product.price.toFixed(2)}` : '—'}
           </span>
           {savings > 0 && product.originalPrice && (
             <span className="text-sm text-gray-400 dark:text-gray-500 line-through">

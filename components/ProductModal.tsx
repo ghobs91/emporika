@@ -81,7 +81,8 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
 
   if (!isOpen) return null;
 
-  const formatPrice = (price: number) => {
+  const formatPrice = (price: number | undefined) => {
+    if (typeof price !== 'number' || !Number.isFinite(price)) return '—';
     return `$${price.toFixed(2)}`;
   };
 
@@ -127,7 +128,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
   const descriptionData = product.shortDescription ? formatDescription(product.shortDescription) : null;
   const isSpecsList = Array.isArray(descriptionData);
 
-  const discount = product.originalPrice && product.originalPrice > product.price
+  const discount = product.originalPrice && typeof product.price === 'number' && product.originalPrice > product.price
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
 
@@ -152,6 +153,13 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
   const isShopify = product.source === 'shopify';
 
   const handleAddToCart = async () => {
+    const unitPrice = product.price;
+    if (unitPrice === undefined) {
+      // A cart line needs a price. Target's catalog enumeration has none, so
+      // refuse rather than putting a fabricated $0 item in the cart.
+      console.warn('Add to Cart: product has no published price', { id: product.id });
+      return;
+    }
     if (!product.variantId || !product.sellerDomain) {
       // Fall back to cart permalink if we don't have Cart MCP data
       console.warn('Add to Cart: missing Cart MCP data, opening merchant page', {
@@ -194,7 +202,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
           shopDomain: product.sellerDomain!,
           merchantName,
           title: product.name,
-          price: product.price,
+          price: unitPrice,
           image: product.image,
           quantity: 1,
           currency: data.cart?.currency || 'USD',
@@ -241,6 +249,10 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
    * checkout time.
    */
   const handleAddLocalToCart = () => {
+    if (product.price === undefined) {
+      console.warn('Add to Cart: product has no published price', { id: product.id });
+      return;
+    }
     const retailer = getRetailerInfo(product.source);
     addItem({
       productId: product.id,
@@ -372,7 +384,7 @@ export default function ProductModal({ product, isOpen, onClose }: ProductModalP
               </div>
               {discount > 0 && (
                 <p className="text-sm text-green-600 dark:text-green-400 mt-1">
-                  You save {formatPrice((product.originalPrice || 0) - product.price)} ({discount}%)
+                  You save {formatPrice((product.originalPrice ?? 0) - (product.price ?? 0))} ({discount}%)
                 </p>
               )}
             </div>

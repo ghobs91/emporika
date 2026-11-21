@@ -132,7 +132,7 @@ export default function SearchFilters({
   const priceBounds = useMemo(() => {
     const prices = products
       .map((product) => product.price)
-      .filter((price) => Number.isFinite(price) && price > 0);
+      .filter((price): price is number => typeof price === 'number' && Number.isFinite(price) && price > 0);
     if (prices.length === 0) return null;
     const min = Math.floor(Math.min(...prices));
     const max = Math.ceil(Math.max(...prices));

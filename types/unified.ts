@@ -31,7 +31,13 @@ export interface ShippingInfo {
 export interface UnifiedProduct {
   id: string;
   name: string;
-  price: number;
+  /**
+   * Price in dollars, when the retailer publishes one. Optional because
+   * Target's catalog enumeration carries no price at all (redsky.target.com is
+   * PerimeterX-blocked and the storefront HTML omits it); a fabricated 0 would
+   * render as a free product.
+   */
+  price?: number;
   originalPrice?: number;
   image: string;
   productUrl: string;
