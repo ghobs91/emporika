@@ -57,9 +57,9 @@ next-env.d.ts
 # Transformers.js model cache used by scripts/bench-embedding-models.ts
 /.cache/
 
-# generated Target corpus (~93MB, rebuilt weekly by .github/workflows/update-target-index.yml)
-# served at runtime, never committed: committing it would add 93MB to history per refresh
-/public/data/target-corpus.bin
+# The Target corpus is tracked by Git LFS instead of being ignored — see
+# .gitattributes. A plain commit would add ~93MB of binary to history per
+# refresh; LFS stores it out of band and the CI job fetches it.
 
 # local agent tool state
 /.serena/
