@@ -13,7 +13,9 @@ import type { RetailerSource, UnifiedProduct } from '@/types/unified';
  */
 export function rankedProductToUnified(ranked: RankedProduct): UnifiedProduct {
   const best = ranked.bestOffer?.offer;
-  const price = best?.price?.amount ?? 0;
+  // Do NOT default to 0: a price-less offer (Target's catalog has no prices at
+  // all) would render as a free product. Undefined renders as an em dash.
+  const price = best?.price?.amount;
   const listPrice = best?.listPrice?.amount;
   const shippingCost = best?.fulfillment?.shippingCost?.amount;
   const availability = best?.availability;
@@ -28,7 +30,9 @@ export function rankedProductToUnified(ranked: RankedProduct): UnifiedProduct {
     name: ranked.product.title,
     price,
     originalPrice:
-      listPrice !== undefined && listPrice > price ? listPrice : undefined,
+      listPrice !== undefined && price !== undefined && listPrice > price
+        ? listPrice
+        : undefined,
     image: ranked.product.imageUrls?.[0] ?? best?.imageUrls?.[0] ?? '',
     productUrl: best?.productUrl ?? '#',
     source: (best?.providerId ?? 'shopify') as RetailerSource,

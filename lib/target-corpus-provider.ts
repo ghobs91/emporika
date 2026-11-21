@@ -24,6 +24,16 @@ const STORAGE_KEY = 'emporika.target-corpus.enabled';
 /** Default hit count per query; the server caps provider results anyway. */
 const DEFAULT_HITS = 24;
 
+/**
+ * How many results to enrich with images/ratings per search.
+ *
+ * Each enrichment is one request to our own `/api/target/product`, which is
+ * CDN- and process-cached. Eight covers the first visible row without turning a
+ * search into a fan-out; the rest keep their generated titles and placeholder.
+ */
+const ENRICH_LIMIT = 8;
+const ENRICH_CONCURRENCY = 4;
+
 /** True when the shopper has opted into the local Target catalog. */
 export function isTargetCorpusEnabled(): boolean {
   if (typeof window === 'undefined') return false;
@@ -72,6 +82,8 @@ export async function getTargetCorpusResult(
     availability: 'unknown' as const,
   }));
 
+  await enrichProducts(products);
+
   return {
     providerId: 'target',
     query,
@@ -80,6 +92,56 @@ export async function getTargetCorpusResult(
       ? { warnings: ['The local Target catalog has no match for these terms.'] }
       : {}),
   };
+}
+
+/**
+ * Fill in images, real titles and ratings from the PDP.
+ *
+ * The corpus only has what the sitemap publishes (a slug-derived title), so
+ * cards would otherwise show placeholders. Price is absent from the PDP shell
+ * entirely — the module ships empty and hydrates through the blocked API — so it
+ * is never faked here.
+ *
+ * Best-effort by design: a failed lookup leaves the generated title and the
+ * placeholder. Skipped outside a browser so tests and SSR do no network I/O.
+ */
+async function enrichProducts(
+  products: BrowserProviderPayload['products']
+): Promise<void> {
+  if (typeof window === 'undefined' || typeof window.fetch !== 'function') return;
+
+  const targets = products.slice(0, ENRICH_LIMIT);
+  if (targets.length === 0) return;
+
+  let cursor = 0;
+  const worker = async (): Promise<void> => {
+    while (cursor < targets.length) {
+      const item = targets[cursor++];
+      const tcin = item.providerProductId.replace(/^target-/, '');
+      try {
+        const response = await window.fetch(
+          `/api/target/product?tcin=${encodeURIComponent(tcin)}`
+        );
+        if (!response.ok) continue;
+        const details = (await response.json()) as {
+          title?: string;
+          imageUrls?: string[];
+          rating?: number;
+          reviewCount?: number;
+        };
+        if (details.title) item.title = details.title;
+        if (details.imageUrls?.length) item.imageUrls = details.imageUrls;
+        if (typeof details.rating === 'number') item.rating = details.rating;
+        if (typeof details.reviewCount === 'number') item.reviewCount = details.reviewCount;
+      } catch {
+        // Placeholder is the correct fallback; never fail a search over it.
+      }
+    }
+  };
+
+  await Promise.all(
+    Array.from({ length: Math.min(ENRICH_CONCURRENCY, targets.length) }, worker)
+  );
 }
 
 /**
