@@ -41,12 +41,16 @@ export const BROWSER_ONLY_PROVIDER_IDS = [
 export type BrowserOnlyProviderId = (typeof BROWSER_ONLY_PROVIDER_IDS)[number];
 
 /**
- * Providers that DO have a server adapter, but whose retailer currently rejects
- * server requests at the edge. The browser is the preferred path; the server
- * adapter is retained as a fallback and for the deals/explore feeds.
+ * Providers whose retailer rejects server requests at the edge, so the browser
+ * is the only working path.
+ *
+ * Target used to be here. It is not any more: its Redsky API is PerimeterX
+ * blocked, but the catalog is now built offline from Target's own sitemap
+ * (`lib/target-index.ts`), so the server CAN answer and routing it to the
+ * browser first made it report "install the extension" while a working backend
+ * sat unused. Costco remains: Kasada has no equivalent published surface.
  */
 export const BROWSER_FIRST_PROVIDER_IDS = [
-  'target',
   'costco',
 ] as const satisfies readonly BrowserProviderId[];
 

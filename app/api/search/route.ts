@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { walmartAPI } from '@/lib/walmart';
 import { bestBuyAPI } from '@/lib/bestbuy';
-import { targetAPI } from '@/lib/target';
 import { ebayAPI } from '@/lib/ebay';
 import { costcoAPI } from '@/lib/costco';
 import { searchShopifyProducts, convertShopifyToUnified } from '@/lib/shopify';
@@ -10,7 +9,6 @@ import {
   UnifiedSearchResponse, 
   normalizeWalmartProduct, 
   normalizeBestBuyProduct, 
-  normalizeTargetProduct,
   normalizeEbayProduct,
   normalizeCostcoProduct,
   UnifiedProduct,
@@ -19,6 +17,8 @@ import {
 import { searchRequestSchema } from '@/search/schemas';
 import { withoutDisabledProviders } from '@/search/providers/availability';
 import { executeSearch, executeSearchStream } from '@/search/orchestrator';
+import { getProvider } from '@/search/providers/adapter';
+import type { ProviderSearchResult } from '@/search/types';
 
 const VALID_SORT_VALUES = ['relevance', 'price', 'title', 'bestseller', 'customerRating', 'new'] as const;
 const VALID_ORDER_VALUES = ['ascending', 'descending'] as const;
@@ -190,12 +190,15 @@ export async function GET(request: NextRequest) {
       : Promise.resolve(null);
     fetchers.push(bestBuyPromise);
 
+    // Target is served from our own catalog index, never from Redsky:
+    // redsky.target.com answers every server request with a PerimeterX 435 (see
+    // lib/target-catalog.ts). Going through the adapter also means a missing
+    // backend reports `index_unavailable` instead of surfacing that raw 435.
     const targetPromise = sources.includes('target')
-      ? targetAPI.searchProducts({ 
-          query, 
-          count: itemsPerSource,
-          store_id: targetStoreId || undefined,
-          zip: targetZip || undefined,
+      ? getProvider('target').search({
+          requestId: `legacy-${query}-target`,
+          query,
+          resultLimit: itemsPerSource,
         })
       : Promise.resolve(null);
     fetchers.push(targetPromise);
@@ -263,16 +266,32 @@ export async function GET(request: NextRequest) {
 
     // Process Target results
     if (sources.includes('target')) {
-      const result = targetResult as PromiseSettledResult<Awaited<ReturnType<typeof targetAPI.searchProducts>>>;
+      const result = targetResult as PromiseSettledResult<ProviderSearchResult | null>;
       if (result.status === 'fulfilled' && result.value) {
-        const products = result.value.data?.search?.products?.map((product, index) => 
-          normalizeTargetProduct(product, index)
-        ) || [];
+        const value = result.value;
+        const products: UnifiedProduct[] = value.products.map((candidate) => ({
+          id: candidate.providerProductId,
+          name: candidate.title,
+          // Target's published catalog carries no price. Absent rather than 0,
+          // so ProductCard renders "—" instead of a fabricated $0.00.
+          price: candidate.price?.amount,
+          image: candidate.imageUrls?.[0] ?? '',
+          productUrl: candidate.productUrl ?? '',
+          source: 'target',
+        }));
         unifiedProducts.push(...products);
-        sources_.target = { count: products.length };
+        if (value.unavailable) {
+          sources_.target = { count: 0, error: value.unavailable.detail };
+        } else if (products.length === 0 && value.warnings.length > 0) {
+          // e.g. a precomputed-vocabulary coverage gap: say so instead of
+          // letting "no results" imply Target has no matching products.
+          sources_.target = { count: 0, error: value.warnings[0] };
+        } else {
+          sources_.target = { count: products.length };
+        }
       } else {
-        console.error('Target API error:', result.status === 'rejected' ? result.reason : 'null result');
-        sources_.target = { count: 0, error: result.status === 'rejected' ? result.reason?.message : 'Failed to fetch from Target' };
+        console.error('Target search error:', result.status === 'rejected' ? result.reason : 'null result');
+        sources_.target = { count: 0, error: result.status === 'rejected' ? result.reason?.message : 'Failed to search Target' };
       }
     }
 

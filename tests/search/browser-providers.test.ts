@@ -55,27 +55,38 @@ describe('browser provider identity', () => {
     expect(isBrowserProvider('walmart')).toBe(false);
   });
 
-  // Target and Costco keep server adapters (for /api/deals and /api/explore),
-  // so "browser-collected" is not the same as "has no server adapter".
-  it('separates browser-only providers from browser-first ones', () => {
+  // Three distinct routing states now:
+  //   only   — no server adapter at all (Back Market)
+  //   first  — the retailer's edge blocks servers and nothing else works (Costco)
+  //   server — the extension can collect it, but the server can answer too
+  //            (Target, since its catalog is built from its own sitemap)
+  it('separates browser-only from browser-first from server-capable', () => {
     expect(isBrowserOnlyProvider('backmarket')).toBe(true);
     expect(isBrowserOnlyProvider('target')).toBe(false);
     expect(isBrowserOnlyProvider('costco')).toBe(false);
 
-    expect(isBrowserFirstProvider('target')).toBe(true);
+    // Costco is Kasada-blocked with no published equivalent, so the browser is
+    // the only working path.
     expect(isBrowserFirstProvider('costco')).toBe(true);
+
+    // Target used to be here. Routing it browser-first meant a request with a
+    // non-empty extension payload short-circuited to "install the extension"
+    // while a working server backend sat unused.
+    expect(isBrowserFirstProvider('target')).toBe(false);
     expect(isBrowserFirstProvider('backmarket')).toBe(false);
     expect(isBrowserFirstProvider('walmart')).toBe(false);
   });
 
-  it('classifies every browser provider exactly once', () => {
+  it('classifies every browser provider into exactly one routing bucket', () => {
+    const buckets: Record<string, 'only' | 'first' | 'server'> = {};
     for (const id of BROWSER_PROVIDER_IDS) {
       const only = isBrowserOnlyProvider(id);
       const first = isBrowserFirstProvider(id);
-      // Exactly one bucket — an unclassified provider would silently never be
-      // routed, and a double-classified one would be routed twice.
-      expect(only !== first).toBe(true);
+      // Never double-classified: that would route the same provider twice.
+      expect(only && first).toBe(false);
+      buckets[id] = only ? 'only' : first ? 'first' : 'server';
     }
+    expect(buckets).toEqual({ backmarket: 'only', costco: 'first', target: 'server' });
   });
 });
 
