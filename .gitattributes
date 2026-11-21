@@ -1,3 +1,0 @@
-
-# Large generated artefacts served as static assets
-public/data/target-corpus.bin filter=lfs diff=lfs merge=lfs -text binary

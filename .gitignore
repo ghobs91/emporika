@@ -57,9 +57,11 @@ next-env.d.ts
 # Transformers.js model cache used by scripts/bench-embedding-models.ts
 /.cache/
 
-# The Target corpus is tracked by Git LFS instead of being ignored — see
-# .gitattributes. A plain commit would add ~93MB of binary to history per
-# refresh; LFS stores it out of band and the CI job fetches it.
+# generated Target corpus (~93MB) — published as a GitHub release asset and
+# fetched at build time by scripts/fetch-target-corpus.mjs.
+# Not committed and not LFS-tracked: every weekly refresh would otherwise add a
+# new ~93MB version to storage, growing without bound.
+/public/data/target-corpus.bin
 
 # local agent tool state
 /.serena/
