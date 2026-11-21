@@ -1,0 +1,120 @@
+name: Update Target catalog index
+
+# Rebuilds the Target catalog artifacts and commits the runtime one.
+#
+# This is the whole Option A serving story: the search runs HERE, on a runner
+# with a real filesystem, and production only reads the small committed
+# artifact. No paid services, no database, no hosted search product — the
+# workflow needs nothing beyond the default GITHUB_TOKEN.
+#
+# What runs, and what it costs:
+#   1. target-sitemap.ts   ETag-diffs ~106 shards via HEAD, downloads only the
+#                          ones that changed (a few MB in steady state; ~900MB
+#                          only on a cold or fully-rotated run).
+#   2. target-index-build.ts  rebuilds the SQLite FTS5 index (~20s).
+#   3. target-precompute.ts   regenerates data/target-precomputed.json (~2MB).
+#
+# The SQLite index and the shard files are NOT committed — they are build
+# intermediates, ~1.6GB. Only the ~2MB artifact is.
+on:
+  schedule:
+    # Tuesdays 07:23 UTC — off the hour, and a day after the trend refresh so a
+    # single failure window does not take out both scheduled jobs.
+    - cron: '23 7 * * 2'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: Why this manual run (recorded in the commit message)
+        required: false
+        default: manual refresh
+      full:
+        description: Refetch every shard instead of only the changed ones
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-target-index
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22' # node:sqlite requires >= 22.5
+          cache: npm
+
+      - run: npm ci
+
+      - name: Restore shard artifacts
+        # Shards are ~750MB and change often, so they live in the Actions cache
+        # rather than git. A miss just means a slower run, never a broken one.
+        uses: actions/cache@v4
+        with:
+          path: |
+            data/target-index/shards
+            data/target-index/manifest.json
+          key: target-shards-${{ github.run_id }}
+          restore-keys: |
+            target-shards-
+
+      - name: Download changed shards
+        run: |
+          if [ "${{ github.event.inputs.full }}" = "true" ]; then
+            npx tsx scripts/target-sitemap.ts --all --full
+          else
+            npx tsx scripts/target-sitemap.ts --all
+          fi
+
+      - name: Build the SQLite catalog index
+        run: npx tsx scripts/target-index-build.ts
+
+      - name: Regenerate the precomputed artifact
+        run: npx tsx scripts/target-precompute.ts
+
+      - name: Fail if the artifact is missing or degraded
+        run: |
+          test -s data/target-precomputed.json
+          node -e "
+            const a = require('./data/target-precomputed.json');
+            const queries = Object.keys(a.queries || {});
+            const hits = queries.reduce((n, q) => n + a.queries[q].length, 0);
+            const covered = queries.filter((q) => a.queries[q].length > 0).length;
+            const rate = queries.length ? covered / queries.length : 0;
+            if (a.version !== 1 || queries.length < 1000 || hits < 10000) {
+              console.error('Artifact too small:', queries.length, 'queries,', hits, 'hits');
+              process.exit(1);
+            }
+            // A sharp coverage collapse means the sitemap moved or a brand
+            // disappeared from it — better to fail loudly than to ship a
+            // quietly empty retailer.
+            if (rate < 0.3) {
+              console.error('Coverage collapsed to', (rate * 100).toFixed(1) + '%');
+              process.exit(1);
+            }
+            console.log(
+              queries.length, 'queries,', hits, 'hits,',
+              (rate * 100).toFixed(1) + '% covered,',
+              'generated', a.generatedAt
+            );
+          "
+
+      - name: Commit the artifact
+        run: |
+          git config user.name 'emporika-target-bot'
+          git config user.email 'target-bot@users.noreply.github.com'
+          if git diff --quiet -- data/target-precomputed.json; then
+            echo 'No Target catalog changes this week.'
+            exit 0
+          fi
+          git add data/target-precomputed.json
+          git commit -m "chore(target): refresh precomputed catalog index (${{ github.event.inputs.reason || 'scheduled' }})"
+          git push
