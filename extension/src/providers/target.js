@@ -122,6 +122,8 @@ async function discoverStore({ signal } = {}) {
   try {
     // Page-context, like the search fetch: the service worker's direct fetch
     // of the storefront was challenged when this provider was first built.
+    // Same-origin from the target.com page, and `Accept` is CORS-safelisted, so
+    // no preflight is triggered.
     const viaPage = await fetchInPageContext({
       pageUrl: STOREFRONT,
       url: STOREFRONT,
@@ -189,9 +191,14 @@ export async function raw(query, { limit = 24, offset = 0, storeId, zip, signal 
     pageUrl: STOREFRONT,
     url: `${API_BASE}?${params.toString()}`,
     headers: {
+      // Only CORS-safelisted headers. `x-requested-with` is NOT safelisted, so
+      // including it forced a preflight that redsky.target.com does not answer
+      // and the request died as "Failed to fetch" before PerimeterX was ever
+      // reached. Measured from a real target.com page:
+      //   Accept + Accept-Language  -> 435 with a 415-byte JSON body (reachable)
+      //   + x-requested-with        -> TypeError: Failed to fetch
       Accept: 'application/json',
       'Accept-Language': 'en-US,en;q=0.9',
-      'x-requested-with': 'XMLHttpRequest',
     },
   });
 
@@ -331,15 +338,19 @@ export async function capture(query) {
     productCount: Array.isArray(json?.data?.search?.products)
       ? json.data.search.products.length
       : 0,
-    // 435 is PerimeterX; 0 bytes with a 200 is a redirect to a challenge route.
+    // 435 is PerimeterX; status 0 means no response at all, which is a different
+    // failure (page context failed, or a CORS preflight the host does not
+    // answer) and must not be reported as a challenge.
     verdict:
       status === 200 && json
         ? 'ok'
-        : status === 435
-          ? 'perimeterx-challenge'
-          : status === 403
-            ? 'forbidden'
-            : 'unexpected',
+        : status === 0
+          ? 'no-response'
+          : status === 435
+            ? 'perimeterx-challenge'
+            : status === 403
+              ? 'forbidden'
+              : 'unexpected',
     bodySample: text.slice(0, 600),
   };
 }
