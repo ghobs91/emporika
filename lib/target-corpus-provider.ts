@@ -57,11 +57,12 @@ const DEFAULT_HITS = 24;
  * How many results to enrich with images/ratings per search.
  *
  * Each enrichment is one request to our own `/api/target/product`, which is
- * CDN- and process-cached. Eight covers the first visible row without turning a
- * search into a fan-out; the rest keep their generated titles and placeholder.
+ * CDN- and process-cached per tcin. Eight left most of a full grid on
+ * placeholders, so this covers a whole page; the cost is paid once per product
+ * ever, not once per search.
  */
-const ENRICH_LIMIT = 8;
-const ENRICH_CONCURRENCY = 4;
+const ENRICH_LIMIT = 24;
+const ENRICH_CONCURRENCY = 8;
 
 /** True when the shopper has opted into the local Target catalog. */
 export function isTargetCorpusEnabled(): boolean {

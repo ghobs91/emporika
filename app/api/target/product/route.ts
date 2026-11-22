@@ -17,6 +17,16 @@ import { parseTargetProductDetails, type TargetProductDetails } from '@/lib/targ
 
 export const runtime = 'nodejs';
 
+/**
+ * MUST stay dynamic.
+ *
+ * Next prerenders GET route handlers at build time by default, which froze this
+ * endpoint to a single build-time response: every `?tcin=` returned the same
+ * product (verified on the deployed site — eight different tcins, one body). The
+ * card then showed one image across the whole grid.
+ */
+export const dynamic = 'force-dynamic';
+
 const REQUEST_TIMEOUT_MS = 8000;
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const MAX_CACHE_ENTRIES = 5000;
