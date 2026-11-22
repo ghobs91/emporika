@@ -50,6 +50,28 @@ export function isTargetCorpusSupported(): boolean {
   return true;
 }
 
+/**
+ * Start the corpus download in the background on devices that can hold it.
+ *
+ * Automatic, because requiring a toggle meant most searches silently used the
+ * curated precomputed vocabulary and missed perfectly ordinary queries. The
+ * device guard is NOT removed: on a phone the index blew past iOS Safari's
+ * per-tab budget and caused a reload loop, so those devices keep the server
+ * path. A failed download clears the flag, so a reload cannot retry forever.
+ */
+export function warmTargetCorpus(): void {
+  if (!isTargetCorpusSupported()) return;
+  setTargetCorpusEnabled(true);
+  // Fire and forget — the page must render while ~98MB downloads.
+  void loadTargetCorpusIndex().catch((error: unknown) => {
+    setTargetCorpusEnabled(false);
+    console.warn(
+      'Target corpus download failed; using server results:',
+      error instanceof Error ? error.message : error
+    );
+  });
+}
+
 /** Default hit count per query; the server caps provider results anyway. */
 const DEFAULT_HITS = 24;
 

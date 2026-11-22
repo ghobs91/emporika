@@ -366,14 +366,8 @@ export function useIntelligentSearch() {
     }
   }, [client, runBatched, runStreamed]);
 
-  /** Toggle AI-assisted search mode. */
-  const toggleAiMode = useCallback(() => {
-    setState(s => ({ ...s, aiEnabled: !s.aiEnabled }));
-  }, []);
-
   return {
     state,
     search,
-    toggleAiMode,
   };
 }

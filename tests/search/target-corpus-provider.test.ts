@@ -10,6 +10,7 @@ vi.mock('@/lib/target-corpus-client', () => ({
 
 import {
   getTargetCorpusResult,
+  warmTargetCorpus,
   isTargetCorpusEnabled,
   isTargetCorpusSupported,
   setTargetCorpusEnabled,
@@ -197,5 +198,37 @@ describe('device support gate', () => {
     store.clear();
     withViewport(false);
     expect(isTargetCorpusSupported()).toBe(true);
+  });
+});
+
+describe('automatic corpus warm', () => {
+  const store = new Map<string, string>();
+
+  it('does nothing on unsupported devices, leaving no persisted flag', () => {
+    store.clear();
+    (globalThis as unknown as { window: unknown }).window = {
+      localStorage: {
+        getItem: (k: string) => store.get(k) ?? null,
+        setItem: (k: string, v: string) => void store.set(k, v),
+        removeItem: (k: string) => void store.delete(k),
+      },
+      matchMedia: () => ({ matches: true, media: '' }),
+    };
+    warmTargetCorpus();
+    expect(store.size).toBe(0);
+  });
+
+  it('enables and starts the download on a supported device', () => {
+    store.clear();
+    (globalThis as unknown as { window: unknown }).window = {
+      localStorage: {
+        getItem: (k: string) => store.get(k) ?? null,
+        setItem: (k: string, v: string) => void store.set(k, v),
+        removeItem: (k: string) => void store.delete(k),
+      },
+      matchMedia: () => ({ matches: false, media: '' }),
+    };
+    warmTargetCorpus();
+    expect(store.get('emporika.target-corpus.enabled')).toBe('true');
   });
 });

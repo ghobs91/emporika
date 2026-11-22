@@ -8,7 +8,6 @@ import ProductGrid, { RESULTS_GRID_CLASS } from '@/components/ProductGrid';
 import ProductCard from '@/components/ProductCard';
 import ProductModal from '@/components/ProductModal';
 import ProviderStatusBar from '@/components/ProviderStatusBar';
-import TargetCorpusToggle from '@/components/TargetCorpusToggle';
 import TrendingFeed from '@/components/TrendingFeed';
 import ThemeToggle from '@/components/ThemeToggle';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
@@ -30,7 +29,7 @@ import {
 } from '@/lib/search-url';
 import { rankedProductToUnified } from '@/lib/ranked-products';
 import { useIntelligentSearch } from '@/hooks/useIntelligentSearch';
-import { SearchModeToggle } from '@/components/WebLLMStatus';
+import { warmTargetCorpus } from '@/lib/target-corpus-provider';
 import SortSelect, { SortOption } from '@/components/SortSelect';
 import Pagination from '@/components/Pagination';
 import ClarificationPrompt from '@/components/ClarificationPrompt';
@@ -79,9 +78,15 @@ export default function EmporikaApp() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [providerStatus, setProviderStatus] = useState<ProviderStatus[]>([]);
+  // The Target catalog is fetched once in the background, automatically. The
+  // provider keeps its device guard, so phones never download ~98MB into a tab
+  // that iOS would kill (that was the reload loop).
+  useEffect(() => {
+    warmTargetCorpus();
+  }, []);
   const [selectedProduct, setSelectedProduct] = useState<UnifiedProduct | null>(null);
   const { storeInfo } = useTargetStore();
-  const { state: aiState, search: aiSearch, toggleAiMode } = useIntelligentSearch();
+  const { state: aiState, search: aiSearch } = useIntelligentSearch();
 
   // Detect if search query is shoe-related
   const isShoeSearch = searchQuery.toLowerCase().match(/\b(shoe|shoes|sneaker|sneakers|boot|boots|sandal|sandals|slipper|slippers|heel|heels|loafer|loafers|oxford|oxfords|moccasin|moccasins|clog|clogs)\b/);
@@ -474,7 +479,6 @@ export default function EmporikaApp() {
             </div>
             
             <div className="flex items-center gap-1">
-              <SearchModeToggle aiEnabled={aiState.aiEnabled} onToggle={toggleAiMode} />
               <ThemeToggle />
             </div>
           </div>
@@ -502,7 +506,6 @@ export default function EmporikaApp() {
             </div>
 
             <div className="flex items-center gap-1 shrink-0">
-              <SearchModeToggle aiEnabled={aiState.aiEnabled} onToggle={toggleAiMode} />
               <ThemeToggle />
             </div>
           </div>
@@ -663,9 +666,6 @@ export default function EmporikaApp() {
 
               {/* Per-retailer status — makes silent degradation visible */}
               <ProviderStatusBar statuses={providerStatus} streaming={aiState.streaming} />
-
-              {/* Opt-in: the full Target catalog, indexed in this browser */}
-              <TargetCorpusToggle />
 
               {/* AI mode: show ranked intelligent results; otherwise classic grid */}
               {aiState.aiEnabled && aiState.response?.results && aiState.response.results.length > 0 ? (
