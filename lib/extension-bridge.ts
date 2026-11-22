@@ -26,7 +26,14 @@ const EXTENSION_SOURCE = 'emporika-extension';
  * own target.com session — so this has to cover two sequential requests on that
  * provider. Retailers are throttled per host server-side.
  */
-const SEARCH_TIMEOUT_MS = 6000;
+/**
+ * Generous because Target does two sequential page-context operations:
+ * store discovery from __TGT_DATA__, then the Redsky search. Each has to
+ * acquire a target.com page and wait for its scripts. At 6s the whole provider
+ * silently timed out before it could answer, so Target never contributed
+ * prices. The cost is only paid when the extension is present but slow.
+ */
+const SEARCH_TIMEOUT_MS = 15000;
 
 interface ExtensionReadyInfo {
   version: string;
