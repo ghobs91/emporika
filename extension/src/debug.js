@@ -10,10 +10,9 @@
 
 import * as backmarket from './providers/backmarket.js';
 import * as costco from './providers/costco.js';
-// Target is not registered — see search/providers/availability.ts.
-// `providers/target.js` is kept for the future navigation-based collector.
+import * as target from './providers/target.js';
 
-const PROVIDERS = { backmarket, costco };
+const PROVIDERS = { backmarket, costco, target };
 
 const output = document.getElementById('output');
 const queryInput = document.getElementById('query');
@@ -90,8 +89,12 @@ async function saveRaw(providerId) {
   }
 
   try {
-    const { status, finalUrl, html } = await provider.raw(currentQuery());
-    const url = URL.createObjectURL(new Blob([html], { type: 'text/plain' }));
+    // Target returns `text` (it may be a JSON body or a challenge page), the
+    // others return `html`. Accept either.
+    const result = await provider.raw(currentQuery());
+    const body = result.html ?? result.text ?? '';
+    const { status, finalUrl } = result;
+    const url = URL.createObjectURL(new Blob([body], { type: 'text/plain' }));
     const anchor = document.createElement('a');
     anchor.href = url;
     anchor.download = `${providerId}-${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
@@ -100,7 +103,7 @@ async function saveRaw(providerId) {
     anchor.remove();
     setTimeout(() => URL.revokeObjectURL(url), 5000);
 
-    show(`${providerId} · saved ${html.length} bytes (HTTP ${status})`, finalUrl);
+    show(`${providerId} · saved ${body.length} bytes (HTTP ${status})`, finalUrl);
   } catch (error) {
     show(`${providerId} · save failed`, String(error));
   }
