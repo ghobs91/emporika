@@ -152,8 +152,10 @@ async function enrichProducts(
       const item = targets[cursor++];
       const tcin = item.providerProductId.replace(/^target-/, '');
       try {
+        // Path segment, not a query parameter: the CDN keys by path, so a
+        // query-parameter URL made every product share one cache entry.
         const response = await window.fetch(
-          `/api/target/product?tcin=${encodeURIComponent(tcin)}`
+          `/api/target/product/${encodeURIComponent(tcin)}`
         );
         if (!response.ok) continue;
         const details = (await response.json()) as {

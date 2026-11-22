@@ -4,6 +4,12 @@ import { parseTargetProductDetails, type TargetProductDetails } from '@/lib/targ
 /**
  * Per-product Target metadata (images, title, description, rating).
  *
+ * The tcin is a PATH SEGMENT, not a query parameter, on purpose: the CDN in front
+ * of this app keys cache entries by path and ignored `?tcin=`, so every product
+ * received whichever body was cached first (verified in production — three
+ * tcins, one product). A distinct path gives each product its own cache entry,
+ * which is what makes caching here correct rather than catastrophic.
+ *
  * Why a server hop: the PDP shell carries this in `<meta>` tags and an embedded
  * module blob, but it does NOT carry a price — the price module ships empty and
  * is hydrated through the PerimeterX-blocked API. So this endpoint enriches the
@@ -78,8 +84,12 @@ async function fetchDetails(tcin: string): Promise<TargetProductDetails | null> 
   }
 }
 
-export async function GET(request: NextRequest): Promise<NextResponse> {
-  const tcin = request.nextUrl.searchParams.get('tcin')?.trim() ?? '';
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ tcin: string }> }
+): Promise<NextResponse> {
+  const { tcin: raw } = await params;
+  const tcin = (raw ?? '').trim();
   if (!/^\d{1,20}$/.test(tcin)) {
     return NextResponse.json({ error: 'A numeric tcin is required' }, { status: 400 });
   }
