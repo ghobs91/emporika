@@ -125,7 +125,14 @@ const ALLOWED_WEB_ORIGINS = new Set([
 function isTrusted(sender) {
   if (sender.id !== chrome.runtime.id) return false;
   const origin = sender.origin ?? (sender.url ? new URL(sender.url).origin : null);
-  return origin !== null && ALLOWED_WEB_ORIGINS.has(origin);
+  if (origin === null) return false;
+
+  // The extension's own documents (the provider harness) are trusted: they run
+  // with extension privileges already, so the web-origin allowlist exists to
+  // gate *pages*, not to lock out our own debug UI.
+  if (origin === chrome.runtime.getURL('').replace(/\/$/, '')) return true;
+
+  return ALLOWED_WEB_ORIGINS.has(origin);
 }
 
 // ── Search ────────────────────────────────────────────────────────────
@@ -180,6 +187,43 @@ async function runSearch(message) {
 
 // ── Message router ────────────────────────────────────────────────────
 
+// ── Target live capture ───────────────────────────────────────────────
+//
+// A visible tab is opened at Target's own search URL so Target's client performs
+// the search. `target-live-hook.js` (main world) records the plp_search_v2
+// response, `target-live-relay.js` forwards it here, and this resolves the
+// pending collector. We never request Redsky ourselves: every request we
+// originate is challenged (435), while the page's own is not.
+
+/** Collectors waiting for a capture, keyed by tab id. */
+const liveWaiters = new Map();
+
+/** Target needs to load, run its sensor, and finish the search. */
+const LIVE_TIMEOUT_MS = 25000;
+
+function onTargetCaptured(sender, message) {
+  const tabId = sender?.tab?.id;
+  if (typeof tabId !== 'number') return;
+
+  const waiter = liveWaiters.get(tabId);
+  if (!waiter) return; // A user's own browsing tab; nothing is waiting on it.
+
+  // Target's client issues several Redsky calls on a search page
+  // (recommendations, ads). Only the one matching the requested keyword is the
+  // search we asked for.
+  try {
+    const keyword = new URL(message.url).searchParams.get('keyword') ?? '';
+    const normalise = (value) => value.trim().toLowerCase().replace(/\s+/g, ' ');
+    if (normalise(keyword) !== normalise(waiter.query)) return;
+  } catch {
+    return;
+  }
+
+  liveWaiters.delete(tabId);
+  clearTimeout(waiter.timer);
+  waiter.resolve({ url: message.url, body: message.body });
+}
+
 function handle(message, sender, sendResponse) {
   if (!isTrusted(sender)) {
     sendResponse({ ok: false, error: 'Untrusted sender' });
@@ -193,6 +237,32 @@ function handle(message, sender, sendResponse) {
       providers: Object.keys(PROVIDERS),
     });
     return false;
+  }
+
+  if (message?.type === 'EMPORIKA_TARGET_CAPTURED') {
+    // Fire-and-forget from a content script; nothing is returned.
+    onTargetCaptured(sender, message);
+    sendResponse({ ok: true });
+    return false;
+  }
+
+  if (message?.type === 'EMPORIKA_LIVE_TARGET') {
+    if (typeof target.collectLive !== 'function') {
+      sendResponse({ ok: false, error: 'Live Target collection is unavailable' });
+      return false;
+    }
+    const query = typeof message.query === 'string' ? message.query.trim() : '';
+    if (!query) {
+      sendResponse({ ok: false, error: 'query is required' });
+      return false;
+    }
+    target
+      .collectLive(query, {
+        liveWaiters,
+        timeoutMs: LIVE_TIMEOUT_MS,
+      })
+      .then(sendResponse, (error) => sendResponse({ ok: false, error: String(error) }));
+    return true; // keep the channel open
   }
 
   if (message?.type === 'EMPORIKA_SEARCH') {

@@ -325,6 +325,54 @@ export async function search(query, { limit = 24, storeId, zip, signal } = {}) {
  * Report what actually happened, so a block can be diagnosed from evidence
  * rather than inferred from an empty result set.
  */
+/**
+ * Collect live results by letting Target search for itself.
+ *
+ * Opens a VISIBLE tab at Target's own search URL. Target's client performs the
+ * request, PerimeterX sees a genuine page load in the user's session, and
+ * `target-live-hook.js` records the plp_search_v2 body. We never ask Redsky
+ * ourselves — every request we originate is answered 435, measured repeatedly.
+ *
+ * Costs one visible tab per search, which is the honest price of this path.
+ * The tab is closed as soon as the capture arrives or the timeout fires.
+ */
+export async function collectLive(query, { liveWaiters, timeoutMs = 25000 } = {}) {
+  if (!liveWaiters) throw new Error('collectLive requires the background waiters map');
+
+  const url = `https://www.target.com/s?searchTerm=${encodeURIComponent(query)}`;
+  const tab = await chrome.tabs.create({ url, active: true });
+
+  try {
+    const captured = await new Promise((resolve) => {
+      const timer = setTimeout(() => {
+        liveWaiters.delete(tab.id);
+        resolve(null);
+      }, timeoutMs);
+      liveWaiters.set(tab.id, { query, resolve, timer });
+    });
+
+    if (!captured) {
+      return { ok: false, error: `Target did not return search results within ${timeoutMs}ms` };
+    }
+
+    let json = null;
+    try {
+      json = JSON.parse(captured.body);
+    } catch {
+      return { ok: false, error: 'Captured body was not JSON (likely a challenge page)' };
+    }
+
+    const products = parseResponse(json, { limit: 24 });
+    if (products.length === 0) {
+      return { ok: false, error: 'Captured a search response but parsed no products' };
+    }
+    return { ok: true, products, count: products.length, capturedUrl: captured.url };
+  } finally {
+    // Never leave a stray tab behind, even on error or timeout.
+    await chrome.tabs.remove(tab.id).catch(() => {});
+  }
+}
+
 export async function capture(query) {
   const { status, finalUrl, text, json, storeId, zip } = await raw(query);
 
