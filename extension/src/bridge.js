@@ -45,6 +45,26 @@ window.addEventListener('message', async (event) => {
     return;
   }
 
+  if (message.type === 'EMPORIKA_LIVE_TARGET') {
+    if (!message.requestId) return;
+
+    let response;
+    try {
+      response = await chrome.runtime.sendMessage({
+        type: 'EMPORIKA_LIVE_TARGET',
+        query: message.query,
+      });
+    } catch (error) {
+      response = { ok: false, error: error instanceof Error ? error.message : String(error) };
+    }
+
+    window.postMessage(
+      { source: 'emporika-extension', type: 'EMPORIKA_RESULT', requestId: message.requestId, response },
+      PAGE_ORIGIN
+    );
+    return;
+  }
+
   if (message.type === 'EMPORIKA_SEARCH') {
     if (!message.requestId) return;
 

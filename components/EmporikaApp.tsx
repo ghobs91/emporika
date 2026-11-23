@@ -17,7 +17,7 @@ import CategoryPillRail from '@/components/CategoryPillRail';
 import DealsCarousel from '@/components/DealsCarousel';
 import CartSummarySection from '@/components/CartSummarySection';
 import { UnifiedProduct, RetailerSource, ProviderStatus } from '@/types/unified';
-import { ShoppingBag, SlidersHorizontal } from 'lucide-react';
+import { ShoppingBag, SlidersHorizontal, Tag } from 'lucide-react';
 import { useTargetStore } from '@/hooks/useTargetStore';
 import SearchFilters, { ActiveFilters } from '@/components/SearchFilters';
 import { ProductFilters, applyProductFilters, matchesProductFilters, countActiveFilters } from '@/lib/filters';
@@ -30,10 +30,33 @@ import {
 import { rankedProductToUnified } from '@/lib/ranked-products';
 import { useIntelligentSearch } from '@/hooks/useIntelligentSearch';
 import { warmTargetCorpus } from '@/lib/target-corpus-provider';
+import { requestLiveTargetPrices } from '@/lib/extension-bridge';
 import SortSelect, { SortOption } from '@/components/SortSelect';
 import Pagination from '@/components/Pagination';
 import ClarificationPrompt from '@/components/ClarificationPrompt';
 import SearchPromptPills from '@/components/SearchPromptPills';
+
+/**
+ * Overlay live Target prices onto products that have none.
+ *
+ * The corpus catalog carries titles, images and ratings but no price, so Target
+ * cards show "Check price at Target". Live prices come from Target's own search
+ * page via the extension, keyed by tcin, and are matched here through the
+ * product URL. Only products without a price are touched, so a real price is
+ * never overwritten by a stale overlay.
+ */
+function withLiveTargetPrices(
+  products: UnifiedProduct[],
+  live: Record<string, number>
+): UnifiedProduct[] {
+  if (Object.keys(live).length === 0) return products;
+  return products.map((product) => {
+    if (product.source !== 'target' || typeof product.price === 'number') return product;
+    const tcin = /\/A-(\d+)/.exec(product.productUrl ?? '')?.[1];
+    const price = tcin ? live[tcin] : undefined;
+    return price === undefined ? product : { ...product, price };
+  });
+}
 
 // Maps the UI sort to the server's ordering key (applied before the result cap).
 const SORT_TO_SEARCH_SORT: Record<SortOption, import('@/search/types').SearchSort> = {
@@ -84,6 +107,11 @@ export default function EmporikaApp() {
   useEffect(() => {
     warmTargetCorpus();
   }, []);
+
+  // Live Target prices, keyed by tcin. Opt-in: collecting them opens a visible
+  // target.com tab, so it only happens when the shopper asks.
+  const [liveTargetPrices, setLiveTargetPrices] = useState<Record<string, number>>({});
+  const [liveTargetStatus, setLiveTargetStatus] = useState<'idle' | 'loading' | 'error'>('idle');
   const [selectedProduct, setSelectedProduct] = useState<UnifiedProduct | null>(null);
   const { storeInfo } = useTargetStore();
   const { state: aiState, search: aiSearch } = useIntelligentSearch();
@@ -295,8 +323,12 @@ export default function EmporikaApp() {
   };
 
   const sourceFilteredProducts = useMemo(
-    () => products.filter((product) => selectedSources.includes(product.source)),
-    [products, selectedSources]
+    () =>
+      withLiveTargetPrices(
+        products.filter((product) => selectedSources.includes(product.source)),
+        liveTargetPrices
+      ),
+    [products, selectedSources, liveTargetPrices]
   );
 
   // Apply property-based filters from the left sidebar
@@ -400,6 +432,34 @@ export default function EmporikaApp() {
     }
   };
 
+  /**
+   * Ask the extension for live Target prices.
+   *
+   * Deliberately a click, not automatic: the collector opens a visible
+   * target.com tab and waits for Target to render its own results, which is
+   * intrusive and takes seconds. Merged prices are keyed by tcin and only fill
+   * gaps.
+   */
+  const collectLiveTargetPrices = useCallback(async () => {
+    if (!searchQuery || liveTargetStatus === 'loading') return;
+    setLiveTargetStatus('loading');
+    try {
+      const prices = await requestLiveTargetPrices(searchQuery);
+      if (!prices || prices.length === 0) {
+        setLiveTargetStatus('error');
+        return;
+      }
+      setLiveTargetPrices((previous) => {
+        const next = { ...previous };
+        for (const entry of prices) next[entry.tcin] = entry.price;
+        return next;
+      });
+      setLiveTargetStatus('idle');
+    } catch {
+      setLiveTargetStatus('error');
+    }
+  }, [searchQuery, liveTargetStatus]);
+
   // ── Pagination ──────────────────────────────────────────────────────
   // The server applies the requested ordering before capping results and
   // renumbers ranks to match, so the returned order is already correct here.
@@ -407,11 +467,14 @@ export default function EmporikaApp() {
   // filters that drive the classic grid also apply to AI-ranked results.
   const aiProducts = useMemo(
     () =>
-      (aiState.response?.results ?? []).map((ranked) => ({
-        ranked,
-        product: rankedProductToUnified(ranked),
+      withLiveTargetPrices(
+        (aiState.response?.results ?? []).map((ranked) => rankedProductToUnified(ranked)),
+        liveTargetPrices
+      ).map((product, index) => ({
+        ranked: (aiState.response?.results ?? [])[index],
+        product,
       })),
-    [aiState.response]
+    [aiState.response, liveTargetPrices]
   );
   const filteredAiProducts = aiProducts.filter(({ product }) =>
     selectedSources.includes(product.source) && matchesProductFilters(product, filters)
@@ -666,6 +729,28 @@ export default function EmporikaApp() {
 
               {/* Per-retailer status — makes silent degradation visible */}
               <ProviderStatusBar statuses={providerStatus} streaming={aiState.streaming} />
+
+              {/* Live Target prices: opens a visible tab, so it is opt-in. */}
+              {searchQuery && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={collectLiveTargetPrices}
+                    disabled={liveTargetStatus === 'loading'}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 px-2.5 py-1 text-[11px] text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-900 disabled:opacity-60 dark:border-gray-700 dark:text-gray-400 dark:hover:text-gray-100"
+                  >
+                    <Tag size={11} aria-hidden />
+                    {liveTargetStatus === 'loading'
+                      ? 'Checking Target prices…'
+                      : 'Get live Target prices'}
+                  </button>
+                  {liveTargetStatus === 'error' && (
+                    <span className="text-[11px] text-amber-700 dark:text-amber-400">
+                      Target did not return prices — the extension is needed and a Target tab opens briefly.
+                    </span>
+                  )}
+                </div>
+              )}
 
               {/* AI mode: show ranked intelligent results; otherwise classic grid */}
               {aiState.aiEnabled && aiState.response?.results && aiState.response.results.length > 0 ? (
