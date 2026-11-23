@@ -2,18 +2,15 @@
   "manifest_version": 3,
   "name": "Emporika Browser Search",
   "version": "0.1.0",
-  "description": "Collects listings from Back Market, Costco and Target inside your own browser, on Emporika's behalf.",
+  "description": "Collects listings from Back Market and Costco inside your own browser, on Emporika's behalf.",
   "permissions": [
     "declarativeNetRequest",
-    "scripting",
-    "tabs"
+    "scripting"
   ],
   "host_permissions": [
     "https://www.backmarket.com/*",
     "https://www.costco.com/*",
-    "https://gdx-api.costco.com/*",
-    "https://www.target.com/*",
-    "https://redsky.target.com/*"
+    "https://gdx-api.costco.com/*"
   ],
   "action": {
     "default_title": "Emporika: open provider harness"
@@ -32,27 +29,6 @@
         "src/bridge.js"
       ],
       "run_at": "document_idle"
-    },
-    {
-      "matches": [
-        "https://www.target.com/*"
-      ],
-      "js": [
-        "src/target-live-hook.js"
-      ],
-      "run_at": "document_start",
-      "world": "MAIN",
-      "all_frames": false
-    },
-    {
-      "matches": [
-        "https://www.target.com/*"
-      ],
-      "js": [
-        "src/target-live-relay.js"
-      ],
-      "run_at": "document_start",
-      "all_frames": false
     }
   ]
 }

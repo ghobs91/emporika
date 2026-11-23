@@ -69,9 +69,9 @@ export const PROVIDER_CAPABILITIES: Record<ProviderId, ProviderCapabilities> = {
     maxConcurrentRequests: 2,
     supportedCountries: ['US'],
     notes: [
-      'Keyword match over a locally built catalog index (lib/target-index.ts)',
-      'Catalog presence and a product link only — no price, availability, shipping, ratings or images',
-      'Redsky is PerimeterX-guarded and the storefront HTML carries no price, so richer data cannot be fetched',
+      'DISABLED — see search/providers/availability.ts',
+      'Price is served only by redsky.target.com, which answers every request we originate with HTTP 435 (PerimeterX)',
+      'The catalog index (titles, images, ratings) is built and parked in lib/target-index.ts',
     ],
   },
 

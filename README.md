@@ -41,7 +41,7 @@ The search engine works without WebLLM. WebLLM is **progressive enhancement**, n
 - **Icons**: Lucide React
 - **Validation**: Zod
 - **Testing**: Vitest
-- **API Integration**: Walmart, Best Buy, eBay, Shopify Global Catalog MCP (server-side) + Back Market, Costco (collected in the user's browser by `extension/`). Target is temporarily disabled.
+- **API Integration**: Walmart, Best Buy, eBay, Shopify Global Catalog MCP (server-side) + Back Market, Costco (collected in the user's browser by `extension/`). **Target is disabled** — see below for why, and for what is parked rather than deleted.
 - **AI**: WebLLM architecture (progressive enhancement, currently mock fallback)
 
 ## Retailer API Access
@@ -56,7 +56,19 @@ All retailer API credentials are **server-side only**. The browser never receive
 
 Costco's search endpoint is Kasada-guarded (`gdx-api.costco.com` returns HTTP 429 with challenge headers) and Back Market has never had a public search API, so both are collected in the user's own browser.
 
-**Target is served from a locally built catalog index** instead of being searched live. `redsky.target.com` returns an HTTP 435 PerimeterX challenge to every non-navigation request, and the storefront HTML is a Next.js shell on every URL form — a canonical product page returns 200 but carries no price, availability or `schema.org` `Product`. What Target *does* publish for crawlers is its product sitemap (`sitemap_pdp-index.xml.gz`: ~106 shards, ~2.5M product URLs), so two scripts turn that into a local catalog:
+**Target is disabled (2026-11).** It was re-enabled once and served from a
+locally built catalog index, which worked for titles, images and ratings but
+never for price. Every route to price was measured and closed: Node, the
+extension service worker, a page's main world from both the homepage and the
+search page, a fresh profile, a real user profile with history, and seven
+retries over twenty seconds — all HTTP 435 PerimeterX. The remaining options
+were a visible tab per search or licensed data, and neither was taken.
+
+Everything below still works and is still tested; it is parked, not deleted.
+Reviving Target means deleting the entry in `search/providers/availability.ts`
+and restoring the app-side wiring.
+
+The catalog pipeline, for the record: `redsky.target.com` returns an HTTP 435 PerimeterX challenge to every non-navigation request, and the storefront HTML is a Next.js shell on every URL form — a canonical product page returns 200 but carries no price, availability or `schema.org` `Product`. What Target *does* publish for crawlers is its product sitemap (`sitemap_pdp-index.xml.gz`: ~106 shards, ~2.5M product URLs), so two scripts turn that into a local catalog:
 
 ```bash
 npx tsx scripts/target-sitemap.ts --all   # download all shards (ETag-incremental, ~920MB once)
@@ -90,7 +102,7 @@ Each retailer has a dedicated adapter implementing `RetailerSearchProvider`:
 |----------|-----------|-------------|
 | **Walmart** | server | Keyword search, shipping data, availability |
 | **Best Buy** | server | Keyword search, brand/price filters, rich category/manufacturer data |
-| **Target** | server (local index) | Keyword match over the locally built catalog index; catalog presence + product link only — no price, availability, shipping, ratings or images |
+| **Target** | — (**disabled**) | Vertex issue: price is only served by a PerimeterX-guarded host. Catalog index (titles/images/ratings) is built and parked; see above |
 | **eBay** | server | Keyword search, GTIN lookup, condition/price filters, marketplace seller data |
 | **Costco** | browser extension (server fallback) | Keyword search, availability |
 | **Shopify** | server | Full keyword search, category/brand/price/destination filters, variants, seller data (Global Catalog MCP) |

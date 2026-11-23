@@ -102,65 +102,6 @@ export function ensureExtensionReady(timeoutMs = 800): Promise<boolean> {
   });
 }
 
-export interface LiveTargetPrice {
-  tcin: string;
-  price: number;
-  title?: string;
-}
-
-/**
- * Ask the extension to collect live Target prices.
- *
- * This opens a visible target.com tab and lets Target's own client run the
- * search, so it is an explicit user action, not part of a normal search. The
- * budget is generous because the page has to load, run its sensor, and finish
- * the request; that cost is the reason the path exists at all.
- */
-export async function requestLiveTargetPrices(
-  query: string,
-  timeoutMs = 32000
-): Promise<LiveTargetPrice[] | null> {
-  const ready = await ensureExtensionReady();
-  if (!ready) return null;
-
-  const response = await new Promise<unknown>((resolve) => {
-    installListener();
-
-    const requestId = crypto.randomUUID();
-    const timer = setTimeout(() => {
-      pending.delete(requestId);
-      resolve(null);
-    }, timeoutMs);
-
-    pending.set(requestId, (value) => {
-      clearTimeout(timer);
-      resolve(value);
-    });
-
-    window.postMessage(
-      { source: PAGE_SOURCE, type: 'EMPORIKA_LIVE_TARGET', requestId, query },
-      window.location.origin
-    );
-  });
-
-  const envelope = response as { ok?: boolean; products?: unknown } | null;
-  if (!envelope?.ok || !Array.isArray(envelope.products)) return null;
-
-  const prices: LiveTargetPrice[] = [];
-  for (const item of envelope.products as Array<Record<string, unknown>>) {
-    const id = typeof item.providerProductId === 'string' ? item.providerProductId : '';
-    const tcin = /^target-(\d+)$/.exec(id)?.[1];
-    const amount = (item.price as { amount?: unknown } | undefined)?.amount;
-    if (!tcin || typeof amount !== 'number' || !Number.isFinite(amount)) continue;
-    prices.push({
-      tcin,
-      price: amount,
-      ...(typeof item.title === 'string' ? { title: item.title } : {}),
-    });
-  }
-  return prices.length > 0 ? prices : null;
-}
-
 /**
  * Ask the extension for listings. Returns null when the extension is absent,
  * slow, or returns a payload that fails validation — the caller then simply

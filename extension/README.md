@@ -97,7 +97,15 @@ framework assumption before checking selectors.
 
 ## Target — DISABLED
 
-**Target is now collected live, like Costco.** The server-side paths were
+**Target is disabled again (2026-11), and the extension no longer touches it.**
+The live collector was built and measured: every page-context request returned
+HTTP 435, including from a real user profile, so price — the only field the
+catalog lacked — was never obtained. The target.com content scripts, host
+permissions and harness controls have been removed, so nothing is injected into
+Target's pages any more. `providers/target.js` and `target-live-{hook,relay}.js`
+are kept as parked research.
+
+For the record, when it was live: The server-side paths were
 measured exhaustively and none carries price:
 
 | Finding | Consequence |

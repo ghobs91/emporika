@@ -10,9 +10,8 @@
 
 import * as backmarket from './providers/backmarket.js';
 import * as costco from './providers/costco.js';
-import * as target from './providers/target.js';
 
-const PROVIDERS = { backmarket, costco, target };
+const PROVIDERS = { backmarket, costco };
 
 const output = document.getElementById('output');
 const queryInput = document.getElementById('query');
@@ -111,34 +110,4 @@ async function saveRaw(providerId) {
 
 for (const button of document.querySelectorAll('[data-save]')) {
   button.addEventListener('click', () => saveRaw(button.dataset.save));
-}
-
-/**
- * Live collection: lets Target's own page perform the search.
- *
- * Unlike `search`, which issues the request itself and is answered 435, this
- * opens a visible target.com tab and reads the response Target fetched for
- * itself. Routed through the service worker because the capture arrives there.
- */
-async function runLive() {
-  const query = currentQuery();
-  const started = performance.now();
-  show(`target · collectLive("${query}")`, 'Opening a visible Target tab — Target performs the search.');
-  try {
-    const response = await chrome.runtime.sendMessage({
-      type: 'EMPORIKA_LIVE_TARGET',
-      query,
-    });
-    const elapsed = Math.round(performance.now() - started);
-    const summary = response?.ok
-      ? `${response.count} products in ${elapsed}ms`
-      : `failed in ${elapsed}ms`;
-    show(`target · collectLive("${query}") · ${summary}`, response);
-  } catch (error) {
-    show('target · collectLive failed', String(error));
-  }
-}
-
-for (const button of document.querySelectorAll('[data-live]')) {
-  button.addEventListener('click', () => runLive(button.dataset.live));
 }

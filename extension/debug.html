@@ -54,40 +54,4 @@
       rather than pretending there were no matches.
     </p>
 
-    <div class="controls">
-      <button data-run="target">Target</button>
-      <button data-capture="target">Capture Target</button>
-      <button data-save="target">Save raw Target response</button>
-      <button data-live="target">Live collect (opens a visible tab)</button>
-    </div>
-
-    <p class="hint">
-      Target's Redsky host answers service-worker requests with an HTTP 435
-      PerimeterX challenge, so this provider issues the request from a real
-      target.com page's main world, where Target's own sensor is running. It
-      acquires your open target.com tab when there is one, else a minimised
-      popup — you may see a tab appear briefly.
-
-      What each outcome means: a <strong>435</strong> here means PerimeterX
-      rejected this page context. Measured from a genuine target.com page in a
-      real browser: seven attempts over twenty seconds, every one 435 — so
-      retrying does not help and is not attempted. If your profile (with its own
-      history and cookies) still gets 435, the only remaining route is a visible
-      tab that navigates to <code>/s/&lt;query&gt;</code> and lets Target render
-      the results, then reads them from the DOM.
-      <strong>“page context could not be created”</strong> means the tab or
-      window could not be acquired. A JSON response with prices means the path
-      works and the loss is upstream in the bridge.
-    </p>
-
-    <p class="hint">
-      Superseded note (kept for context): Target used to be disabled in
-      search/providers/availability.ts because a background fetch could never
-      satisfy the challenge.
-    </p>
-
-    <div id="output" role="log" aria-live="polite"></div>
-
-    <script type="module" src="./src/debug.js"></script>
-  </body>
 </html>

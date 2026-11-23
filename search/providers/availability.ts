@@ -28,16 +28,34 @@ export interface ProviderDisablement {
  * Keep this list short and dated: an entry is a known outage, not a place to
  * hide a broken adapter.
  *
- * Target has graduated out of this list. It used to be here because its Redsky
- * host answered every non-navigation request with an HTTP 435 PerimeterX
- * challenge; it is now served from a locally built catalog index
- * (`lib/target-index.ts`) that never contacts the retailer, gated on that
- * artifact existing rather than on this registry. The list is kept because
- * "this retailer is off, and here is why" is still a thing that happens —
- * deleting the mechanism would mean the next outage gets hard-coded into the
- * orchestrator instead.
+ * Target is back in this list, and this time the reason is final rather than an
+ * outage. It graduated out once, served from a catalog we built ourselves, and
+ * that worked for titles, images and ratings — but never for price. Every route
+ * to price was measured and closed: Node, the extension service worker, a page's
+ * main world from both the homepage and the search page, a fresh profile, a real
+ * user profile with history, and seven retries over twenty seconds. All 435.
+ * The remaining options were a visible tab per search or licensed data, and the
+ * product decision was to have neither.
+ *
+ * What is parked, not deleted: `lib/target-index.ts`, `lib/target-corpus.ts`,
+ * `scripts/target-sitemap.ts`, `scripts/target-index-build.ts`,
+ * `scripts/target-corpus-build.ts` and `scripts/target-precompute.ts` all work
+ * and are covered by tests. Reviving Target means deleting this entry and
+ * restoring the app-side wiring — not rebuilding any of it.
  */
-export const DISABLED_PROVIDERS: Partial<Record<RetailerSource, ProviderDisablement>> = {};
+export const DISABLED_PROVIDERS: Partial<Record<RetailerSource, ProviderDisablement>> = {
+  target: {
+    reason: 'Target is not currently searchable.',
+    blockedBy:
+      'Price is only served by redsky.target.com, which answers every request we ' +
+      'originate with an HTTP 435 PerimeterX challenge — verified from Node, the ' +
+      'extension service worker, a page main world (homepage and search page), a ' +
+      'fresh profile, a real user profile, and on retry. The catalog index still ' +
+      'supplies titles, images and ratings from the catalog sitemap, but without ' +
+      'price it is not worth offering. Disabled 2026-11; see this file for what ' +
+      'would have to change.',
+  },
+};
 
 /** True when the retailer must not be searched or offered. */
 export function isProviderDisabled(id: RetailerSource): boolean {
